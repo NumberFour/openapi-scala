@@ -1,0 +1,3 @@
+# Doesn't work with resolvers += Resolver.bintrayRepo("ovotech", "maven")
+-Dsbt.override.build.repos=true
+-Dsbt.repository.config=project/repositories

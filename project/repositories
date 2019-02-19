@@ -1,0 +1,4 @@
+[repositories]
+local
+n4-public: http://srv-nexus.numberfour.eu/nexus/content/repositories/public/
+n4-public-ivy: http://srv-nexus.numberfour.eu/nexus/content/repositories/public/, [organization]/[module]/(scala_[scalaVersion]/)(sbt_[sbtVersion]/)[revision]/[type]s/[artifact](-[classifier]).[ext]

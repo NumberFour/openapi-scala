@@ -1,0 +1,8 @@
+target/
+.idea/
+mongo-to-kafka/biggest.json
+*.DS_Store
+*.metals
+.bloop
+.log
+*.log
