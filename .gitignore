@@ -6,3 +6,4 @@ mongo-to-kafka/biggest.json
 .bloop
 .log
 *.log
+data

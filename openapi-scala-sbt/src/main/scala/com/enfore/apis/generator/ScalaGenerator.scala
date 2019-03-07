@@ -77,8 +77,18 @@ object ScalaGenerator {
     "case"
   )
 
-  private def cleanScalaSymbol(in: String): String =
-    scalaSymbols.find(_ == in).fold(in)(name => s"`$name`")
+  val illegalScalaSymbols = List(".", ",", "-", ":")
+
+  def underscoreToCamel(name: String) =
+    "_([a-z\\d])".r.replaceAllIn(name, { m =>
+      m.group(1).toUpperCase()
+    })
+
+  private def cleanScalaSymbol(in: String): String = {
+    val containsIllegal = illegalScalaSymbols.foldLeft(false)((buf, value) => buf || in.contains(value))
+    if (scalaSymbols.contains(in) || containsIllegal) underscoreToCamel(s"`$in`")
+    else underscoreToCamel(in)
+  }
 
   private def primitiveSymbolGenerator(symbol: PrimitiveSymbol): String =
     s"${symbol.valName} : ${SymbolAnnotationMaker.makeAnnotation(symbol)}".trim

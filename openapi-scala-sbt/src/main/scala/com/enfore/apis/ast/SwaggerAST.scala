@@ -88,6 +88,7 @@ object SwaggerAST {
     val mapped: immutable.Iterable[Option[Symbol]] = properties.mapValues(loadSingleProperty) map {
       case (name: String, repr: Option[TypeRepr]) =>
         val mapOp = if (required.contains(name)) repr else repr.map(PrimitiveOption)
+        assert(mapOp.isDefined, s"$name in $typeName could not be parsed.")
         mapOp map (makeSymbolFromTypeRepr(name, _))
     }
     mapped.toList.sequence.map(PrimitiveProduct(packageName.name, typeName, _))
@@ -111,9 +112,9 @@ object SwaggerAST {
       .toList
       .toMap
 
-  def generateScala(filePath: String): Either[circe.Error, Map[String, String]] =
+  def generateScala(filePath: String, packageName: String): Either[circe.Error, Map[String, String]] =
     loadReprFromFile(filePath)
-      .map(readToTypeRepr(_)(PackageName("com.enfore.apis"))) // TODO: Fix this shim
+      .map(readToTypeRepr(_)(PackageName(packageName))) // TODO: Fix this shim
       .map(_.map(x => x._1 -> x._2.generateScala))
 
 }
