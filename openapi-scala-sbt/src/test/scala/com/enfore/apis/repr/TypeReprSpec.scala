@@ -38,9 +38,15 @@ class TypeReprSpec extends FlatSpec with Matchers {
       """
         |package com.enfore.apis
         |
-        |object Animal extends Enumeration {
-        | val Human, Dolphin, Dog = Value
-        | }
+        |import enumeratum._
+        |
+        |sealed trait Animal extends EnumEntry
+        |object Animal extends Enum[Animal] with CirceEnum[Animal] {
+        | val values = findValues
+        | case object Human extends Animal
+        | case object Dolphin extends Animal
+        | case object Dog extends Animal
+        |}
       """.stripMargin.trim.parse[Source]
     val tree: Parsed[Source] = animal.generateScala.parse[Source]
     tree.get.structure shouldBe expected.get.structure
