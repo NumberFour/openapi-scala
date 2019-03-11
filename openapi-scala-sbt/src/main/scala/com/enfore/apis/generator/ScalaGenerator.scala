@@ -112,9 +112,15 @@ object ScalaGenerator {
     case NewTypeSymbol(_, PrimitiveProduct(packageName, typeName, values)) =>
       s"""
          |package $packageName\n
+         |import io.circe._
+         |import io.circe.derivation._\n
          |final case class $typeName${values
            .map(sym => s"${cleanScalaSymbol(sym.valName)} : ${SymbolAnnotationMaker.makeAnnotation(sym)}")
-           .mkString("(", ",\n\t", ")")}
+           .mkString("(", ",\n\t", ")")} \n
+         | object $typeName {
+         |  implicit val circeDecoder: Decoder[$typeName] = deriveDecoder[$typeName](renaming.snakeCase)
+         |  implicit val circeEncoder: Encoder[$typeName] = deriveEncoder[$typeName](renaming.snakeCase)
+         | }
        """.stripMargin.trim
   }
 

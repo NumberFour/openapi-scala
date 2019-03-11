@@ -23,7 +23,15 @@ class TypeReprSpec extends FlatSpec with Matchers {
       """
         |package com.enfore.apis
         |
+        |import io.circe._
+        |import io.circe.derivation._
+        |
         |final case class Person(name: String, age: Int)
+        |
+        |object Person {
+        | implicit val circeDecoder: Decoder[Person] = deriveDecoder[Person](renaming.snakeCase)
+        | implicit val circeEncoder: Encoder[Person] = deriveEncoder[Person](renaming.snakeCase)
+        |}
       """.stripMargin.trim.parse[Source]
     val tree: Parsed[Source] = person.generateScala.parse[Source]
     tree.get.structure shouldBe expected.get.structure
@@ -70,10 +78,18 @@ class TypeReprSpec extends FlatSpec with Matchers {
       """
         |package com.enfore.apis
         |
+        |import io.circe._
+        |import io.circe.derivation._
+        |
         |final case class ParamedType(optionalVal: Option[String],
         | listVal: List[Int],
         | opListVal: Option[List[Boolean]],
         | listOpVal: List[Option[Double]])
+        |
+        | object ParamedType {
+        |   implicit val circeDecoder: Decoder[ParamedType] = deriveDecoder[ParamedType](renaming.snakeCase)
+        |   implicit val circeEncoder: Encoder[ParamedType] = deriveEncoder[ParamedType](renaming.snakeCase)
+        | }
       """.stripMargin.trim.parse[Source]
     val tree: Parsed[Source] = paramedType.generateScala.parse[Source]
     tree.get.structure shouldBe expected.get.structure
