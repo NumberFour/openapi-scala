@@ -14,13 +14,18 @@ object TypeRepr {
     val ref: Ref
   }
 
-  sealed trait Primitive                               extends TypeRepr
-  case object PrimitiveString                          extends Primitive
-  case object PrimitiveNumber                          extends Primitive
-  case object PrimitiveInt                             extends Primitive
-  case object PrimitiveBoolean                         extends Primitive
-  final case class PrimitiveArray(dataType: TypeRepr)  extends Primitive
-  final case class PrimitiveOption(dataType: TypeRepr) extends Primitive
+  sealed trait Primitive                                                                      extends TypeRepr
+  final case class PrimitiveString(refinements: Option[List[RefinedTags]])                    extends Primitive
+  final case class PrimitiveNumber(refinements: Option[List[RefinedTags]])                    extends Primitive
+  final case class PrimitiveInt(refinements: Option[List[RefinedTags]])                       extends Primitive
+  final case class PrimitiveBoolean(refinements: Option[List[RefinedTags]])                   extends Primitive
+  final case class PrimitiveArray(dataType: TypeRepr, refinements: Option[List[RefinedTags]]) extends Primitive
+  final case class PrimitiveOption(dataType: TypeRepr)                                        extends Primitive
+
+  sealed trait RefinedTags
+  sealed trait CollectionRefinements      extends RefinedTags
+  final case class MinLength(length: Int) extends CollectionRefinements
+  final case class MaxLength(length: Int) extends CollectionRefinements
 
   sealed trait NewType extends TypeRepr {
     val packageName: String

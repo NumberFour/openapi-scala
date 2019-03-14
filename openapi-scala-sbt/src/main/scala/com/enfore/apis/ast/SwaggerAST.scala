@@ -37,7 +37,9 @@ object SwaggerAST {
       description: Option[String], // Optional field (docstring)
       `type`: Option[PropertyType], // Only present when property is not a reference
       items: Option[Property], // Only present when property is a sequence
-      $ref: Option[String]) // Reference to another type
+      $ref: Option[String], // Reference to another type
+      minLength: Option[Int], // Optional refinement of minimum length
+      maxLength: Option[Int]) // Optional refinement of maximum length
 
   final case class Component(
       description: Option[String],
@@ -58,24 +60,27 @@ object SwaggerAST {
       .flatMap(_.as[CoreASTRepr])
   }
 
-  def loadPropertyObject(pType: Option[PropertyType], param: Option[Property])(
+  def loadPropertyObject(pType: Option[PropertyType], param: Option[Property], refinements: Option[List[RefinedTags]])(
       implicit packageName: PackageName): Option[TypeRepr] =
     pType flatMap {
       case PropertyType.`object` => None
-      case PropertyType.string   => PrimitiveString.some
-      case PropertyType.boolean  => PrimitiveBoolean.some
+      case PropertyType.string   => PrimitiveString(refinements).some
+      case PropertyType.boolean  => PrimitiveBoolean(refinements).some
       case PropertyType.array =>
         assert(param.isDefined, "A parameter type for an array is not defined")
-        loadSingleProperty(param.get).map(PrimitiveArray).widen[TypeRepr]
-      case PropertyType.number => PrimitiveNumber.some
+        loadSingleProperty(param.get).map(PrimitiveArray(_, refinements)).widen[TypeRepr]
+      case PropertyType.number => PrimitiveNumber(refinements).some
     }
 
-  def loadSingleProperty(property: Property)(implicit packageName: PackageName): Option[TypeRepr] =
-    property.$ref.fold(loadPropertyObject(property.`type`, property.items)) { ref =>
+  def loadSingleProperty(property: Property)(implicit packageName: PackageName): Option[TypeRepr] = {
+    val refinements: Option[List[CollectionRefinements]] =
+      List(property.minLength.map(MinLength), property.maxLength.map(MaxLength)).filter(_.isDefined).sequence
+    property.$ref.fold(loadPropertyObject(property.`type`, property.items, refinements)) { ref =>
       val name: String = ref.split("/").last
       val path: String = ref.split("/").dropRight(1).mkString(".")
       (Ref(path.replace("#.components.schemas", packageName.name), name): TypeRepr).some
     }
+  }
 
   def makeSymbolFromTypeRepr(name: String, repr: TypeRepr): Symbol = repr match {
     case p: Primitive => PrimitiveSymbol(name, p)
