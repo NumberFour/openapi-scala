@@ -2,17 +2,17 @@ import com.enfore.plugin.BuildInfo
 import com.enfore.plugin.BasicBuildPlugin._
 
 ThisBuild / organization := BuildInfo.organization
-ThisBuild / version := "0.0.6"
+ThisBuild / version := "0.0.7-RC2"
 
 lazy val root = (project in file("."))
-  .settings(name := "openapi-scala")
+  .settings(name := "openapi")
   .settings(scalaVersion := "2.12.8")
-  .aggregate(`openapi-scala-sbt`, `openapi-sbt-plugin`)
+  .aggregate(`openapi-scala`, `sbt-openapi`)
   .enablePlugins(ScalaCrossPlugin, NexusPublishPlugin)
 
-lazy val `openapi-scala-sbt` = (project in file("openapi-scala-sbt"))
+lazy val `openapi-scala` = (project in file("openapi-scala"))
   .settings(
-    name := "openapi-scala-sbt",
+    name := "openapi-scala",
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
     libraryDependencies ++= Seq(
       "com.github.mpilquist" %% "simulacrum"       % "0.15.0",
@@ -34,11 +34,11 @@ lazy val `openapi-scala-sbt` = (project in file("openapi-scala-sbt"))
   )
   .enablePlugins(Scala212Plugin, SbtPlugin, NexusPublishPlugin, BasicBuildPlugin)
 
-lazy val `openapi-sbt-plugin` = (project in file("openapi-sbt-plugin"))
+lazy val `sbt-openapi` = (project in file("sbt-openapi"))
   .settings(
-    name := "openapi-sbt-plugin",
+    name := "sbt-openapi",
     sbtPlugin := true,
     organization := "com.enfore"
   )
-  .dependsOn(`openapi-scala-sbt`)
+  .dependsOn(`openapi-scala`)
   .enablePlugins(Scala212Plugin, SbtPlugin, NexusPublishPlugin, BasicBuildPlugin)

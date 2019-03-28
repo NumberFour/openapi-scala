@@ -1,0 +1,34 @@
+components:
+  schemas:
+    Problem:
+      description: |
+        A problem that occurred while processing an API request.
+        This is based on problem+json as defined in [RFC7807](https://tools.ietf.org/html/rfc7807)
+        Will have a textual message that is intended for use by developers using the API and not usable for display to end users.
+        If the error occurred as part of operating on a specific resource, the object may provide the URI idenifying that object.
+      type: object
+      properties:
+        type:
+          description: |
+            A URI reference [RFC3986] that identifies the problem type.
+          type: string
+          format: uri
+        title:
+          description: |
+            A short, human-readable summary of the problem type.
+            Note that this is not specific to the specific problem occurrence but only depends on the type.
+            Target audience is developers using the API, not suitable for display to end users.
+          type: string
+        detail:
+          type: string
+          description: |
+            A human-readable explanation specific to this occurrence of the problem.
+            Target audience is developers using the API, not suitable for display to end users.
+        on_resource:
+          description: URI of the resource for which the error occurred.
+          type: string
+          format: uri
+      required:
+        - type
+        - title
+        - detail
