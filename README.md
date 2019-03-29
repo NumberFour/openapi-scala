@@ -21,20 +21,28 @@ and used to generate managed Scala sources.
 
 ## Quickstart
 
+A release log of the plugin and the library can be found [here](https://github.numberfour.eu/Server/openapi-scala/releases).
+
 To use the plugin, you first need to make it available in your SBT.
-```
+```scala
 // project/plugins.sbt
-addSbtPlugin("com.enfore" % "sbt-openapi" % "0.0.7-RC2")
+addSbtPlugin("com.enfore" % "sbt-openapi" % "<openapi-scala-version>")
+```
+
+You will also need to make the library available to be able to use the generated code.
+```scala
+libraryDependencies += "com.enfore" %% "openapi-lib" % "<openapi-scala-version>"
 ```
 
 Once the plugin is available in your project you can enable it on a given an SBT sub-project and use the setting `openAPIOutputPackage` to specify
-the package name for your components.
+the package name for your components. 
 
-```
+```scala
 // build.sbt
 lazy val root = (project in ("."))
     .settings(
-        openAPIOutputPackage := "com.enfore.model"
+        openAPIOutputPackage := "com.enfore.model",
+        libraryDependencies += "com.enfore" %% "openapi-lib" % "<openapi-scala-version>"
     )
     .enablePlugins(OpenapiPlugin)
 ```
