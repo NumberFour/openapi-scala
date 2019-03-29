@@ -20,18 +20,17 @@ class PathsTypeReprSpec extends FlatSpec with Matchers {
     )
     val expected =
       """
-        |trait Get extends GetRequest {
+        |trait Get[F[_]] extends GetRequest {
         | val path = "/products"
         | val queries = Map()
         | val pathVariables = List("id")
-        | 
+        |
+        | import shapeless._
         | type Response = com.enfore.apis.Product :+: CNil
-        | type AvailableErrors = com.enfore.model.Problem :+: CNil
-        | val badEncoding: IO[AvailableErrors]
-        | def `application/json`(id: String): IO[com.enfore.apis.Product]
-        | def impl(encoding: String)(id: String): Either[IO[AvailableErrors], IO[Response]] = encoding match {
-        |   case "application/json" => Right(`application/json`(id).map(Coproduct[Response](_)))
-        |   case _ => Left(badEncoding)
+        | def `application/json`(id: String): F[com.enfore.apis.Product]
+        | def impl(encoding: String)(id: String)(implicit ME: cats.MonadError[F, Throwable], F: cats.Functor[F]): F[Response] = encoding match {
+        |   case "application/json" => F.map(`application/json`(id))(Coproduct[Response](_))
+        |   case _ => ME.raiseError(EncodingMatchFailure(s"$encoding is not acceptable for $path"))
         | }
         |}
       """.stripMargin.parse[Source]
@@ -51,18 +50,17 @@ class PathsTypeReprSpec extends FlatSpec with Matchers {
     )
     val expected =
       """
-        |trait Post extends PostRequest {
+        |trait Post[F[_]] extends PostRequest {
         | val path = "/products"
         | val queries = Map()
         | val pathVariables = List()
-        | 
+        |
+        | import shapeless._
         | type Response = com.enfore.apis.Product :+: CNil
-        | type AvailableErrors = com.enfore.model.Problem :+: CNil
-        | val badEncoding: IO[AvailableErrors]
-        | def `application/json`(req: com.enfore.apis.Product): IO[com.enfore.apis.Product]
-        | def impl(encoding: String)(req: com.enfore.apis.Product): Either[IO[AvailableErrors], IO[Response]] = encoding match {
-        |   case "application/json" => Right(`application/json`(req).map(Coproduct[Response](_)))
-        |   case _ => Left(badEncoding)
+        | def `application/json`(req: com.enfore.apis.Product): F[com.enfore.apis.Product]
+        | def impl(encoding: String)(req: com.enfore.apis.Product)(implicit ME: cats.MonadError[F, Throwable], F: cats.Functor[F]): F[Response] = encoding match {
+        |   case "application/json" => F.map(`application/json`(req))(Coproduct[Response](_))
+        |   case _ => ME.raiseError(EncodingMatchFailure(s"$encoding is not acceptable for $path"))
         | }
         |}
       """.stripMargin.parse[Source]
@@ -82,15 +80,13 @@ class PathsTypeReprSpec extends FlatSpec with Matchers {
     )
     val expected =
       """
-        |trait Post extends PostRequest {
+        |trait Post[F[_]] extends PostRequest {
         | val path = "/subscriptions"
         | val queries = Map()
         | val pathVariables = List()
         |
         | type Response = Unit
-        | type AvailableErrors = com.enfore.model.Problem :+: CNil
-        | val badEncoding: IO[AvailableErrors]
-        | def impl(req: com.enfore.apis.Subscription): IO[Response]
+        | def impl(req: com.enfore.apis.Subscription): F[Response]
         |}
       """.stripMargin.trim.parse[Source]
 
@@ -107,15 +103,13 @@ class PathsTypeReprSpec extends FlatSpec with Matchers {
     )
     val expected =
       """
-      |trait Get extends GetRequest {
+      |trait Get[F[_]] extends GetRequest {
       | val path = "/subscriptions/{subscription-id}"
       | val queries = Map()
       | val pathVariables = List("`subscription-id`")
       | 
       | type Response = Unit
-      | type AvailableErrors = com.enfore.model.Problem :+: CNil
-      | val badEncoding: IO[AvailableErrors]
-      | def impl(`subscription-id`: String): IO[Response]
+      | def impl(`subscription-id`: String): F[Response]
       |}
     """.stripMargin.parse[Source]
 

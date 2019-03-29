@@ -230,7 +230,7 @@ object ScalaGenerator {
       .map {
         case (encodingName, typeRef) =>
           val returnType = resolveRef(typeRef)(p)
-          s"def $encodingName($params): IO[$returnType]"
+          s"def $encodingName($params): F[$returnType]"
       }
       .mkString("\n")
 
@@ -273,21 +273,21 @@ object ScalaGenerator {
   private def encodingCallMapper(encodingList: List[String], typelessParams: String): String =
     encodingList
       .map(encoding =>
-        s"""case "$encoding" => Right(${cleanScalaSymbol(encoding)}($typelessParams).map(Coproduct[Response](_)))""")
+        s"""case "$encoding" => F.map(${cleanScalaSymbol(encoding)}($typelessParams))(Coproduct[Response](_))""")
       .mkString("\t\n")
 
   private def makeEncodingCallString(encodings: List[String], typelessParams: String): String =
     s"""
       |\t\t\t${encodingCallMapper(encodings, typelessParams)}
-      |\t\t\tcase _ => Left(badEncoding)
-    """.stripMargin
+    """.stripMargin + "\t" +
+      """case _ => ME.raiseError(EncodingMatchFailure(s"$encoding is not acceptable for $path"))""".stripMargin
 
   private def implGenerator(encodingList: Option[List[String]], params: String, typelessParams: String) =
     encodingList
       .flatMap(NonEmptyList.fromList(_).map(_.toList))
-      .fold(s"""def impl($params): IO[Response]""") { encodings =>
+      .fold(s"""def impl($params): F[Response]""") { encodings =>
         s"""
-         |\t\tdef impl(encoding: String)($params): Either[IO[AvailableErrors], IO[Response]] = encoding match {
+         |\t\tdef impl(encoding: String)($params)(implicit ME: cats.MonadError[F, Throwable], F: cats.Functor[F]): F[Response] = encoding match {
          |  ${makeEncodingCallString(encodings, typelessParams)}
          |\t\t}
        """.stripMargin
@@ -311,16 +311,15 @@ object ScalaGenerator {
       case ReqWithContentType.POST => "Post"
       case ReqWithContentType.PUT  => "Put"
     }
-    val responseType: String = res.map(r => MiniTypeHelpers.referenceCoproduct(r.values.toList)(p)).getOrElse("Unit")
+    val responseType: String    = res.map(r => MiniTypeHelpers.referenceCoproduct(r.values.toList)(p)).getOrElse("Unit")
+    val shapelessImport: String = if (responseType == "Unit") "" else "import shapeless._\n\t\t"
     s"""
-       |\ttrait $reqName extends ${reqName}Request {
+       |\ttrait $reqName[F[_]] extends ${reqName}Request {
        |\t\tval path = "$path"
        |\t\tval queries = $querySyntax
        |\t\tval pathVariables = ${pathVars.map(pv => s""" "$pv" """.trim).mkString("List(", ", ", ")")}
        |\t
-       |\t\ttype Response = $responseType
-       |\t\ttype AvailableErrors = com.enfore.model.Problem :+: CNil
-       |\t\tval badEncoding: IO[AvailableErrors]
+       |\t\t${shapelessImport}type Response = $responseType
        |\t\t${cleanEncodingReferences
          .map(e => "\t" + encodingFnDec(e, params)(p))
          .getOrElse("")}
@@ -342,15 +341,14 @@ object ScalaGenerator {
     val params: String                                    = paramsMaker(queries, pathVars, None)(p)
     val typelessParams: String                            = typelessParamsMaker(queries, pathVars)
     val responseType: String                              = res.map(r => MiniTypeHelpers.referenceCoproduct(r.values.toList)(p)).getOrElse("Unit")
+    val shapelessImport: String                           = if (responseType == "Unit") "" else "import shapeless._\n\t\t"
     s"""
-       |\ttrait Get extends GetRequest {
+       |\ttrait Get[F[_]] extends GetRequest {
        |\t\tval path = "$path"
        |\t\tval queries = $querySyntax
        |\t\tval pathVariables = ${pathVars.map(pv => s""" "$pv" """.trim).mkString("List(", ", ", ")")}
        |\t
-       |\t\ttype Response = $responseType
-       |\t\ttype AvailableErrors = com.enfore.model.Problem :+: CNil
-       |\t\tval badEncoding: IO[AvailableErrors]
+       |\t\t${shapelessImport}type Response = $responseType
        |\t${cleanEncodingReferences
          .map(e => "\t" + encodingFnDec(e, params)(p))
          .getOrElse("")}
@@ -367,15 +365,14 @@ object ScalaGenerator {
     val params: String                                    = paramsMaker(Map.empty, pathVars, None)(p)
     val typelessParams: String                            = typelessParamsMaker(Map.empty, pathVars)
     val responseType: String                              = res.map(r => MiniTypeHelpers.referenceCoproduct(r.values.toList)(p)).getOrElse("Unit")
+    val shapelessImport: String                           = if (responseType == "Unit") "" else "import shapeless._\n\t\t"
     s"""
-       |\ttrait Delete extends DeleteRequest {
+       |\ttrait Delete[F[_]] extends DeleteRequest {
        |\t\tval path = "$path"
        |\t\tval queries = Map.empty[String, String]
        |\t\tval pathVariables = ${pathVars.map(pv => s""" "$pv" """.trim).mkString("List(", ", ", ")")}
        |\t
-       |\t\ttype Response = $responseType
-       |\t\ttype AvailableErrors = com.enfore.model.Problem :+: CNil
-       |\t\tval badEncoding: IO[AvailableErrors]
+       |\t\t${shapelessImport}type Response = $responseType
        |\t${cleanEncodingReferences
          .map(e => "\t" + encodingFnDec(e, params)(p))
          .getOrElse("")}
@@ -400,8 +397,6 @@ object ScalaGenerator {
       s"""
        |package ${p.name}.routes
        |
-       |import shapeless._
-       |import cats.effect._
        |import com.enfore.apis.lib._
        |
        |object ${cleanScalaSymbol(path)} {

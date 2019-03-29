@@ -2,7 +2,7 @@ import com.enfore.plugin.BuildInfo
 import com.enfore.plugin.BasicBuildPlugin._
 
 ThisBuild / organization := BuildInfo.organization
-ThisBuild / version := "0.0.7-5-SNAPSHOT"
+ThisBuild / version := "0.0.7"
 
 lazy val root = (project in file("."))
   .settings(name := "openapi")
@@ -37,7 +37,7 @@ lazy val `openapi-scala` = (project in file("openapi-scala"))
 lazy val `openapi-lib` = (project in file("openapi-lib"))
   .settings(
     name := "openapi-lib",
-    libraryDependencies += "org.typelevel" %% "cats-effect" % "1.2.0",
+    libraryDependencies += "org.typelevel" %% "cats-core" % "1.6.0",
     scalacOptions ++= Seq("-language:implicitConversions"),
     scalacOptions in (Compile, console) ~= (_ filterNot (_ == "-Xfatal-warnings")),
     Compile / doc / javacOptions ++= Seq(
