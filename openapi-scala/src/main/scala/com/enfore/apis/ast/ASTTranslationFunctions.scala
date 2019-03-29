@@ -54,7 +54,7 @@ object ASTTranslationFunctions {
       .map(_.name -> PrimitiveString(None)) // TODO: Will be extended later on
       .toMap
 
-  private def typeReprFromSwaggerAST(path: String)(route: PathObject, requestType: RequestType): RouteDefinition = {
+  private def routeDefFromSwaggerAST(path: String)(route: PathObject, requestType: RequestType): RouteDefinition = {
     val parameters                          = route.parameters.getOrElse(List.empty[ParamObject])
     val pathParameters: List[PathParameter] = extractPathParameters(parameters)
     val queryParams: Map[String, Primitive] = extractQueryParameters(parameters)
@@ -81,10 +81,10 @@ object ASTTranslationFunctions {
   private def readToRoutes(paths: Map[String, Map[String, PathObject]]): List[RouteDefinition] =
     paths.flatMap {
       case (path: String, routes: Map[String, PathObject]) =>
-        val post: Option[RouteDefinition] = routes.get("post").map(typeReprFromSwaggerAST(path)(_, RequestType.POST))
-        val get: Option[RouteDefinition]  = routes.get("get").map(typeReprFromSwaggerAST(path)(_, RequestType.GET))
+        val post: Option[RouteDefinition] = routes.get("post").map(routeDefFromSwaggerAST(path)(_, RequestType.POST))
+        val get: Option[RouteDefinition]  = routes.get("get").map(routeDefFromSwaggerAST(path)(_, RequestType.GET))
         val delete: Option[RouteDefinition] =
-          routes.get("delete").map(typeReprFromSwaggerAST(path)(_, RequestType.DELETE))
+          routes.get("delete").map(routeDefFromSwaggerAST(path)(_, RequestType.DELETE))
         List(post, get, delete).flatten
     }.toList
 
@@ -148,12 +148,25 @@ object ASTTranslationFunctions {
     newType.map(NewTypeSymbol(name, _))
   }
 
+  def splitReadOnlyComponents(components: Map[String, Component]): Map[String, Component] = {
+    val (hasReadOnlyProps: Map[String, Component], hasNoReadOnlyProps: Map[String, Component]) =
+      components.partition(_._2.properties.exists { properties: Map[String, Property] =>
+        properties.values.exists(_.readOnly.getOrElse(false))
+      })
+    val withoutReadOnlyFields = hasReadOnlyProps.map {
+      case (cKey, cValue) =>
+        s"${cKey}Request" -> cValue.copy(
+          properties = cValue.properties.filter(_.exists(_._2.readOnly.getOrElse(false))))
+    }
+    hasNoReadOnlyProps ++ hasReadOnlyProps ++ withoutReadOnlyFields
+  }
+
   def readComponentsToInterop(ast: CoreASTRepr)(implicit packageName: PackageName): Map[String, Symbol] =
-    ast.components.schemas
+    splitReadOnlyComponents(ast.components.schemas)
       .flatMap {
-        case (key, value) =>
-          evalSchema(key, value)
-            .map { cleanFilename(key) -> _ }
+        case (name: String, component: Component) =>
+          evalSchema(name, component)
+            .map { cleanFilename(name) -> _ }
       }
       .toList
       .toMap

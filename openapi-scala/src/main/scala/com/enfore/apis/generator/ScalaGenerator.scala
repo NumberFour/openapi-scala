@@ -402,6 +402,7 @@ object ScalaGenerator {
        |
        |import shapeless._
        |import cats.effect._
+       |import com.enfore.apis.lib._
        |
        |object ${cleanScalaSymbol(path)} {
        |\t$generatedCode

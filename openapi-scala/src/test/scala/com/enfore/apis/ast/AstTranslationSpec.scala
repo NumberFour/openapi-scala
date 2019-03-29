@@ -1,6 +1,6 @@
 package com.enfore.apis.ast
 
-import com.enfore.apis.ast.SwaggerAST.CoreASTRepr
+import com.enfore.apis.ast.SwaggerAST._
 import io.circe
 import io.circe.yaml.parser
 import io.circe.generic.auto._
@@ -65,6 +65,35 @@ class AstTranslationSpec extends FlatSpec with Matchers {
       ast.left.map(x => println(x + s" in $source")) // For debugging the failing tests
       ast.isRight shouldBe true
     }
+  }
+
+  "readComponentsToInterop" should "be able to separate readOnly components from regular ones" in {
+    val components = Map(
+      "readOnlyComponent" -> Component(
+        None,
+        ComponentType.`object`,
+        Some(
+          Map(
+            "id"   -> Property(None, Some(PropertyType.string), None, None, Some(true), None, None),
+            "desc" -> Property(None, Some(PropertyType.string), None, None, None, None, None)
+          )),
+        None,
+        Some(List("id"))
+      ),
+      "regularComponent" -> Component(
+        None,
+        ComponentType.`object`,
+        Some(Map("id" -> Property(None, Some(PropertyType.string), None, None, None, None, None))),
+        None,
+        Some(List("id"))
+      )
+    )
+    val filtered: Map[String, Component] = ASTTranslationFunctions.splitReadOnlyComponents(components)
+
+    filtered.size shouldBe 3
+    filtered.keys should contain("readOnlyComponentRequest")
+    filtered.get("readOnlyComponentRequest").map(_.properties.size) shouldBe Some(1)
+    filtered.get("regularComponent").map(_.properties.size) shouldBe Some(1)
   }
 
 }

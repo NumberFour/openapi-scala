@@ -38,6 +38,7 @@ object SwaggerAST {
       `type`: Option[PropertyType], // Only present when property is not a reference
       items: Option[Property], // Only present when property is a sequence
       $ref: Option[String], // Reference to another type
+      readOnly: Option[Boolean], // Points out whether a property is readOnly (defaults to false)
       minLength: Option[Int], // Optional refinement of minimum length
       maxLength: Option[Int]) // Optional refinement of maximum length
 

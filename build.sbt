@@ -2,12 +2,12 @@ import com.enfore.plugin.BuildInfo
 import com.enfore.plugin.BasicBuildPlugin._
 
 ThisBuild / organization := BuildInfo.organization
-ThisBuild / version := "0.0.7-RC2"
+ThisBuild / version := "0.0.7-5-SNAPSHOT"
 
 lazy val root = (project in file("."))
   .settings(name := "openapi")
   .settings(scalaVersion := "2.12.8")
-  .aggregate(`openapi-scala`, `sbt-openapi`)
+  .aggregate(`openapi-scala`, `openapi-lib`, `sbt-openapi`)
   .enablePlugins(ScalaCrossPlugin, NexusPublishPlugin)
 
 lazy val `openapi-scala` = (project in file("openapi-scala"))
@@ -32,7 +32,22 @@ lazy val `openapi-scala` = (project in file("openapi-scala"))
       "-no-link-warnings"
     )
   )
-  .enablePlugins(Scala212Plugin, SbtPlugin, NexusPublishPlugin, BasicBuildPlugin)
+  .enablePlugins(Scala212Plugin, NexusPublishPlugin, BasicBuildPlugin)
+
+lazy val `openapi-lib` = (project in file("openapi-lib"))
+  .settings(
+    name := "openapi-lib",
+    libraryDependencies += "org.typelevel" %% "cats-effect" % "1.2.0",
+    scalacOptions ++= Seq("-language:implicitConversions"),
+    scalacOptions in (Compile, console) ~= (_ filterNot (_ == "-Xfatal-warnings")),
+    Compile / doc / javacOptions ++= Seq(
+      "-no-link-warnings"
+    ),
+    Compile / doc / scalacOptions ++= Seq(
+      "-no-link-warnings"
+    )
+  )
+  .enablePlugins(Scala212Plugin, NexusPublishPlugin, BasicBuildPlugin)
 
 lazy val `sbt-openapi` = (project in file("sbt-openapi"))
   .settings(
@@ -42,3 +57,4 @@ lazy val `sbt-openapi` = (project in file("sbt-openapi"))
   )
   .dependsOn(`openapi-scala`)
   .enablePlugins(Scala212Plugin, SbtPlugin, NexusPublishPlugin, BasicBuildPlugin)
+
