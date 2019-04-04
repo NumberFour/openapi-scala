@@ -20,17 +20,17 @@ object ASTTranslationFunctions {
 
   // Functions for translating routes
 
-  // TODO: When we make inline schemas available, this should be refactored to parse schemas
-  //  and return optional schema objects
-  private def getContentForEncoding(media: MediaTypeObject, encoding: String): Option[Ref] =
-    media.content.flatMap(_.get(encoding).flatMap { schemaRefObj =>
-      schemaRefObj.schema.flatMap(_.$ref).map(x => Ref(x, x.split("/").last))
-    })
+  private def buildRefFromSchemaRefContainer(schemaObject: SchemaRefContainer): Option[Ref] =
+    schemaObject.schema
+      .flatMap(_.$ref)
+      .map(x => Ref(x, x.split("/").last))
+
+  private def getEncodings(media: MediaTypeObject): List[Ref] =
+    media.content.flatMap(_.values.toList.map { buildRefFromSchemaRefContainer }.sequence).toList.flatten
 
   private def getEncodedMap(media: MediaTypeObject): Map[String, Ref] =
     mapValues(
-      mapValues(media.content.getOrElse(Map.empty))(schemaRefObj =>
-        schemaRefObj.schema.flatMap(_.$ref).map(x => Ref(x, x.split("/").last)))
+      mapValues(media.content.getOrElse(Map.empty))(buildRefFromSchemaRefContainer)
         .filter(_._2.isDefined))(_.get)
 
   private def getNameContentEncoding(
@@ -58,18 +58,18 @@ object ASTTranslationFunctions {
     val parameters                          = route.parameters.getOrElse(List.empty[ParamObject])
     val pathParameters: List[PathParameter] = extractPathParameters(parameters)
     val queryParams: Map[String, Primitive] = extractQueryParameters(parameters)
-    val possibleBody: Option[Ref]           = route.requestBody.flatMap(getContentForEncoding(_, "application/json"))
+    val possibleBodies: List[Ref]           = route.requestBody.toList.flatMap(getEncodings)
     val possibleResponse: Option[Map[String, Ref]] =
       getNameContentEncoding(route.responses, x => x >= 200 && x < 300)
     requestType match {
       case RequestType.POST | RequestType.PUT =>
-        assert(possibleBody.isDefined, s"A request body should exist for $path $requestType request")
+        assert(possibleBodies.size == 1, s"We only support one content type for $path $requestType request")
         PutOrPostRequest(
           path,
           translateReqContentType(requestType),
           pathParameters,
           queryParams,
-          possibleBody.get,
+          possibleBodies.head,
           possibleResponse)
       case RequestType.GET =>
         GetRequest(path, pathParameters, queryParams, possibleResponse)

@@ -3445,6 +3445,7 @@ components:
         - RELATIVE
         - FRIEND
         - BUSINESS_CONNECTION
+        - CRAZY_EX_GIRLFRIEND
     Representative:
       type: object
       properties:

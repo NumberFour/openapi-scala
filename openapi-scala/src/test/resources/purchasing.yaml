@@ -64,6 +64,7 @@ components:
         note:
           description: |
             A note from the supplier accompanying the status change
+          type: string
       required:
         - '@type'
         - n4PurchaseOrderNumber

@@ -16,9 +16,10 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/RegisterSupplierRequest'
-                - $ref: '#/components/schemas/RegisterCustomerRequest'
+              $ref: '#/components/schemas/RegisterSupplierRequest'
+#              oneOf:
+#                - $ref: '#/components/schemas/RegisterSupplierRequest'
+#                - $ref: '#/components/schemas/RegisterCustomerRequest'
       responses:
         200:
           description: Registry entry created
@@ -206,19 +207,22 @@ components:
             ID of the subsupplier within the Supplier Group
           type: string
         supplierInfo:
-          description: |
-            User-facing information about the supplier
-          type: object
-          properties:
-            name:
-              type: string
-          required:
-            - name
+          $ref: '#/components/schemas/SupplierInfo'
       required:
         - '@type'
         - supplierGroupId
         - subSupplierId
         - supplierInfo
+
+    SupplierInfo:
+      type: object
+      description: |
+        User-facing information about the supplier
+      properties:
+        name:
+          type: string
+      required:
+        - name
 
     RegistrySupplierRequestAnnotation:
       description: |
@@ -251,6 +255,7 @@ components:
           description: |
             Some opaque string that can be stored here with the customer and then is sent along with requests to the adapters.
             This allows to store additional customer-identifying information along the customer id
+          type: string
         supplierCustomerId:
           description: |
             ID of the Customer at the Supplier

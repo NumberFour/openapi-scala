@@ -56,7 +56,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
     ast.isRight shouldBe true
   }
 
-  it should "be able to read the catalog yaml" in {
+  it should "be able to read all yamls" in {
     val sources = List("catalog", "Contacts-API", "ERP-API", "problem", "purchasing", "registry").map(_ + ".yaml")
     sources.foreach { source =>
       info { source }

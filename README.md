@@ -70,3 +70,4 @@ in a different file, they need to be resolved before using our library/plugin.
 - We do not support any anonymous types for representing HTTP requests and responses.
 - We do not support nested type definitions. Therefore, any objects that are used must be defined in the components and must not contain
 any other nested objects. Nested arrays, however, are supported.
+- We do not support more than one type for Content-Type header for incoming requests. Multiple types corresponding to their encodings are, however, available with an Accept-Encoding header on a request.
