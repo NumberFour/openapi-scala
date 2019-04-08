@@ -33,6 +33,13 @@ You will also need to make the library available to be able to use the generated
 ```scala
 libraryDependencies += "com.enfore" %% "openapi-lib" % "<openapi-scala-version>"
 ```
+Additionally you will need to satisfy these libraray dependencies for `openapi-lib`
+```
+"com.beachape"         %% "enumeratum"       % "<version>",
+"com.beachape"         %% "enumeratum-circe" % "<version>",
+"io.circe"             %% "circe-derivation" % "<version>",
+"com.chuusai"          %% "shapeless"        % "<version>"
+```
 
 Once the plugin is available in your project you can enable it on a given an SBT sub-project and use the setting `openAPIOutputPackage` to specify
 the package name for your components. 
