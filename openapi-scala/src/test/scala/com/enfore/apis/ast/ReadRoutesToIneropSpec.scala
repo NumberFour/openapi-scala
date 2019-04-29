@@ -11,16 +11,24 @@ import org.scalatest.{FlatSpec, Matchers}
 class ReadRoutesToIneropSpec extends FlatSpec with Matchers {
   "readRoutesToInerop" should "be able to read multiple methods per route" in {
     val expected = Map("_contacts_individual_{contact-id}" ->
-        PathItemAggregation("/contacts/individual/{contact-id}",
+        PathItemAggregation(
+          "/contacts/individual/{contact-id}",
           List(
             GetRequest("/contacts/individual/{contact-id}",List(PathParameter("contact-id")),Map(),Some(Map("application/vnd.enfore.contacts+json" -> Ref("#/components/schemas/IndividualContact","IndividualContact")))),
             PutOrPostRequest("/contacts/individual/{contact-id}", PUT, List(PathParameter("contact-id")), Map(), Ref("#/components/schemas/IndividualContact","IndividualContact"), Some(Map("application/vnd.enfore.contacts+json" -> Ref("#/components/schemas/IndividualContact","IndividualContact"))))
           )))
 
-    val actual =
-    ASTTranslationFunctions.readRoutesToInerop(ast)
+    val actual = ASTTranslationFunctions.readRoutesToInerop(ast)
 
-    actual should equal(expected)
+    normalise(actual) should equal(normalise(expected))
+  }
+
+  private def normalise(in: Map[String, PathItemAggregation]): Map[String, PathItemAggregation] = {
+    in.mapValues { p =>
+      p.copy(
+        items = p.items.sortBy(_.toString)  // Sort request types
+      )
+    }
   }
 
   private lazy val ast = CoreASTRepr(
@@ -69,7 +77,8 @@ class ReadRoutesToIneropSpec extends FlatSpec with Matchers {
         "put" -> PathObject(
           Some("Full update of an IndividualContact"),
           Some(MediaTypeObject(Some(Map("application/vnd.enfore.contacts+json" -> SchemaRefContainer(Some(SchemaObject(Some("#/components/schemas/IndividualContact")))))))),
-          Map(200 -> MediaTypeObject(Some(Map("application/vnd.enfore.contacts+json" -> SchemaRefContainer(Some(SchemaObject(Some("#/components/schemas/IndividualContact"))))))),
+          Map(
+            200 -> MediaTypeObject(Some(Map("application/vnd.enfore.contacts+json" -> SchemaRefContainer(Some(SchemaObject(Some("#/components/schemas/IndividualContact"))))))),
             400 -> MediaTypeObject(None),
             403 -> MediaTypeObject(None),
             404 -> MediaTypeObject(None)),
