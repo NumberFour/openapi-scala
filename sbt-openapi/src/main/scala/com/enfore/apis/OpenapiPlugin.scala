@@ -2,15 +2,21 @@ package com.enfore.apis
 
 import sbt.{Def, _}
 import Keys._
+import com.enfore.apis.generator.RouteImplementation
 import java.io.{File, FileWriter}
 
 object OpenapiPlugin extends AutoPlugin {
 
-  def compileOpenAPI(sourceDir: File, outputDir: File, packageName: String): Seq[File] = {
+  def compileOpenAPI(
+      sourceDir: File,
+      outputDir: File,
+      packageName: String,
+      routesImplementations: List[RouteImplementation]
+  ): Seq[File] = {
     println(s"[info] Creating OpenAPI from $sourceDir and writing to target $outputDir")
     sourceDir.listFiles.flatMap { sourceFile =>
       Main
-        .generateScala(sourceFile.getAbsolutePath, packageName)
+        .generateScala(sourceFile.getAbsolutePath, packageName, routesImplementations)
         .right
         .get
         .map {
@@ -33,6 +39,8 @@ object OpenapiPlugin extends AutoPlugin {
       settingKey[File]("Output directory for OpenAPI. Defaults to managed sources - openapi.")
     val openAPIOutputPackage =
       settingKey[String]("Name of the package to be used for OpenAPI generated objects.")
+    val routeImplementations =
+      settingKey[List[RouteImplementation]]("List of implementations for routes that should be generated")
     val openAPIGenerate =
       taskKey[Seq[File]]("Generate Scala sources from OpenAPI definition in YAML.")
   }
@@ -46,7 +54,12 @@ object OpenapiPlugin extends AutoPlugin {
       openAPIOutputPackage := "com.enfore.openapi",
       openAPIGenerate := Def.taskDyn {
         Def.task {
-          compileOpenAPI(openAPISource.value, openAPIOutput.value, openAPIOutputPackage.value)
+          compileOpenAPI(
+            openAPISource.value,
+            openAPIOutput.value,
+            openAPIOutputPackage.value,
+            routeImplementations.value
+          )
         }
       }.value,
       watchSources ++= { (openAPISource.value ** "*").get },

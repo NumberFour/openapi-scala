@@ -2,7 +2,7 @@ import com.enfore.plugin.BuildInfo
 import com.enfore.plugin.BasicBuildPlugin._
 
 ThisBuild / organization := BuildInfo.organization
-ThisBuild / version := "0.0.8-RC2"
+ThisBuild / version := "0.1.0"
 
 lazy val root = (project in file("."))
   .settings(name := "openapi")

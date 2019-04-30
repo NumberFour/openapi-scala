@@ -17,7 +17,7 @@ import simulacrum._
 object ShowTypeTag {
   import ops._
 
-  implicit private val primitiveShowType: ShowTypeTag[Primitive] = {
+  implicit val primitiveShowType: ShowTypeTag[Primitive] = {
     case PrimitiveString(_)                => "String"
     case PrimitiveNumber(_)                => "Double"
     case PrimitiveInt(_)                   => "Int"
@@ -103,7 +103,7 @@ object ScalaGenerator {
   import ShowTypeTag.typeReprShowType
 
   // List of symbol names that are not allowed to be used directly
-  private val forbiddenSymbols = List(
+  val forbiddenSymbols = List(
     "type",
     "class",
     "trait",
@@ -135,7 +135,12 @@ object ScalaGenerator {
       m.group(1).toUpperCase()
     })
 
-  private def cleanScalaSymbol(in: String): String = {
+  def hyphenAndUnderscoreToCamel(name: String): String =
+    "[-_]([a-z\\d])".r.replaceAllIn(name, { m =>
+      m.group(1).toUpperCase()
+    })
+
+  def cleanScalaSymbol(in: String): String = {
     val containsIllegal = illegalScalaSymbols.foldLeft(false)((buf, value) => buf || in.contains(value))
     if (forbiddenSymbols.contains(in) || containsIllegal) underscoreToCamel(s"`$in`")
     else underscoreToCamel(in)

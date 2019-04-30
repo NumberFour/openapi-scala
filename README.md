@@ -11,8 +11,12 @@ section.
 ### OpenAPI Scala
 
 SBT sub-project `openapi-scala` contains the main logic and library for loading, representing, and translating YAML to Scala code.
-These contain components that are translated to Scala's `case classes` and Routes that each translate to a Scala `trait` declaring interfaces
-for that particular HTTP route.
+These contain components that are translated to Scala's `case classes` and Routes, which are explained in the next section.
+
+#### Routes
+We support different types of Route generation, depending on the backend you need it for. 
+- The generic Routes are each translated to a Scala `trait` declaring interfaces for that particular HTTP route.
+- The http4s Routes translate into two files, one file with a trait for the implementation you'll need to provide and one file with an Object who's apply function accepts mentioned implementation trait. 
 
 ### sbt-openapi
 
@@ -41,6 +45,12 @@ Additionally you will need to satisfy these libraray dependencies for `openapi-l
 "com.chuusai"  %% "shapeless"        % "2.3.3"
 ```
 
+For http4s Routes you will also need: 
+```scala
+"org.http4s" %% s"http4s-dsl" % "0.20.0-M7",
+"org.http4s" %% s"http4s-circe" % "0.20.0-M7"
+```
+
 Once the plugin is available in your project you can enable it on a given an SBT sub-project and use the setting `openAPIOutputPackage` to specify
 the package name for your components. 
 
@@ -64,6 +74,8 @@ Following are the settings available for your SBT project.
 **openAPIOutput**: Output directory for the OpenAPI. Defaults to managed sources — `openapi`.
 
 **openAPIOutputPacakge**: Name of the package to be used for OpenAPI components.
+
+**routeImplementations**: A List of `com.enfore.apis.generator.RouteImplementation`, which controls which kind of routes should be generated. Find out more about [routes](#Routes)
 
 ## Support And Limitations
 
