@@ -22,7 +22,8 @@ object RouteDefinitions {
     Some(
       Map(
         "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
-      ))
+      )
+    )
   )
 
   lazy val `POST /contacts/individual` = PutOrPostRequest(
@@ -41,7 +42,8 @@ object RouteDefinitions {
     Some(
       Map(
         "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
-      ))
+      )
+    )
   )
 
   lazy val `PUT /contacts/individual/{contacts-id}` = PutOrPostRequest(
@@ -66,7 +68,8 @@ object RouteDefinitions {
     Some(
       Map(
         "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
-      ))
+      )
+    )
   )
 
   lazy val `POST /contacts/organization/{contacts-id}/addresses` = PutOrPostRequest(
@@ -88,7 +91,8 @@ object RouteDefinitions {
     Some(
       Map(
         "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
-      ))
+      )
+    )
   )
 
   lazy val `PUT /contacts/organization/{contacts-id}/addresses/{address-id}` = PutOrPostRequest(
@@ -103,7 +107,8 @@ object RouteDefinitions {
     Some(
       Map(
         "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
-      ))
+      )
+    )
   )
 
   lazy val `DELETE /contacts/organization/{contacts-id}/addresses/{address-id}` = DeleteRequest(
@@ -115,7 +120,8 @@ object RouteDefinitions {
     Some(
       Map(
         "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
-      ))
+      )
+    )
   )
 
   lazy val `GET /contacts/individual?query1&query2&optional1&optional2&list1&optional-list1` = GetRequest(
@@ -132,7 +138,8 @@ object RouteDefinitions {
     Some(
       Map(
         "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
-      ))
+      )
+    )
   )
 
   lazy val `POST /contacts/individual?query1&query2&optional1&optional2&list1&optional-list1` = PutOrPostRequest(
@@ -161,7 +168,8 @@ object RouteDefinitions {
     Some(
       Map(
         "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
-      ))
+      )
+    )
   )
 
   lazy val `PUT /contacts/individual/{contacts-id}?optional1&optional2` = PutOrPostRequest(
@@ -192,7 +200,8 @@ object RouteDefinitions {
     Some(
       Map(
         "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
-      ))
+      )
+    )
   )
 
   lazy val `POST /contacts/organization/{contacts-id}/addresses?query1&query2` = PutOrPostRequest(
@@ -220,7 +229,8 @@ object RouteDefinitions {
     Some(
       Map(
         "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
-      ))
+      )
+    )
   )
 
   lazy val `PUT /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2` = PutOrPostRequest(
@@ -238,7 +248,8 @@ object RouteDefinitions {
     Some(
       Map(
         "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
-      ))
+      )
+    )
   )
 
   lazy val `DELETE /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2` = DeleteRequest(
@@ -250,7 +261,8 @@ object RouteDefinitions {
     Some(
       Map(
         "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
-      ))
+      )
+    )
   )
 
   lazy val `GET /contacts/individual?optional-list1&optional-list2` = GetRequest(
@@ -263,7 +275,8 @@ object RouteDefinitions {
     Some(
       Map(
         "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
-      ))
+      )
+    )
   )
 
   lazy val `POST /contacts/individual?optionaoListl1&optional-list2` = PutOrPostRequest(
@@ -291,6 +304,7 @@ object RouteDefinitions {
     Some(
       Map(
         "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
-      ))
+      )
+    )
   )
 }

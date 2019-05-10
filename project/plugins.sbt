@@ -1,10 +1,10 @@
 // Code auto-formatting with compile
-addSbtPlugin("com.geirsson" % "sbt-scalafmt" % "1.5.1")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.0.0")
 
 // Code style hints
 addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "1.0.0")
 
-val sbtN4BuildVersion = "0.2.82"
+val sbtN4BuildVersion = "0.3.3"
 // Build Plugin
 addSbtPlugin("com.enfore" % "sbt-n4build" % sbtN4BuildVersion)
 

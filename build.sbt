@@ -57,4 +57,3 @@ lazy val `sbt-openapi` = (project in file("sbt-openapi"))
   )
   .dependsOn(`openapi-scala`)
   .enablePlugins(Scala212Plugin, SbtPlugin, NexusPublishPlugin, BasicBuildPlugin)
-

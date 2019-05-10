@@ -54,7 +54,8 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
         Some(
           Map(
             "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
-          ))
+          )
+        )
       ),
       PutOrPostRequest(
         "/contacts/individual",
@@ -84,7 +85,8 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
         Some(
           Map(
             "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
-          ))
+          )
+        )
       ),
       PutOrPostRequest(
         "/contacts/individual/queries",

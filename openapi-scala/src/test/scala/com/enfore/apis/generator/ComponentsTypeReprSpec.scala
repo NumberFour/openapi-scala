@@ -17,8 +17,9 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         "Person",
         List(
           PrimitiveSymbol("name", PrimitiveString(None)),
-          PrimitiveSymbol("age", PrimitiveInt(None)),
-        ))
+          PrimitiveSymbol("age", PrimitiveInt(None))
+        )
+      )
     )
     val expected =
       """
@@ -46,8 +47,9 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         "Person",
         List(
           RefSymbol("name", Ref("com.enfore.apis", "Name")),
-          PrimitiveSymbol("age", PrimitiveInt(None)),
-        ))
+          PrimitiveSymbol("age", PrimitiveInt(None))
+        )
+      )
     )
     val expected =
       """

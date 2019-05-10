@@ -77,8 +77,8 @@ object TypeRepr {
       path: String,
       pathParams: List[PathParameter],
       queries: Map[String, Primitive],
-      res: Option[Map[String, Ref]])
-      extends RouteDefinition
+      res: Option[Map[String, Ref]]
+  ) extends RouteDefinition
 
   final case class PutOrPostRequest(
       path: String,
@@ -86,8 +86,8 @@ object TypeRepr {
       pathParams: List[PathParameter],
       queries: Map[String, Primitive],
       req: Ref,
-      res: Option[Map[String, Ref]])
-      extends RouteDefinition
+      res: Option[Map[String, Ref]]
+  ) extends RouteDefinition
 
   final case class DeleteRequest(path: String, pathParams: List[PathParameter], res: Option[Map[String, Ref]])
       extends RouteDefinition
@@ -98,8 +98,9 @@ object TypeRepr {
     incoming.foldLeft(Map[Ref, Boolean]()) {
       case (refTable: Map[Ref, Boolean], s @ NewTypeSymbol(_, data: PrimitiveProduct)) =>
         // TODO: When found a NewTypeSymbol as a value of a product, add that to resolution list
-        data.values.foldLeft(refTable + (s.ref -> true))((refChart: Map[Ref, Boolean], symbol: Symbol) =>
-          refChart + (symbol.ref               -> true))
+        data.values.foldLeft(refTable + (s.ref                                    -> true))(
+          (refChart: Map[Ref, Boolean], symbol: Symbol) => refChart + (symbol.ref -> true)
+        )
       case (refTable: Map[Ref, Boolean], x) => refTable + (x.ref -> true)
     }
 

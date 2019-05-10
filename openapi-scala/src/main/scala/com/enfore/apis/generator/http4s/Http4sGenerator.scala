@@ -104,7 +104,8 @@ object Http4sGenerator {
     */
   private def queryParameterMatchers(
       routes: Map[FileName, PathItemAggregation],
-      indentationLevel: Int): List[String] = {
+      indentationLevel: Int
+  ): List[String] = {
     val routeDefinitions = routes.values.toList.flatMap(_.items)
 
     val listDecoder = RouteGenerator.listDecoder(routeDefinitions, indentationLevel)

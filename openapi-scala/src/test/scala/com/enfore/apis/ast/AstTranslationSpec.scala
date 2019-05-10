@@ -81,7 +81,8 @@ class AstTranslationSpec extends FlatSpec with Matchers {
               $ref = None,
               readOnly = Some(true),
               minLength = None,
-              maxLength = None),
+              maxLength = None
+            ),
             "desc" -> Property(
               description = None,
               `type` = Some(PropertyType.string),
@@ -89,8 +90,10 @@ class AstTranslationSpec extends FlatSpec with Matchers {
               $ref = None,
               readOnly = None,
               minLength = None,
-              maxLength = None)
-          )),
+              maxLength = None
+            )
+          )
+        ),
         enum = None,
         required = Some(List("id"))
       ),

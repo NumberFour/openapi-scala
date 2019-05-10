@@ -31,7 +31,8 @@ object ASTTranslationFunctions {
   private def getEncodedMap(media: MediaTypeObject): Map[String, Ref] =
     mapValues(
       mapValues(media.content.getOrElse(Map.empty))(buildRefFromSchemaRefContainer)
-        .filter(_._2.isDefined))(_.get)
+        .filter(_._2.isDefined)
+    )(_.get)
 
   private def getNameContentEncoding(
       mediaMap: Map[Int, MediaTypeObject],
@@ -70,7 +71,8 @@ object ASTTranslationFunctions {
           pathParameters,
           queryParams,
           possibleBodies.head,
-          possibleResponse)
+          possibleResponse
+        )
       case RequestType.GET =>
         GetRequest(path, pathParameters, queryParams, possibleResponse)
       case RequestType.DELETE =>
@@ -99,7 +101,8 @@ object ASTTranslationFunctions {
     }
 
   def loadPropertyObject(pType: Option[PropertyType], param: Option[Property], refinements: Option[List[RefinedTags]])(
-      implicit packageName: PackageName): Option[TypeRepr] =
+      implicit packageName: PackageName
+  ): Option[TypeRepr] =
     pType flatMap {
       case PropertyType.`object` => None
       case PropertyType.string   => PrimitiveString(refinements).some
@@ -127,7 +130,8 @@ object ASTTranslationFunctions {
   }
 
   def loadObjectProperties(typeName: String, properties: Map[String, Property], required: List[String])(
-      implicit packageName: PackageName): Option[NewType] = {
+      implicit packageName: PackageName
+  ): Option[NewType] = {
     val mapped: immutable.Iterable[Option[Symbol]] = properties.mapValues(loadSingleProperty) map {
       case (name: String, repr: Option[TypeRepr]) =>
         val mapOp = if (required.contains(name)) repr else repr.map(PrimitiveOption)
@@ -160,7 +164,8 @@ object ASTTranslationFunctions {
           properties = cValue.properties.map(
             _.filterNot(
               _.exists(_.readOnly.getOrElse(false))
-            ))
+            )
+          )
         )
     }
     hasNoReadOnlyProps ++ hasReadOnlyProps ++ withoutReadOnlyFields

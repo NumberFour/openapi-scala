@@ -176,9 +176,11 @@ object ScalaGenerator {
           PrimitiveSymbol(vn, typeRepr)
         case t @ _ => t
       }
-      .map(sym =>
-        s"val ${cleanScalaSymbol(sym.valName)} = new RefinedTypeOps[${SymbolAnnotationMaker
-          .refinedAnnotation(sym)}, ${SymbolAnnotationMaker.refinementOnType(sym)}]")
+      .map(
+        sym =>
+          s"val ${cleanScalaSymbol(sym.valName)} = new RefinedTypeOps[${SymbolAnnotationMaker
+            .refinedAnnotation(sym)}, ${SymbolAnnotationMaker.refinementOnType(sym)}]"
+      )
     NonEmptyList.fromList(helpers)
   }
 
@@ -252,7 +254,8 @@ object ScalaGenerator {
 
   // TODO: Empty lists are not considered in this implementation, fix that.
   private def paramsMaker(queries: Map[String, Primitive], pathParams: List[String], reqType: Option[Ref])(
-      implicit p: PackageName): String = {
+      implicit p: PackageName
+  ): String = {
     val querySyntax: Option[String] = NonEmptyList
       .fromList(queries.map {
         case (name, prim) => s"$name:  ${typeReprShowType.showType(prim)}"
@@ -268,7 +271,8 @@ object ScalaGenerator {
   private def typelessParamsMaker(
       queries: Map[String, Primitive],
       pathParams: List[String],
-      req: Boolean = false): String =
+      req: Boolean = false
+  ): String =
     NonEmptyList
       .fromList(queries.keys.toList ++ pathParams)
       .map(_.toList)
@@ -277,8 +281,10 @@ object ScalaGenerator {
 
   private def encodingCallMapper(encodingList: List[String], typelessParams: String): String =
     encodingList
-      .map(encoding =>
-        s"""case "$encoding" => F.map(${cleanScalaSymbol(encoding)}($typelessParams))(Coproduct[Response](_))""")
+      .map(
+        encoding =>
+          s"""case "$encoding" => F.map(${cleanScalaSymbol(encoding)}($typelessParams))(Coproduct[Response](_))"""
+      )
       .mkString("\t\n")
 
   private def makeEncodingCallString(encodings: List[String], typelessParams: String): String =
@@ -304,7 +310,8 @@ object ScalaGenerator {
       pathParams: List[PathParameter],
       queries: Map[String, Primitive],
       req: Ref,
-      res: Option[Map[String, Ref]])(implicit p: PackageName): String = {
+      res: Option[Map[String, Ref]]
+  )(implicit p: PackageName): String = {
     val cleanEncodingReferences: Option[Map[String, Ref]] = res.map(_.map { case (k, v) => cleanScalaSymbol(k) -> v })
     val encodings: Option[Iterable[String]]               = res.map(_.keys)
     val queryMap: List[String]                            = queryListMaker(queries)
@@ -337,7 +344,8 @@ object ScalaGenerator {
       path: String,
       pathParams: List[PathParameter],
       queries: Map[String, Primitive],
-      res: Option[Map[String, Ref]])(implicit p: PackageName): String = {
+      res: Option[Map[String, Ref]]
+  )(implicit p: PackageName): String = {
     val cleanEncodingReferences: Option[Map[String, Ref]] = res.map(_.map { case (k, v) => cleanScalaSymbol(k) -> v })
     val encodings: Option[Iterable[String]]               = res.map(_.keys)
     val queryMap: List[String]                            = queryListMaker(queries)
@@ -363,7 +371,8 @@ object ScalaGenerator {
   }
 
   private def deleteRequestGenerator(path: String, pathParams: List[PathParameter], res: Option[Map[String, Ref]])(
-      implicit p: PackageName): String = {
+      implicit p: PackageName
+  ): String = {
     val cleanEncodingReferences: Option[Map[String, Ref]] = res.map(_.map { case (k, v) => cleanScalaSymbol(k) -> v })
     val encodings: Option[Iterable[String]]               = res.map(_.keys)
     val pathVars: List[String]                            = pathParams map (_.name) map cleanScalaSymbol
