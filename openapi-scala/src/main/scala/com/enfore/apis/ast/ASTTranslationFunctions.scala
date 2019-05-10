@@ -81,7 +81,7 @@ object ASTTranslationFunctions {
   private def readToRoutes(paths: Map[String, Map[String, PathObject]]): List[RouteDefinition] =
     paths.flatMap {
       case (path: String, routes: Map[String, PathObject]) =>
-        val put: Option[RouteDefinition] = routes.get("put").map(routeDefFromSwaggerAST(path)(_, RequestType.PUT))
+        val put: Option[RouteDefinition]  = routes.get("put").map(routeDefFromSwaggerAST(path)(_, RequestType.PUT))
         val post: Option[RouteDefinition] = routes.get("post").map(routeDefFromSwaggerAST(path)(_, RequestType.POST))
         val get: Option[RouteDefinition]  = routes.get("get").map(routeDefFromSwaggerAST(path)(_, RequestType.GET))
         val delete: Option[RouteDefinition] =
@@ -157,7 +157,11 @@ object ASTTranslationFunctions {
     val withoutReadOnlyFields = hasReadOnlyProps.map {
       case (cKey, cValue) =>
         s"${cKey}Request" -> cValue.copy(
-          properties = cValue.properties.filter(_.exists(_._2.readOnly.getOrElse(false))))
+          properties = cValue.properties.map(
+            _.filterNot(
+              _.exists(_.readOnly.getOrElse(false))
+            ))
+        )
     }
     hasNoReadOnlyProps ++ hasReadOnlyProps ++ withoutReadOnlyFields
   }
@@ -174,15 +178,15 @@ object ASTTranslationFunctions {
 
   private def aggregateRoutes(routes: List[RouteDefinition]): Map[String, PathItemAggregation] =
     routes
-        .foldLeft(Map.empty[String, List[RouteDefinition]]) {
-          case (acc, route) =>
-            val existingRoutes = acc.getOrElse(route.path, List.empty)
-            val nextRoute = existingRoutes :+ route
-            acc + (route.path -> nextRoute)
-        }
-        .map {
-          case (key, value) => cleanFilename(key) -> PathItemAggregation(key, value)
-        }
+      .foldLeft(Map.empty[String, List[RouteDefinition]]) {
+        case (acc, route) =>
+          val existingRoutes = acc.getOrElse(route.path, List.empty)
+          val nextRoute      = existingRoutes :+ route
+          acc + (route.path -> nextRoute)
+      }
+      .map {
+        case (key, value) => cleanFilename(key) -> PathItemAggregation(key, value)
+      }
 
   def readRoutesToInerop(ast: CoreASTRepr): Map[String, PathItemAggregation] =
     ast.paths.map(p => aggregateRoutes(readToRoutes(p))).getOrElse(Map.empty)

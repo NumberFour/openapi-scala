@@ -70,30 +70,58 @@ class AstTranslationSpec extends FlatSpec with Matchers {
   "readComponentsToInterop" should "be able to separate readOnly components from regular ones" in {
     val components = Map(
       "readOnlyComponent" -> Component(
-        None,
-        ComponentType.`object`,
-        Some(
+        description = None,
+        `type` = ComponentType.`object`,
+        properties = Some(
           Map(
-            "id"   -> Property(None, Some(PropertyType.string), None, None, Some(true), None, None),
-            "desc" -> Property(None, Some(PropertyType.string), None, None, None, None, None)
+            "id" -> Property(
+              description = None,
+              `type` = Some(PropertyType.string),
+              items = None,
+              $ref = None,
+              readOnly = Some(true),
+              minLength = None,
+              maxLength = None),
+            "desc" -> Property(
+              description = None,
+              `type` = Some(PropertyType.string),
+              items = None,
+              $ref = None,
+              readOnly = None,
+              minLength = None,
+              maxLength = None)
           )),
-        None,
-        Some(List("id"))
+        enum = None,
+        required = Some(List("id"))
       ),
       "regularComponent" -> Component(
-        None,
-        ComponentType.`object`,
-        Some(Map("id" -> Property(None, Some(PropertyType.string), None, None, None, None, None))),
-        None,
-        Some(List("id"))
+        description = None,
+        `type` = ComponentType.`object`,
+        properties = Some(
+          Map(
+            "id" -> Property(
+              description = None,
+              `type` = Some(PropertyType.string),
+              items = None,
+              $ref = None,
+              readOnly = None,
+              minLength = None,
+              maxLength = None
+            )
+          )
+        ),
+        enum = None,
+        required = Some(List("id"))
       )
     )
     val filtered: Map[String, Component] = ASTTranslationFunctions.splitReadOnlyComponents(components)
 
     filtered.size shouldBe 3
     filtered.keys should contain("readOnlyComponentRequest")
-    filtered.get("readOnlyComponentRequest").map(_.properties.size) shouldBe Some(1)
-    filtered.get("regularComponent").map(_.properties.size) shouldBe Some(1)
+    filtered.get("readOnlyComponentRequest").map(_.properties.get.size) shouldBe Some(1)
+    filtered.get("readOnlyComponentRequest").map(_.properties.get.keys) shouldBe Some(Set("desc"))
+    filtered.get("regularComponent").map(_.properties.get.size) shouldBe Some(1)
+    filtered.get("regularComponent") shouldBe components.get("regularComponent")
   }
 
 }
