@@ -1,0 +1,41 @@
+variables:
+  SBT: 'sbt -ivy ivy2/'
+  VERSION: pipeline${CI_PIPELINE_IID}-${CI_COMMIT_SHORT_SHA}
+  ECR: 241219621310.dkr.ecr.eu-west-1.amazonaws.com/numberfour
+
+image: ${ECR}/scala-build-images:openjdk11-scala2.12-sbt1.2
+
+cache:
+  key: one-cache-per-project
+  paths:
+    - ivy2/
+
+stages:
+  - build-test
+  - publish
+
+build and test:
+  stage: build-test
+  script:
+    - ${SBT} clean coverage testOnly coverageReport coverageAggregate
+  artifacts:
+    expire_in: 1 hour
+    reports:
+      junit:
+        - './target/test-reports/*.xml'
+        - '**/target/test-reports/*.xml'
+
+publish:
+  stage: publish
+  script:
+    - sed "s/unstable-SNAPSHOT/${CI_COMMIT_TAG}/" build.sbt > build.sbt.2 && mv build.sbt.2 build.sbt
+    - cat build.sbt | grep version
+    - ${SBT} publish   # publish must be separate from coverage
+  artifacts:
+    expire_in: 1 hour
+    reports:
+      junit:
+        - './target/test-reports/*.xml'
+        - '**/target/test-reports/*.xml'
+  only:
+    - tags
