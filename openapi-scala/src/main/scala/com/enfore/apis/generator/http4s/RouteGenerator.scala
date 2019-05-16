@@ -101,16 +101,16 @@ object RouteGenerator {
 
     val functionName = ImplementationGenerator.getFunctionName(route)
 
-    def flatmap(s: String) = route match {
+    def flatmapPutOrPost(s: String) = route match {
       case _: PutOrPostRequest => s".flatMap($s)"
       case _                   => s
     }
 
-    val arguments = getArgumentList(route)
+    val arguments = getArgumentList(route) + "(request)"
 
     val response = getResponseStatus(route)
 
-    s"""$requestDecoding${flatmap(s"impl.`$functionName`$arguments")}.flatMap($response)"""
+    s"""$requestDecoding${flatmapPutOrPost(s"impl.`$functionName`$arguments")}.flatMap($response)"""
   }
 
   private val anyListQueryParameter: RouteDefinition => Boolean = {
@@ -182,10 +182,10 @@ object RouteGenerator {
 
   private def getVariableNameAndMethod(route: RouteDefinition): String =
     route match {
-      case _: GetRequest                         => "GET"
+      case _: GetRequest                         => "request @ GET"
       case PutOrPostRequest(_, PUT, _, _, _, _)  => "request @ PUT"
       case PutOrPostRequest(_, POST, _, _, _, _) => "request @ POST"
-      case _: DeleteRequest                      => "DELETE"
+      case _: DeleteRequest                      => "request @ DELETE"
     }
 
   private def buildPath(route: RouteDefinition): String =

@@ -91,6 +91,8 @@ object Http4sGenerator {
       s"""package ${packageName.name}
          |package http4s
          |
+         |import org.http4s.Request
+         |
          |trait ApiImplementation[F[_]] {
          |${implementationTrait(routes).map("  " + _).mkString("\n")}
          |}

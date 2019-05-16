@@ -26,6 +26,17 @@ object RouteDefinitions {
     )
   )
 
+  lazy val `GET /org/{org-id}/contacts/individual` = GetRequest(
+    "/org/{org-id}/contacts/individual",
+    List(PathParameter("org-id")),
+    Map.empty,
+    Some(
+      Map(
+        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
+      )
+    )
+  )
+
   lazy val `POST /contacts/individual` = PutOrPostRequest(
     "/contacts/individual",
     POST,
@@ -38,6 +49,17 @@ object RouteDefinitions {
   lazy val `GET /contacts/individual/{contacts-id}` = GetRequest(
     "/contacts/individual/{contacts-id}",
     List(PathParameter("contacts-id")),
+    Map.empty,
+    Some(
+      Map(
+        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
+      )
+    )
+  )
+
+  lazy val `GET /org/{org-id}/contacts/individual/{contacts-id}` = GetRequest(
+    "/org/{org-id}/contacts/individual/{contacts-id}",
+    List(PathParameter("org-id"), PathParameter("contacts-id")),
     Map.empty,
     Some(
       Map(

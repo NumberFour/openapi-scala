@@ -1,6 +1,6 @@
 package com.enfore.apis
 
-import com.enfore.apis.generator.GenericImplementation
+import com.enfore.apis.generator.{GenericImplementation, Http4sImplementation}
 import org.scalatest._
 
 class MainSpec extends FlatSpec with Matchers {
@@ -12,7 +12,7 @@ class MainSpec extends FlatSpec with Matchers {
       val result = Main.generateScala(
         ClassLoader.getSystemResource(source).getPath,
         "test.package",
-        List(GenericImplementation)
+        List(GenericImplementation, Http4sImplementation)
       )
 
       result.left.map(x => println(x + s" in $source")) // For debugging the failing tests
