@@ -200,7 +200,7 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
       |        impl.`GET /contacts/individual`(request).flatMap(Ok(_))
       |
       |      case request @ POST -> Root / "contacts" / "individual" =>
-      |        request.as[IndividualContact].flatMap(impl.`POST /contacts/individual`(request)).flatMap(Ok(_))
+      |        request.as[IndividualContact].flatMap(impl.`POST /contacts/individual`(_)(request)).flatMap(Ok(_))
       |
       |      case request @ GET -> Root / "contacts" / "individual" / "queries" :? `query1 String Matcher`(query1) +& `query2 Int Matcher`(query2) +& `query3 Int Matcher`(query3) +& `optional1 Option[String] Matcher`(optional1) +& `list1 List[Int] Matcher`(list1) +& `optional-list1 Option[List[String]] Matcher`(optionalList1) =>
       |        impl.`GET /contacts/individual/queries`(list1, optionalList1, optional1, query1, query2, query3)(request).flatMap(Ok(_))

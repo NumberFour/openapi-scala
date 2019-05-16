@@ -59,7 +59,7 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
     RouteDefinitions.`POST /contacts/individual`,
     List(
       """case request @ POST -> Root / "contacts" / "individual" =>""",
-      """  request.as[IndividualContact].flatMap(impl.`POST /contacts/individual`(request)).flatMap(Ok(_))"""
+      """  request.as[IndividualContact].flatMap(impl.`POST /contacts/individual`(_)(request)).flatMap(Ok(_))"""
     )
   )
 
