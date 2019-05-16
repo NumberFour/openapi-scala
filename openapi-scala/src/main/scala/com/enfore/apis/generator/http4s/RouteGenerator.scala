@@ -166,7 +166,7 @@ object RouteGenerator {
 
       case PutOrPostRequest(_, _, Nil, queries, request, _) if queries.isEmpty =>
         assert(request.typeName != "Unit", "Unit is not allowed as request type")
-        ""
+        "(_)"
 
       case PutOrPostRequest(_, _, parameters, queries, request, _) =>
         assert(request.typeName != "Unit", "Unit is not allowed as request type")
