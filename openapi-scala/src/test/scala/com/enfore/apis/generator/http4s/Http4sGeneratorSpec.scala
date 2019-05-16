@@ -196,32 +196,32 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
       |    object `query2 Double Matcher` extends QueryParamDecoderMatcher[Double]("query2")
       |
       |    HttpRoutes.of[F] {
-      |      case GET -> Root / "contacts" / "individual" =>
-      |        impl.`GET /contacts/individual`.flatMap(Ok(_))
+      |      case request @ GET -> Root / "contacts" / "individual" =>
+      |        impl.`GET /contacts/individual`(request).flatMap(Ok(_))
       |
       |      case request @ POST -> Root / "contacts" / "individual" =>
-      |        request.as[IndividualContact].flatMap(impl.`POST /contacts/individual`).flatMap(Ok(_))
+      |        request.as[IndividualContact].flatMap(impl.`POST /contacts/individual`(request)).flatMap(Ok(_))
       |
-      |      case GET -> Root / "contacts" / "individual" / "queries" :? `query1 String Matcher`(query1) +& `query2 Int Matcher`(query2) +& `query3 Int Matcher`(query3) +& `optional1 Option[String] Matcher`(optional1) +& `list1 List[Int] Matcher`(list1) +& `optional-list1 Option[List[String]] Matcher`(optionalList1) =>
-      |        impl.`GET /contacts/individual/queries`(list1, optionalList1, optional1, query1, query2, query3).flatMap(Ok(_))
+      |      case request @ GET -> Root / "contacts" / "individual" / "queries" :? `query1 String Matcher`(query1) +& `query2 Int Matcher`(query2) +& `query3 Int Matcher`(query3) +& `optional1 Option[String] Matcher`(optional1) +& `list1 List[Int] Matcher`(list1) +& `optional-list1 Option[List[String]] Matcher`(optionalList1) =>
+      |        impl.`GET /contacts/individual/queries`(list1, optionalList1, optional1, query1, query2, query3)(request).flatMap(Ok(_))
       |
       |      case request @ POST -> Root / "contacts" / "individual" / "queries" :? `query1 String Matcher`(query1) +& `query2 Int Matcher`(query2) +& `query3 Int Matcher`(query3) +& `optional1 Option[String] Matcher`(optional1) +& `list1 List[Int] Matcher`(list1) +& `optional-list1 Option[List[String]] Matcher`(optionalList1) =>
-      |        request.as[IndividualContact].flatMap(impl.`POST /contacts/individual/queries`(list1, optionalList1, optional1, query1, query2, query3, _)).flatMap(Ok(_))
+      |        request.as[IndividualContact].flatMap(impl.`POST /contacts/individual/queries`(list1, optionalList1, optional1, query1, query2, query3, _)(request)).flatMap(Ok(_))
       |
-      |      case GET -> Root / "contacts" / "individual" / contactId =>
-      |        impl.`GET /contacts/individual/{contact-id}`(contactId).flatMap(Ok(_))
+      |      case request @ GET -> Root / "contacts" / "individual" / contactId =>
+      |        impl.`GET /contacts/individual/{contact-id}`(contactId)(request).flatMap(Ok(_))
       |
       |      case request @ PUT -> Root / "contacts" / "individual" / contactId =>
-      |        request.as[IndividualContact].flatMap(impl.`PUT /contacts/individual/{contact-id}`(contactId, _)).flatMap(Ok(_))
+      |        request.as[IndividualContact].flatMap(impl.`PUT /contacts/individual/{contact-id}`(contactId, _)(request)).flatMap(Ok(_))
       |
-      |      case GET -> Root / "contacts" / "individual" / contactId / "queries" :? `query1 String Matcher`(query1) +& `query2 Double Matcher`(query2) =>
-      |        impl.`GET /contacts/individual/{contact-id}/queries`(contactId, query1, query2).flatMap(Ok(_))
+      |      case request @ GET -> Root / "contacts" / "individual" / contactId / "queries" :? `query1 String Matcher`(query1) +& `query2 Double Matcher`(query2) =>
+      |        impl.`GET /contacts/individual/{contact-id}/queries`(contactId, query1, query2)(request).flatMap(Ok(_))
       |
       |      case request @ PUT -> Root / "contacts" / "individual" / contactId / "queries" :? `query1 String Matcher`(query1) +& `query2 Double Matcher`(query2) =>
-      |        request.as[IndividualContact].flatMap(impl.`PUT /contacts/individual/{contact-id}/queries`(contactId, query1, query2, _)).flatMap(Ok(_))
+      |        request.as[IndividualContact].flatMap(impl.`PUT /contacts/individual/{contact-id}/queries`(contactId, query1, query2, _)(request)).flatMap(Ok(_))
       |
-      |      case DELETE -> Root / "contacts" / "individual" / contactId / "web-addresses" / webAddressId =>
-      |        impl.`DELETE /contacts/individual/{contact-id}/web-addresses/{web-address-id}`(contactId, webAddressId).flatMap(_ => NoContent())
+      |      case request @ DELETE -> Root / "contacts" / "individual" / contactId / "web-addresses" / webAddressId =>
+      |        impl.`DELETE /contacts/individual/{contact-id}/web-addresses/{web-address-id}`(contactId, webAddressId)(request).flatMap(_ => NoContent())
       |    }
       |  }
       |}
@@ -232,16 +232,18 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
     """package com.enfore.contactsapiservice.contacts
       |package http4s
       |
+      |import org.http4s.Request
+      |
       |trait ApiImplementation[F[_]] {
-      |  def `GET /contacts/individual`: F[IndividualContact]
-      |  def `POST /contacts/individual`(body: IndividualContact): F[IndividualContact]
-      |  def `GET /contacts/individual/queries`(list1: List[Int], `optional-list1`: Option[List[String]], optional1: Option[String], query1: String, query2: Int, query3: Int): F[IndividualContact]
-      |  def `POST /contacts/individual/queries`(list1: List[Int], `optional-list1`: Option[List[String]], optional1: Option[String], query1: String, query2: Int, query3: Int, body: IndividualContact): F[IndividualContact]
-      |  def `GET /contacts/individual/{contact-id}`(`contact-id`: String): F[IndividualContact]
-      |  def `PUT /contacts/individual/{contact-id}`(`contact-id`: String, body: IndividualContact): F[IndividualContact]
-      |  def `GET /contacts/individual/{contact-id}/queries`(`contact-id`: String, query1: String, query2: Double): F[IndividualContact]
-      |  def `PUT /contacts/individual/{contact-id}/queries`(`contact-id`: String, query1: String, query2: Double, body: IndividualContact): F[IndividualContact]
-      |  def `DELETE /contacts/individual/{contact-id}/web-addresses/{web-address-id}`(`contact-id`: String, `web-address-id`: String): F[Unit]
+      |  def `GET /contacts/individual`(implicit request: Request[F]): F[IndividualContact]
+      |  def `POST /contacts/individual`(body: IndividualContact)(implicit request: Request[F]): F[IndividualContact]
+      |  def `GET /contacts/individual/queries`(list1: List[Int], `optional-list1`: Option[List[String]], optional1: Option[String], query1: String, query2: Int, query3: Int)(implicit request: Request[F]): F[IndividualContact]
+      |  def `POST /contacts/individual/queries`(list1: List[Int], `optional-list1`: Option[List[String]], optional1: Option[String], query1: String, query2: Int, query3: Int, body: IndividualContact)(implicit request: Request[F]): F[IndividualContact]
+      |  def `GET /contacts/individual/{contact-id}`(`contact-id`: String)(implicit request: Request[F]): F[IndividualContact]
+      |  def `PUT /contacts/individual/{contact-id}`(`contact-id`: String, body: IndividualContact)(implicit request: Request[F]): F[IndividualContact]
+      |  def `GET /contacts/individual/{contact-id}/queries`(`contact-id`: String, query1: String, query2: Double)(implicit request: Request[F]): F[IndividualContact]
+      |  def `PUT /contacts/individual/{contact-id}/queries`(`contact-id`: String, query1: String, query2: Double, body: IndividualContact)(implicit request: Request[F]): F[IndividualContact]
+      |  def `DELETE /contacts/individual/{contact-id}/web-addresses/{web-address-id}`(`contact-id`: String, `web-address-id`: String)(implicit request: Request[F]): F[Unit]
       |}
      """.stripMargin.trim.parse[Source].get.structure
 }

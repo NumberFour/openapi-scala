@@ -14,7 +14,7 @@ object ImplementationGenerator {
     val parameters   = getParameters(route)
     val responseType = getResponseType(route)
 
-    s"""def `$functionName`$parameters: F[$responseType]"""
+    s"""def `$functionName`$parameters(implicit request: Request[F]): F[$responseType]"""
   }
 
   /**
