@@ -95,8 +95,13 @@ object RouteGenerator {
 
   private def getImplementationCall(route: RouteDefinition): String = {
     val requestDecoding = route match {
-      case PutOrPostRequest(_, _, _, _, request, _) => s"request.as[${request.typeName}]"
-      case _                                        => ""
+      case PutOrPostRequest(_, _, _, _, request, _, hasReadOnlyType) =>
+        if (hasReadOnlyType) {
+          s"request.as[${request.typeName}Request]"
+        } else {
+          s"request.as[${request.typeName}]"
+        }
+      case _ => ""
     }
 
     val functionName = ImplementationGenerator.getFunctionName(route)
@@ -118,9 +123,9 @@ object RouteGenerator {
   }
 
   private val getListQueryParams: RouteDefinition =/> Map[String, TypeRepr.Primitive] = {
-    case GetRequest(_, _, queries, _)             => queries
-    case PutOrPostRequest(_, _, _, queries, _, _) => queries
-    case _: DeleteRequest                         => Map.empty
+    case GetRequest(_, _, queries, _)                => queries
+    case PutOrPostRequest(_, _, _, queries, _, _, _) => queries
+    case _: DeleteRequest                            => Map.empty
   }
 
   private val listParameterType: TypeRepr.Primitive =/> Boolean = {
@@ -164,11 +169,11 @@ object RouteGenerator {
       case GetRequest(_, parameters, queries, _) =>
         buildParameters(parameters, queries.keys.toList).mkString("(", ", ", ")")
 
-      case PutOrPostRequest(_, _, Nil, queries, request, _) if queries.isEmpty =>
+      case PutOrPostRequest(_, _, Nil, queries, request, _, _) if queries.isEmpty =>
         assert(request.typeName != "Unit", "Unit is not allowed as request type")
         "(_)"
 
-      case PutOrPostRequest(_, _, parameters, queries, request, _) =>
+      case PutOrPostRequest(_, _, parameters, queries, request, _, _) =>
         assert(request.typeName != "Unit", "Unit is not allowed as request type")
         (buildParameters(parameters, queries.keys.toList) :+ "_").mkString("(", ", ", ")")
 
@@ -182,10 +187,10 @@ object RouteGenerator {
 
   private def getVariableNameAndMethod(route: RouteDefinition): String =
     route match {
-      case _: GetRequest                         => "request @ GET"
-      case PutOrPostRequest(_, PUT, _, _, _, _)  => "request @ PUT"
-      case PutOrPostRequest(_, POST, _, _, _, _) => "request @ POST"
-      case _: DeleteRequest                      => "request @ DELETE"
+      case _: GetRequest                            => "request @ GET"
+      case PutOrPostRequest(_, PUT, _, _, _, _, _)  => "request @ PUT"
+      case PutOrPostRequest(_, POST, _, _, _, _, _) => "request @ POST"
+      case _: DeleteRequest                         => "request @ DELETE"
     }
 
   private def buildPath(route: RouteDefinition): String =
@@ -193,11 +198,9 @@ object RouteGenerator {
       .replaceAll(replaceLeadingSlashReqex, "")
       .split("/")
       .toList
-      .map { part =>
-        part match {
-          case pathVariableReqex(variable) => sanitiseScalaName(variable)
-          case pathString                  => "\"" + pathString + "\""
-        }
+      .map {
+        case pathVariableReqex(variable) => sanitiseScalaName(variable)
+        case pathString                  => "\"" + pathString + "\""
       }
       .mkString(" / ")
 

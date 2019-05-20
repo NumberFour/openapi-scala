@@ -18,7 +18,7 @@ trait RouteImplementation {
   ): Map[FileName, ScalaSourceContent]
 }
 
-case object GenericImplementation extends RouteImplementation {
+object GenericImplementation extends RouteImplementation {
   def generateScala(
       routesMap: Map[FileName, PathItemAggregation],
       packageName: PackageName
@@ -28,7 +28,7 @@ case object GenericImplementation extends RouteImplementation {
   }
 }
 
-case object Http4sImplementation extends RouteImplementation {
+object Http4sImplementation extends RouteImplementation {
   def generateScala(
       routesMap: Map[FileName, PathItemAggregation],
       packageName: PackageName

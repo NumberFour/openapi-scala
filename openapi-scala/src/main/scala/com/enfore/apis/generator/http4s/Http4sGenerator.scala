@@ -22,7 +22,7 @@ object Http4sGenerator {
     *
     * {{{
     * object Routes {
-    *   def appply[F[_] : Sync](impl: ApiImplementation[F]): HttpRoutes[F] = {
+    *   def apply[F[_] : Sync](impl: ApiImplementation[F]): HttpRoutes[F] = {
     *     val dsl = new Http4sDsl[F]{}
     *     import dsl._
     *

@@ -46,7 +46,7 @@ object ASTTranslationFunctions {
     case _    => ReqWithContentType.POST
   }
 
-  private def extractPathParameters(parameters: List[SwaggerAST.ParamObject]) =
+  private def extractPathParameters(parameters: List[SwaggerAST.ParamObject]): List[PathParameter] =
     parameters.filter(_.in == ParameterLocation.path).map(x => PathParameter(x.name))
 
   private def extractQueryParameters(parameters: List[ParamObject]): Map[String, Primitive] =
@@ -55,7 +55,9 @@ object ASTTranslationFunctions {
       .map(_.name -> PrimitiveString(None)) // TODO: Will be extended later on
       .toMap
 
-  private def routeDefFromSwaggerAST(path: String)(route: PathObject, requestType: RequestType): RouteDefinition = {
+  private def routeDefFromSwaggerAST(path: String)(route: PathObject, requestType: RequestType)(
+      components: Map[String, Component]
+  ): RouteDefinition = {
     val parameters                          = route.parameters.getOrElse(List.empty[ParamObject])
     val pathParameters: List[PathParameter] = extractPathParameters(parameters)
     val queryParams: Map[String, Primitive] = extractQueryParameters(parameters)
@@ -65,13 +67,24 @@ object ASTTranslationFunctions {
     requestType match {
       case RequestType.POST | RequestType.PUT =>
         assert(possibleBodies.size == 1, s"We only support one content type for $path $requestType request")
+        val correspondingComponent: Option[Component] = components
+          .find {
+            case (key: String, _: Component) =>
+              key == possibleBodies.head.typeName
+          }
+          .map(_._2)
+        assert(
+          correspondingComponent.nonEmpty,
+          s"The component referenced in $path $requestType (${possibleBodies.head.typeName}) is not found in components"
+        )
         PutOrPostRequest(
           path,
           translateReqContentType(requestType),
           pathParameters,
           queryParams,
           possibleBodies.head,
-          possibleResponse
+          possibleResponse,
+          hasReadOnlyComponent(correspondingComponent.get)
         )
       case RequestType.GET =>
         GetRequest(path, pathParameters, queryParams, possibleResponse)
@@ -80,14 +93,19 @@ object ASTTranslationFunctions {
     }
   }
 
-  private def readToRoutes(paths: Map[String, Map[String, PathObject]]): List[RouteDefinition] =
+  private def readToRoutes(paths: Map[String, Map[String, PathObject]])(
+      components: Map[String, Component]
+  ): List[RouteDefinition] =
     paths.flatMap {
       case (path: String, routes: Map[String, PathObject]) =>
-        val put: Option[RouteDefinition]  = routes.get("put").map(routeDefFromSwaggerAST(path)(_, RequestType.PUT))
-        val post: Option[RouteDefinition] = routes.get("post").map(routeDefFromSwaggerAST(path)(_, RequestType.POST))
-        val get: Option[RouteDefinition]  = routes.get("get").map(routeDefFromSwaggerAST(path)(_, RequestType.GET))
+        val put: Option[RouteDefinition] =
+          routes.get("put").map(routeDefFromSwaggerAST(path)(_, RequestType.PUT)(components))
+        val post: Option[RouteDefinition] =
+          routes.get("post").map(routeDefFromSwaggerAST(path)(_, RequestType.POST)(components))
+        val get: Option[RouteDefinition] =
+          routes.get("get").map(routeDefFromSwaggerAST(path)(_, RequestType.GET)(components))
         val delete: Option[RouteDefinition] =
-          routes.get("delete").map(routeDefFromSwaggerAST(path)(_, RequestType.DELETE))
+          routes.get("delete").map(routeDefFromSwaggerAST(path)(_, RequestType.DELETE)(components))
         List(put, post, get, delete).flatten
     }.toList
 
@@ -153,11 +171,14 @@ object ASTTranslationFunctions {
     newType.map(NewTypeSymbol(name, _))
   }
 
-  def splitReadOnlyComponents(components: Map[String, Component]): Map[String, Component] = {
+  private def hasReadOnlyComponent(component: Component): Boolean =
+    component.properties.exists { properties: Map[String, Property] =>
+      properties.values.exists(_.readOnly.getOrElse(false))
+    }
+
+  private[ast] def splitReadOnlyComponents(components: Map[String, Component]): Map[String, Component] = {
     val (hasReadOnlyProps: Map[String, Component], hasNoReadOnlyProps: Map[String, Component]) =
-      components.partition(_._2.properties.exists { properties: Map[String, Property] =>
-        properties.values.exists(_.readOnly.getOrElse(false))
-      })
+      components.partition(x => hasReadOnlyComponent(x._2))
     val withoutReadOnlyFields = hasReadOnlyProps.map {
       case (cKey, cValue) =>
         s"${cKey}Request" -> cValue.copy(
@@ -194,6 +215,6 @@ object ASTTranslationFunctions {
       }
 
   def readRoutesToInerop(ast: CoreASTRepr): Map[String, PathItemAggregation] =
-    ast.paths.map(p => aggregateRoutes(readToRoutes(p))).getOrElse(Map.empty)
+    ast.paths.map(p => aggregateRoutes(readToRoutes(p)(ast.components.schemas))).getOrElse(Map.empty)
 
 }

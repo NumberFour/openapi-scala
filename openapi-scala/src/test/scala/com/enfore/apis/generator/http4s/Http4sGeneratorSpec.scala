@@ -63,7 +63,8 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
         List.empty,
         Map.empty,
         TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"),
-        Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")))
+        Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+        true
       )
     )
   )
@@ -101,7 +102,8 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
           "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None), None))
         ),
         TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"),
-        Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")))
+        Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+        false
       )
     )
   )
@@ -121,7 +123,8 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
         List(PathParameter("contact-id")),
         Map.empty,
         TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"),
-        Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")))
+        Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+        false
       )
     )
   )
@@ -147,7 +150,8 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
           "query2" -> PrimitiveNumber(None)
         ),
         TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"),
-        Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")))
+        Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+        false
       )
     )
   )
@@ -200,7 +204,7 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
       |        impl.`GET /contacts/individual`(request).flatMap(Ok(_))
       |
       |      case request @ POST -> Root / "contacts" / "individual" =>
-      |        request.as[IndividualContact].flatMap(impl.`POST /contacts/individual`(_)(request)).flatMap(Ok(_))
+      |        request.as[IndividualContactRequest].flatMap(impl.`POST /contacts/individual`(_)(request)).flatMap(Ok(_))
       |
       |      case request @ GET -> Root / "contacts" / "individual" / "queries" :? `query1 String Matcher`(query1) +& `query2 Int Matcher`(query2) +& `query3 Int Matcher`(query3) +& `optional1 Option[String] Matcher`(optional1) +& `list1 List[Int] Matcher`(list1) +& `optional-list1 Option[List[String]] Matcher`(optionalList1) =>
       |        impl.`GET /contacts/individual/queries`(list1, optionalList1, optional1, query1, query2, query3)(request).flatMap(Ok(_))
@@ -236,7 +240,7 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
       |
       |trait ApiImplementation[F[_]] {
       |  def `GET /contacts/individual`(implicit request: Request[F]): F[IndividualContact]
-      |  def `POST /contacts/individual`(body: IndividualContact)(implicit request: Request[F]): F[IndividualContact]
+      |  def `POST /contacts/individual`(body: IndividualContactRequest)(implicit request: Request[F]): F[IndividualContact]
       |  def `GET /contacts/individual/queries`(list1: List[Int], `optional-list1`: Option[List[String]], optional1: Option[String], query1: String, query2: Int, query3: Int)(implicit request: Request[F]): F[IndividualContact]
       |  def `POST /contacts/individual/queries`(list1: List[Int], `optional-list1`: Option[List[String]], optional1: Option[String], query1: String, query2: Int, query3: Int, body: IndividualContact)(implicit request: Request[F]): F[IndividualContact]
       |  def `GET /contacts/individual/{contact-id}`(`contact-id`: String)(implicit request: Request[F]): F[IndividualContact]

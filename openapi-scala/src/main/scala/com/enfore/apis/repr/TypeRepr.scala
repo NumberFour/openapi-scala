@@ -86,8 +86,18 @@ object TypeRepr {
       pathParams: List[PathParameter],
       queries: Map[String, Primitive],
       req: Ref,
-      res: Option[Map[String, Ref]]
-  ) extends RouteDefinition
+      res: Option[Map[String, Ref]],
+      hasReadOnlyType: Boolean
+  ) extends RouteDefinition {
+
+    lazy val readOnlyTypeName: String =
+      if (hasReadOnlyType) {
+        s"${req.typeName}Request"
+      } else {
+        req.typeName
+      }
+
+  }
 
   final case class DeleteRequest(path: String, pathParams: List[PathParameter], res: Option[Map[String, Ref]])
       extends RouteDefinition
