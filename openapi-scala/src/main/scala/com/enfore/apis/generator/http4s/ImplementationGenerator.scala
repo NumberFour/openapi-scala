@@ -23,10 +23,10 @@ object ImplementationGenerator {
   def getFunctionName(route: RouteDefinition): String = s"${getMethod(route)} ${route.path}"
 
   private def getMethod(route: RouteDefinition): String = route match {
-    case _: GetRequest                         => "GET"
-    case PutOrPostRequest(_, PUT, _, _, _, _)  => "PUT"
-    case PutOrPostRequest(_, POST, _, _, _, _) => "POST"
-    case _: DeleteRequest                      => "DELETE"
+    case _: GetRequest                            => "GET"
+    case PutOrPostRequest(_, PUT, _, _, _, _, _)  => "PUT"
+    case PutOrPostRequest(_, POST, _, _, _, _, _) => "POST"
+    case _: DeleteRequest                         => "DELETE"
   }
 
   private def getParameters(route: RouteDefinition) = {
@@ -34,7 +34,7 @@ object ImplementationGenerator {
     val queryParamameters = getQueryParamameters(route)
     val body              = getRequestBody(route)
 
-    val allParameters = (pathParameters ++ queryParamameters ++ body)
+    val allParameters = pathParameters ++ queryParamameters ++ body
 
     assert(
       allParameters.map(_._1).size == allParameters.map(_._1).distinct.size,
@@ -61,9 +61,9 @@ object ImplementationGenerator {
       )
 
     val responseType = route match {
-      case GetRequest(_, _, _, response)             => getJsonOrFirstType(response)
-      case PutOrPostRequest(_, _, _, _, _, response) => getJsonOrFirstType(response)
-      case _: DeleteRequest                          => None
+      case GetRequest(_, _, _, response)                => getJsonOrFirstType(response)
+      case PutOrPostRequest(_, _, _, _, _, response, _) => getJsonOrFirstType(response)
+      case _: DeleteRequest                             => None
     }
 
     responseType.fold("Unit")(_.typeName)
@@ -80,9 +80,9 @@ object ImplementationGenerator {
     }
 
     route match {
-      case GetRequest(_, pathParams, _, _)             => extractFromPathParameters(pathParams)
-      case PutOrPostRequest(_, _, pathParams, _, _, _) => extractFromPathParameters(pathParams)
-      case DeleteRequest(_, pathParams, _)             => extractFromPathParameters(pathParams)
+      case GetRequest(_, pathParams, _, _)                => extractFromPathParameters(pathParams)
+      case PutOrPostRequest(_, _, pathParams, _, _, _, _) => extractFromPathParameters(pathParams)
+      case DeleteRequest(_, pathParams, _)                => extractFromPathParameters(pathParams)
     }
   }
 
@@ -91,14 +91,15 @@ object ImplementationGenerator {
       queries.mapValues(primitiveShowType.showType).toList.sortBy(_._1)
 
     route match {
-      case GetRequest(_, _, queries, _)             => extractFromQueries(queries)
-      case PutOrPostRequest(_, _, _, queries, _, _) => extractFromQueries(queries)
-      case DeleteRequest(_, _, _)                   => List.empty
+      case GetRequest(_, _, queries, _)                => extractFromQueries(queries)
+      case PutOrPostRequest(_, _, _, queries, _, _, _) => extractFromQueries(queries)
+      case DeleteRequest(_, _, _)                      => List.empty
     }
   }
 
   private def getRequestBody(route: RouteDefinition): Option[(ArgumentName, ArgumentType)] = route match {
-    case PutOrPostRequest(_, _, _, _, request, _) => Some(("body", request.typeName))
-    case _: Any                                   => None
+    case req: PutOrPostRequest =>
+      Some(("body", req.readOnlyTypeName))
+    case _: Any => None
   }
 }

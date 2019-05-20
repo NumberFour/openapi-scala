@@ -43,7 +43,8 @@ object RouteDefinitions {
     List.empty,
     Map.empty,
     TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"),
-    Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")))
+    Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    false
   )
 
   lazy val `GET /contacts/individual/{contacts-id}` = GetRequest(
@@ -74,7 +75,8 @@ object RouteDefinitions {
     List(PathParameter("contacts-id")),
     Map.empty,
     TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"),
-    Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")))
+    Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    false
   )
 
   lazy val `DELETE /contacts/individual/{contacts-id}` = DeleteRequest(
@@ -100,7 +102,8 @@ object RouteDefinitions {
     List(PathParameter("contacts-id")),
     Map.empty,
     TypeRepr.Ref("#/components/schemas/Address", "Address"),
-    Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")))
+    Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address"))),
+    false
   )
 
   lazy val `GET /contacts/organization/{contacts-id}/addresses/{address-id}` = GetRequest(
@@ -130,7 +133,8 @@ object RouteDefinitions {
       Map(
         "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
       )
-    )
+    ),
+    false
   )
 
   lazy val `DELETE /contacts/organization/{contacts-id}/addresses/{address-id}` = DeleteRequest(
@@ -177,7 +181,8 @@ object RouteDefinitions {
       "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None), None))
     ),
     TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"),
-    Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")))
+    Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    false
   )
 
   lazy val `GET /contacts/individual/{contacts-id}?optional1&optional2` = GetRequest(
@@ -203,7 +208,8 @@ object RouteDefinitions {
       "optional2" -> PrimitiveOption(PrimitiveInt(None))
     ),
     TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"),
-    Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")))
+    Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    false
   )
 
   lazy val `DELETE /contacts/individual/{contacts-id}?optional1&optional2` = DeleteRequest(
@@ -235,7 +241,8 @@ object RouteDefinitions {
       "query2" -> PrimitiveInt(None)
     ),
     TypeRepr.Ref("#/components/schemas/Address", "Address"),
-    Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")))
+    Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address"))),
+    false
   )
 
   lazy val `GET /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2` = GetRequest(
@@ -271,7 +278,8 @@ object RouteDefinitions {
       Map(
         "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
       )
-    )
+    ),
+    false
   )
 
   lazy val `DELETE /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2` = DeleteRequest(
@@ -310,7 +318,8 @@ object RouteDefinitions {
       "optional-list2" -> PrimitiveOption(PrimitiveArray(PrimitiveInt(None), None))
     ),
     TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"),
-    Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")))
+    Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    false
   )
 
   lazy val `GET /contacts/individual/funny.,argument/type/?other:@funny&trait` = GetRequest(
