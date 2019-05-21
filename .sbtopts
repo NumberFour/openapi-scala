@@ -2,3 +2,5 @@
 -J-XX:+CMSClassUnloadingEnabled
 -Dsbt.override.build.repos=true
 -Dsbt.repository.config=project/repositories
+-Dsbt.global.base=cache/sbtboot
+-Dsbt.boot.directory=cache/boot

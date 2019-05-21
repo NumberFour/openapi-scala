@@ -9,6 +9,7 @@ cache:
   key: one-cache-per-project
   paths:
     - ivy2/
+    - cache/
 
 stages:
   - build-test
