@@ -4,10 +4,21 @@ import com.enfore.plugin.BasicBuildPlugin._
 ThisBuild / organization := BuildInfo.organization
 ThisBuild / version := "unstable-SNAPSHOT"
 
+lazy val commonScalaSettings = Seq(
+  scalacOptions ++= Seq("-language:implicitConversions"),
+  scalacOptions in (Compile, console) ~= (_ filterNot (_ == "-Xfatal-warnings")),
+  Compile / doc / javacOptions ++= Seq(
+    "-no-link-warnings"
+  ),
+  Compile / doc / scalacOptions ++= Seq(
+    "-no-link-warnings"
+  )
+)
+
 lazy val root = (project in file("."))
   .settings(name := "openapi")
   .settings(scalaVersion := "2.12.8")
-  .aggregate(`openapi-scala`, `openapi-lib`, `sbt-openapi`)
+  .aggregate(`openapi-scala`, `openapi-lib`, `openapi-http4s-lib`, `sbt-openapi`)
   .enablePlugins(ScalaCrossPlugin, NexusPublishPlugin)
 
 lazy val `openapi-scala` = (project in file("openapi-scala"))
@@ -22,31 +33,37 @@ lazy val `openapi-scala` = (project in file("openapi-scala"))
       "com.beachape"         %% "enumeratum-circe" % "1.5.20",
       "org.scalatest"        %% "scalatest"        % "3.0.5" % "test",
       "org.scalameta"        %% "scalameta"        % "4.1.0" % "test"
-    ),
-    scalacOptions ++= Seq("-language:implicitConversions"),
-    scalacOptions in (Compile, console) ~= (_ filterNot (_ == "-Xfatal-warnings")),
-    Compile / doc / javacOptions ++= Seq(
-      "-no-link-warnings"
-    ),
-    Compile / doc / scalacOptions ++= Seq(
-      "-no-link-warnings"
     )
   )
+  .settings(commonScalaSettings)
   .enablePlugins(Scala212Plugin, NexusPublishPlugin, BasicBuildPlugin)
 
 lazy val `openapi-lib` = (project in file("openapi-lib"))
   .settings(
-    name := "openapi-lib",
-    libraryDependencies += "org.typelevel" %% "cats-core" % "1.6.0",
-    scalacOptions ++= Seq("-language:implicitConversions"),
-    scalacOptions in (Compile, console) ~= (_ filterNot (_ == "-Xfatal-warnings")),
-    Compile / doc / javacOptions ++= Seq(
-      "-no-link-warnings"
-    ),
-    Compile / doc / scalacOptions ++= Seq(
-      "-no-link-warnings"
-    )
+    name := "openapi-lib"
   )
+  .settings(commonScalaSettings)
+  .enablePlugins(Scala212Plugin, NexusPublishPlugin, BasicBuildPlugin)
+
+lazy val `openapi-http4s-lib` = (project in file("openapi-http4s-lib"))
+  .settings(
+    name := "openapi-http4s-lib",
+    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+    libraryDependencies ++= Seq(
+      "com.enfore"           %% "openapi-lib"      % "0.2.2",
+      "com.beachape"         %% "enumeratum"       % "1.5.13",
+      "com.beachape"         %% "enumeratum-circe" % "1.5.20",
+      "io.circe"             %% "circe-derivation" % "0.11.0-M1",
+      "io.circe"             %% s"circe-generic"   % "0.11.0",
+      "io.circe"             %% s"circe-refined"   % "0.11.0",
+      "com.chuusai"          %% "shapeless"        % "2.3.3",
+      "com.github.mpilquist" %% "simulacrum"       % "0.15.0",
+      "eu.timepit"           %% "refined"          % "0.9.5"
+    )
+      ++ Http4sCirce.latestDependencies
+  )
+  .dependsOn(`openapi-lib`)
+  .settings(commonScalaSettings)
   .enablePlugins(Scala212Plugin, NexusPublishPlugin, BasicBuildPlugin)
 
 lazy val `sbt-openapi` = (project in file("sbt-openapi"))
@@ -55,5 +72,6 @@ lazy val `sbt-openapi` = (project in file("sbt-openapi"))
     sbtPlugin := true,
     organization := "com.enfore"
   )
+  .settings(commonScalaSettings)
   .dependsOn(`openapi-scala`)
   .enablePlugins(Scala212Plugin, SbtPlugin, NexusPublishPlugin, BasicBuildPlugin)
