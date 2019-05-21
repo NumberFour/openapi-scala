@@ -26,7 +26,7 @@ build and test:
         - './target/test-reports/*.xml'
         - '**/target/test-reports/*.xml'
 
-publish:
+publish:tagged:
   stage: publish
   script:
     - sed "s/unstable-SNAPSHOT/${CI_COMMIT_TAG}/" build.sbt > build.sbt.2
@@ -40,4 +40,20 @@ publish:
         - './target/test-reports/*.xml'
         - '**/target/test-reports/*.xml'
   only:
+    - tags
+
+publish:branch:
+  stage: publish
+  script:
+    - sed "s/unstable-SNAPSHOT/${VERSION}/" build.sbt > build.sbt.2
+    - mv build.sbt.2 build.sbt
+    - cat build.sbt | grep version
+    - sbt publish
+  artifacts:
+    expire_in: 1 hour
+    reports:
+      junit:
+        - './target/test-reports/*.xml'
+        - '**/target/test-reports/*.xml'
+  except:
     - tags
