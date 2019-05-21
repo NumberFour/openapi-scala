@@ -9,6 +9,7 @@ cache:
   paths:
     - cache/
     - "target/*/resolution-cache"
+    - "*/target/*/resolution-cache"
 
 stages:
   - build-test
