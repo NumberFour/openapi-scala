@@ -25,6 +25,8 @@ build and test:
       junit:
         - './target/test-reports/*.xml'
         - '**/target/test-reports/*.xml'
+    paths:
+      - "*/target/*"
 
 publish:tagged:
   stage: publish
@@ -33,12 +35,6 @@ publish:tagged:
     - mv build.sbt.2 build.sbt
     - cat build.sbt | grep version
     - sbt publish
-  artifacts:
-    expire_in: 1 hour
-    reports:
-      junit:
-        - './target/test-reports/*.xml'
-        - '**/target/test-reports/*.xml'
   only:
     - tags
 
@@ -49,11 +45,5 @@ publish:branch:
     - mv build.sbt.2 build.sbt
     - cat build.sbt | grep version
     - sbt publish
-  artifacts:
-    expire_in: 1 hour
-    reports:
-      junit:
-        - './target/test-reports/*.xml'
-        - '**/target/test-reports/*.xml'
   except:
     - tags
