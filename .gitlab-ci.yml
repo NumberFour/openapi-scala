@@ -10,6 +10,7 @@ cache:
   paths:
     - ivy2/
     - cache/
+    - "target/*/resolution-cache"
 
 stages:
   - build-test
