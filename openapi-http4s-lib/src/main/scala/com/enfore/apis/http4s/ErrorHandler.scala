@@ -7,25 +7,23 @@ import io.circe.derivation._
 import io.circe.syntax._
 import org.http4s.Response
 import org.http4s.circe._
-import org.http4s.dsl.impl.EntityResponseGenerator
 import org.http4s.dsl.io._
 import org.slf4j.LoggerFactory
 
-trait ErrorResolver[T] {
-  def resolveErrors(x: IO[T]): IO[Either[ServiceException, T]]
+trait ErrorHandler[F[_]] {
+  def resolve[T](x: F[T], status: T => F[Response[F]]): F[Response[F]]
 }
 
-class ErrorHandler(convertThrowableToServiceExceptionFn: Throwable => ServiceException) {
+class ErrorHandlerImplementation(convertThrowableToServiceExceptionFn: Throwable => ServiceException)
+    extends ErrorHandler[IO] {
 
   private val logger = LoggerFactory.getLogger(getClass)
 
-  implicit class ResolveOps[T: Encoder](val x: IO[T]) {
-    def resolveErrorsToResponse(status: EntityResponseGenerator[IO]): IO[Response[IO]] =
-      resolveErrors(x).flatMap {
-        case Right(value)              => status.apply(value.asJson)
-        case Left(e: ServiceException) => mapServiceErrorsFn(e)
-      }
-  }
+  override def resolve[T](x: IO[T], status: T => IO[Response[IO]]): IO[Response[IO]] =
+    resolveErrors(x).flatMap {
+      case Right(value)              => status(value)
+      case Left(e: ServiceException) => mapServiceErrorsFn(e)
+    }
 
   private def resolveErrors[T](in: IO[T]): IO[Either[ServiceException, T]] =
     in.attempt

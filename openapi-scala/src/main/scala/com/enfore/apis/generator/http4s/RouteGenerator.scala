@@ -113,9 +113,9 @@ object RouteGenerator {
 
     val arguments = getArgumentList(route) + "(request)"
 
-    val response = getResponseStatus(route)
+    val status = getResponseStatus(route)
 
-    s"""$requestDecoding${flatmapPutOrPost(s"impl.`$functionName`$arguments")}.flatMap($response)"""
+    s"""errorHandler.resolve($requestDecoding${flatmapPutOrPost(s"impl.`$functionName`$arguments")}, $status)"""
   }
 
   private val anyListQueryParameter: RouteDefinition => Boolean = {
@@ -216,9 +216,16 @@ object RouteGenerator {
     }
   }
 
+  private def firstResponseType(response: Option[Map[String, Ref]]): String =
+    response.flatMap(_.headOption).map(_._2.typeName).getOrElse("Unit")
+
   private def getResponseStatus(route: RouteDefinition): String =
     route match {
-      case _: DeleteRequest => "_ => NoContent()"
-      case _                => "Ok(_)"
+      // TODO: NoContent should follow from response code 204. Also support more than Ok
+      case DeleteRequest(_, _, response) => s"(_: ${firstResponseType(response)}) => NoContent()"
+      case PutOrPostRequest(_, _, _, _, _, response, _) =>
+        s"(x: ${firstResponseType(response)}) => Ok(x.asJson)"
+      case GetRequest(_, _, _, response) =>
+        s"(x: ${firstResponseType(response)}) => Ok(x.asJson)"
     }
 }

@@ -70,8 +70,11 @@ lazy val `sbt-openapi` = (project in file("sbt-openapi"))
   .settings(
     name := "sbt-openapi",
     sbtPlugin := true,
-    organization := "com.enfore"
+    organization := "com.enfore",
+    addSbtPlugin("com.eed3si9n"     % "sbt-buildinfo" % "0.7.0"),
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, organization),
+    buildInfoPackage := organization.value + ".openapi.plugin"
   )
   .settings(commonScalaSettings)
   .dependsOn(`openapi-scala`)
-  .enablePlugins(Scala212Plugin, SbtPlugin, NexusPublishPlugin, BasicBuildPlugin)
+  .enablePlugins(Scala212Plugin, SbtPlugin, NexusPublishPlugin, BasicBuildPlugin, BuildInfoPlugin)

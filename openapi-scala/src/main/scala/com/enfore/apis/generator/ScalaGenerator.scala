@@ -263,7 +263,7 @@ object ScalaGenerator {
       .map(_.toList.mkString(", "))
     val pathParamsSyntax: Option[String] =
       NonEmptyList.fromList(pathParams.map(param => s"$param: String")).map(_.toList.mkString(", "))
-    val reqSyntax: Option[String] = reqType.map(req => s"req: ${resolveRef(req)(p)}")
+    val reqSyntax: Option[String] = reqType.map(request => s"request: ${resolveRef(request)(p)}")
     List(querySyntax, pathParamsSyntax, reqSyntax).flatten
       .mkString(", ")
   }
@@ -271,13 +271,13 @@ object ScalaGenerator {
   private def typelessParamsMaker(
       queries: Map[String, Primitive],
       pathParams: List[String],
-      req: Boolean = false
+      request: Boolean = false
   ): String =
     NonEmptyList
       .fromList(queries.keys.toList ++ pathParams)
       .map(_.toList)
-      .map(list => if (req) list ++ List("req") else list)
-      .fold(if (req) "req" else "")(_.mkString(", "))
+      .map(list => if (request) list ++ List("request") else list)
+      .fold(if (request) "request" else "")(_.mkString(", "))
 
   private def encodingCallMapper(encodingList: List[String], typelessParams: String): String =
     encodingList
@@ -309,21 +309,24 @@ object ScalaGenerator {
       reqType: ReqWithContentType,
       pathParams: List[PathParameter],
       queries: Map[String, Primitive],
-      req: Ref,
-      res: Option[Map[String, Ref]]
+      request: Ref,
+      response: Option[Map[String, Ref]]
   )(implicit p: PackageName): String = {
-    val cleanEncodingReferences: Option[Map[String, Ref]] = res.map(_.map { case (k, v) => cleanScalaSymbol(k) -> v })
-    val encodings: Option[Iterable[String]]               = res.map(_.keys)
-    val queryMap: List[String]                            = queryListMaker(queries)
-    val querySyntax: String                               = queryMap.mkString("Map(", ", ", ")")
-    val pathVars: List[String]                            = pathParams map (_.name) map cleanScalaSymbol
-    val params: String                                    = paramsMaker(queries, pathVars, Some(req))(p)
-    val typelessParams: String                            = typelessParamsMaker(queries, pathVars, true)
+    val cleanEncodingReferences: Option[Map[String, Ref]] = response.map(_.map {
+      case (k, v) => cleanScalaSymbol(k) -> v
+    })
+    val encodings: Option[Iterable[String]] = response.map(_.keys)
+    val queryMap: List[String]              = queryListMaker(queries)
+    val querySyntax: String                 = queryMap.mkString("Map(", ", ", ")")
+    val pathVars: List[String]              = pathParams map (_.name) map cleanScalaSymbol
+    val params: String                      = paramsMaker(queries, pathVars, Some(request))(p)
+    val typelessParams: String              = typelessParamsMaker(queries, pathVars, true)
     val reqName: String = reqType match {
       case ReqWithContentType.POST => "Post"
       case ReqWithContentType.PUT  => "Put"
     }
-    val responseType: String    = res.map(r => MiniTypeHelpers.referenceCoproduct(r.values.toList)(p)).getOrElse("Unit")
+    val responseType: String =
+      response.map(r => MiniTypeHelpers.referenceCoproduct(r.values.toList)(p)).getOrElse("Unit")
     val shapelessImport: String = if (responseType == "Unit") "" else "import shapeless._\n\t\t"
     s"""
        |\ttrait $reqName[F[_]] extends ${reqName}Request {
@@ -344,17 +347,20 @@ object ScalaGenerator {
       path: String,
       pathParams: List[PathParameter],
       queries: Map[String, Primitive],
-      res: Option[Map[String, Ref]]
+      response: Option[Map[String, Ref]]
   )(implicit p: PackageName): String = {
-    val cleanEncodingReferences: Option[Map[String, Ref]] = res.map(_.map { case (k, v) => cleanScalaSymbol(k) -> v })
-    val encodings: Option[Iterable[String]]               = res.map(_.keys)
-    val queryMap: List[String]                            = queryListMaker(queries)
-    val querySyntax: String                               = queryMap.mkString("Map(", ", ", ")")
-    val pathVars: List[String]                            = pathParams map (_.name) map cleanScalaSymbol
-    val params: String                                    = paramsMaker(queries, pathVars, None)(p)
-    val typelessParams: String                            = typelessParamsMaker(queries, pathVars)
-    val responseType: String                              = res.map(r => MiniTypeHelpers.referenceCoproduct(r.values.toList)(p)).getOrElse("Unit")
-    val shapelessImport: String                           = if (responseType == "Unit") "" else "import shapeless._\n\t\t"
+    val cleanEncodingReferences: Option[Map[String, Ref]] = response.map(_.map {
+      case (k, v) => cleanScalaSymbol(k) -> v
+    })
+    val encodings: Option[Iterable[String]] = response.map(_.keys)
+    val queryMap: List[String]              = queryListMaker(queries)
+    val querySyntax: String                 = queryMap.mkString("Map(", ", ", ")")
+    val pathVars: List[String]              = pathParams map (_.name) map cleanScalaSymbol
+    val params: String                      = paramsMaker(queries, pathVars, None)(p)
+    val typelessParams: String              = typelessParamsMaker(queries, pathVars)
+    val responseType: String =
+      response.map(r => MiniTypeHelpers.referenceCoproduct(r.values.toList)(p)).getOrElse("Unit")
+    val shapelessImport: String = if (responseType == "Unit") "" else "import shapeless._\n\t\t"
     s"""
        |\ttrait Get[F[_]] extends GetRequest {
        |\t\tval path = "$path"
@@ -370,16 +376,19 @@ object ScalaGenerator {
        """.stripMargin.trim
   }
 
-  private def deleteRequestGenerator(path: String, pathParams: List[PathParameter], res: Option[Map[String, Ref]])(
+  private def deleteRequestGenerator(path: String, pathParams: List[PathParameter], response: Option[Map[String, Ref]])(
       implicit p: PackageName
   ): String = {
-    val cleanEncodingReferences: Option[Map[String, Ref]] = res.map(_.map { case (k, v) => cleanScalaSymbol(k) -> v })
-    val encodings: Option[Iterable[String]]               = res.map(_.keys)
-    val pathVars: List[String]                            = pathParams map (_.name) map cleanScalaSymbol
-    val params: String                                    = paramsMaker(Map.empty, pathVars, None)(p)
-    val typelessParams: String                            = typelessParamsMaker(Map.empty, pathVars)
-    val responseType: String                              = res.map(r => MiniTypeHelpers.referenceCoproduct(r.values.toList)(p)).getOrElse("Unit")
-    val shapelessImport: String                           = if (responseType == "Unit") "" else "import shapeless._\n\t\t"
+    val cleanEncodingReferences: Option[Map[String, Ref]] = response.map(_.map {
+      case (k, v) => cleanScalaSymbol(k) -> v
+    })
+    val encodings: Option[Iterable[String]] = response.map(_.keys)
+    val pathVars: List[String]              = pathParams map (_.name) map cleanScalaSymbol
+    val params: String                      = paramsMaker(Map.empty, pathVars, None)(p)
+    val typelessParams: String              = typelessParamsMaker(Map.empty, pathVars)
+    val responseType: String =
+      response.map(r => MiniTypeHelpers.referenceCoproduct(r.values.toList)(p)).getOrElse("Unit")
+    val shapelessImport: String = if (responseType == "Unit") "" else "import shapeless._\n\t\t"
     s"""
        |\ttrait Delete[F[_]] extends DeleteRequest {
        |\t\tval path = "$path"
@@ -396,12 +405,12 @@ object ScalaGenerator {
   }
 
   private[generator] def routeDefGen(implicit p: PackageName): ScalaGenerator[RouteDefinition] = {
-    case GetRequest(path, pathParams, queries, res) =>
-      getRequestGenerator(path, pathParams, queries, res)
-    case PutOrPostRequest(path, reqType, pathParams, queries, req, res, _) =>
-      postRequestGenerator(path, reqType, pathParams, queries, req, res)
-    case DeleteRequest(path, pathParams, res) =>
-      deleteRequestGenerator(path, pathParams, res)
+    case GetRequest(path, pathParams, queries, response) =>
+      getRequestGenerator(path, pathParams, queries, response)
+    case PutOrPostRequest(path, reqType, pathParams, queries, request, response, _) =>
+      postRequestGenerator(path, reqType, pathParams, queries, request, response)
+    case DeleteRequest(path, pathParams, response) =>
+      deleteRequestGenerator(path, pathParams, response)
   }
 
   def pathInterfaceGen(implicit p: PackageName): ScalaGenerator[PathItemAggregation] =

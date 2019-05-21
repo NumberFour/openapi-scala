@@ -77,7 +77,7 @@ object TypeRepr {
       path: String,
       pathParams: List[PathParameter],
       queries: Map[String, Primitive],
-      res: Option[Map[String, Ref]]
+      response: Option[Map[String, Ref]]
   ) extends RouteDefinition
 
   final case class PutOrPostRequest(
@@ -85,21 +85,21 @@ object TypeRepr {
       `type`: ReqWithContentType,
       pathParams: List[PathParameter],
       queries: Map[String, Primitive],
-      req: Ref,
-      res: Option[Map[String, Ref]],
+      request: Ref,
+      response: Option[Map[String, Ref]],
       hasReadOnlyType: Boolean
   ) extends RouteDefinition {
 
     lazy val readOnlyTypeName: String =
       if (hasReadOnlyType) {
-        s"${req.typeName}Request"
+        s"${request.typeName}Request"
       } else {
-        req.typeName
+        request.typeName
       }
 
   }
 
-  final case class DeleteRequest(path: String, pathParams: List[PathParameter], res: Option[Map[String, Ref]])
+  final case class DeleteRequest(path: String, pathParams: List[PathParameter], response: Option[Map[String, Ref]])
       extends RouteDefinition
 
   // MARK: Helper functions -------------------------------------------

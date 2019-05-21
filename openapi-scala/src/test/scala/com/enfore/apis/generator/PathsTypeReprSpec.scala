@@ -58,9 +58,9 @@ class PathsTypeReprSpec extends FlatSpec with Matchers {
         |
         | import shapeless._
         | type Response = com.enfore.apis.Product :+: CNil
-        | def `application/json`(req: com.enfore.apis.Product): F[com.enfore.apis.Product]
-        | def impl(encoding: String)(req: com.enfore.apis.Product)(implicit ME: cats.MonadError[F, Throwable], F: cats.Functor[F]): F[Response] = encoding match {
-        |   case "application/json" => F.map(`application/json`(req))(Coproduct[Response](_))
+        | def `application/json`(request: com.enfore.apis.Product): F[com.enfore.apis.Product]
+        | def impl(encoding: String)(request: com.enfore.apis.Product)(implicit ME: cats.MonadError[F, Throwable], F: cats.Functor[F]): F[Response] = encoding match {
+        |   case "application/json" => F.map(`application/json`(request))(Coproduct[Response](_))
         |   case _ => ME.raiseError(EncodingMatchFailure(s"$encoding is not acceptable for $path"))
         | }
         |}
@@ -88,7 +88,7 @@ class PathsTypeReprSpec extends FlatSpec with Matchers {
         | val pathVariables = List()
         |
         | type Response = Unit
-        | def impl(req: com.enfore.apis.Subscription): F[Response]
+        | def impl(request: com.enfore.apis.Subscription): F[Response]
         |}
       """.stripMargin.trim.parse[Source]
 

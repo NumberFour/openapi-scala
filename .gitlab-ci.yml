@@ -1,6 +1,7 @@
 variables:
   VERSION: pipeline${CI_PIPELINE_IID}-${CI_COMMIT_SHORT_SHA}
   ECR: 241219621310.dkr.ecr.eu-west-1.amazonaws.com/numberfour
+  SBT_OPTS: '-Dsbt.ivy.home=cache/ivy'
 
 image: ${ECR}/scala-build-images:openjdk11-scala2.12-sbt1.2
 

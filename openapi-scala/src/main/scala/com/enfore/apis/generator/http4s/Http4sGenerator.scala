@@ -53,12 +53,14 @@ object Http4sGenerator {
          |import cats.effect.Sync
          |import cats.implicits._
          |import org.http4s._
+         |import io.circe.syntax._
          |import org.http4s.circe.CirceEntityEncoder._
          |import org.http4s.circe.CirceEntityDecoder._
          |import org.http4s.dsl.Http4sDsl
+         |import com.enfore.apis.http4s.ErrorHandler
          |
          |object Routes {
-         |  def apply[F[_] : Sync](impl: ApiImplementation[F]): HttpRoutes[F] = {
+         |  def apply[F[_] : Sync](impl: ApiImplementation[F], errorHandler: ErrorHandler[F]): HttpRoutes[F] = {
          |    val dsl = new Http4sDsl[F]{}
          |    import dsl._
          |${queryParameterMatchers(routes, indentationLevel = 2).mkString("\n")}

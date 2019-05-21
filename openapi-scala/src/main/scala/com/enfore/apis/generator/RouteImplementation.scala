@@ -40,8 +40,8 @@ object Http4sImplementation extends RouteImplementation {
       Http4sGenerator.implementation(packageName)
 
     Map(
-      "http4s/Http4sRoutes"                  -> Http4sGenerator.RoutesObject(routesMap).generateScala,
-      "http4s/Http4sRoutesApiImplementation" -> Http4sGenerator.ApiTrait(routesMap).generateScala
+      "http4s/Http4sRoutes"    -> Http4sGenerator.RoutesObject(routesMap).generateScala,
+      "http4s/Http4sRoutesApi" -> Http4sGenerator.ApiTrait(routesMap).generateScala
     )
   }
 }
