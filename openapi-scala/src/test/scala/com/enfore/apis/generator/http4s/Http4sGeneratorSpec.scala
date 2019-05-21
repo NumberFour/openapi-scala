@@ -70,7 +70,7 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
       |import com.enfore.apis.http4s.ErrorHandler
       |
       |object Routes {
-      |  def apply[F[_] : Sync](impl: ApiImplementation[F], errorHandler: ErrorHandler[F]): HttpRoutes[F] = {
+      |  def apply[F[_] : Sync](impl: Http4sRoutesApi[F], errorHandler: ErrorHandler[F]): HttpRoutes[F] = {
       |    val dsl = new Http4sDsl[F]{}
       |    import dsl._
       |
@@ -89,7 +89,7 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
       |
       |import org.http4s.Request
       |
-      |trait ApiImplementation[F[_]] {
+      |trait Http4sRoutesApi[F[_]] {
       |  def `GET /contacts/individual`(implicit request: Request[F]): F[IndividualContact]
       |}
      """.stripMargin.trim.parse[Source].get.structure

@@ -23,7 +23,7 @@ build and test and publish:
     - sed "s/unstable-SNAPSHOT/${VERSION}/" build.sbt > build.sbt.2
     - mv build.sbt.2 build.sbt
     - cat build.sbt | grep version
-    - sbt publish
+    - sbt publish   # publish must be separate from coverage
   artifacts:
     expire_in: 1 hour
     reports:

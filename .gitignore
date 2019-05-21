@@ -7,3 +7,4 @@ mongo-to-kafka/biggest.json
 .log
 *.log
 data
+cache

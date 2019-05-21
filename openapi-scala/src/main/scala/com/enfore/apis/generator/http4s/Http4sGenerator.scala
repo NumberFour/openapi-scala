@@ -22,7 +22,7 @@ object Http4sGenerator {
     *
     * {{{
     * object Routes {
-    *   def apply[F[_] : Sync](impl: ApiImplementation[F]): HttpRoutes[F] = {
+    *   def apply[F[_] : Sync](impl: Http4sRoutesApi[F]): HttpRoutes[F] = {
     *     val dsl = new Http4sDsl[F]{}
     *     import dsl._
     *
@@ -60,7 +60,7 @@ object Http4sGenerator {
          |import com.enfore.apis.http4s.ErrorHandler
          |
          |object Routes {
-         |  def apply[F[_] : Sync](impl: ApiImplementation[F], errorHandler: ErrorHandler[F]): HttpRoutes[F] = {
+         |  def apply[F[_] : Sync](impl: Http4sRoutesApi[F], errorHandler: ErrorHandler[F]): HttpRoutes[F] = {
          |    val dsl = new Http4sDsl[F]{}
          |    import dsl._
          |${queryParameterMatchers(routes, indentationLevel = 2).mkString("\n")}
@@ -74,17 +74,17 @@ object Http4sGenerator {
   }
 
   /**
-    * The generated ApiImplementation trait will look something like this:
+    * The generated Http4sRoutesApi trait will look something like this:
     *
     * {{{
-    * trait ApiImplementation[F[_]] {
+    * trait Http4sRoutesApi[F[_]] {
     *   def `GET /contacts/individual`: F[IndividualContact]
     *   def `POST /contacts/individual`(body: IndividualContact): F[IndividualContact]
     * }
     * }}}
     *
-    * @param packageName The package where the ApiImplementation trait should reside
-    * @return A String with the ApiImplementation trait's definition as Scala Source
+    * @param packageName The package where the Http4sRoutesApi trait should reside
+    * @return A String with the Http4sRoutesApi trait's definition as Scala Source
     */
   def implementation(
       packageName: PackageName
@@ -95,7 +95,7 @@ object Http4sGenerator {
          |
          |import org.http4s.Request
          |
-         |trait ApiImplementation[F[_]] {
+         |trait Http4sRoutesApi[F[_]] {
          |${implementationTrait(routes).map("  " + _).mkString("\n")}
          |}
       """.stripMargin
