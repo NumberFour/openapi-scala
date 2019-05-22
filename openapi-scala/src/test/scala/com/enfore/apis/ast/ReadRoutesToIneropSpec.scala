@@ -14,8 +14,9 @@ import com.enfore.apis.ast.SwaggerAST.{
 import com.enfore.apis.ast.SwaggerAST.PropertyType.{`object` => _, _}
 import com.enfore.apis.ast.SwaggerAST.ComponentType.{`object`, string => componentString}
 import com.enfore.apis.ast.SwaggerAST.ParameterLocation.path
-import com.enfore.apis.repr.TypeRepr.ReqWithContentType.PUT
-import com.enfore.apis.repr.TypeRepr.{GetRequest, PathItemAggregation, PathParameter, PutOrPostRequest, Ref}
+import com.enfore.apis.repr.ReqWithContentType.PUT
+import com.enfore.apis.repr.TypeRepr.Ref
+import com.enfore.apis.repr.{GetRequest, PathItemAggregation, PathParameter, PutOrPostRequest}
 import org.scalatest.{FlatSpec, Matchers}
 
 class ReadRoutesToIneropSpec extends FlatSpec with Matchers {

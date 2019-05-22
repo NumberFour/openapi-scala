@@ -1,17 +1,9 @@
 package com.enfore.apis.generator.http4s
 
 import com.enfore.apis.repr.TypeRepr
-import com.enfore.apis.repr.TypeRepr.ReqWithContentType.{POST, PUT}
-import com.enfore.apis.repr.TypeRepr.{
-  DeleteRequest,
-  GetRequest,
-  PathParameter,
-  PrimitiveArray,
-  PrimitiveInt,
-  PrimitiveOption,
-  PrimitiveString,
-  PutOrPostRequest
-}
+import com.enfore.apis.repr.TypeRepr._
+import com.enfore.apis.repr.ReqWithContentType.{POST, PUT}
+import com.enfore.apis.repr._
 import scala.collection.immutable.ListMap
 
 object RouteDefinitions {

@@ -8,8 +8,6 @@ object TypeRepr {
 
   final case class Ref(path: String, typeName: String) extends TypeRepr
 
-  // MARK: Types for types --------------------------------------------
-
   sealed trait Symbol {
     val valName: String
     val typeName: String
@@ -49,79 +47,6 @@ object TypeRepr {
 
   final case class RefSymbol(valName: String, ref: Ref) extends Symbol {
     val typeName: String = ref.typeName
-  }
-
-  // MARK: Types for route definitions -------------------------------
-
-  sealed trait RouteDefinition {
-    val path: String
-  }
-
-  final case class PathItemAggregation(path: String, items: List[RouteDefinition])
-
-  /**
-    * This sum type is used to mark a request that will have content body and may
-    * return a response.
-    */
-  sealed trait ReqWithContentType
-  object ReqWithContentType {
-    case object POST extends ReqWithContentType
-    case object PUT  extends ReqWithContentType
-  }
-
-  final case class PathParameter(
-      name: String
-  )
-
-  final case class GetRequest(
-      path: String,
-      pathParams: List[PathParameter],
-      queries: Map[String, Primitive],
-      response: Option[Map[String, Ref]]
-  ) extends RouteDefinition
-
-  final case class PutOrPostRequest(
-      path: String,
-      `type`: ReqWithContentType,
-      pathParams: List[PathParameter],
-      queries: Map[String, Primitive],
-      request: Ref,
-      response: Option[Map[String, Ref]],
-      hasReadOnlyType: Boolean
-  ) extends RouteDefinition {
-
-    lazy val readOnlyTypeName: String =
-      if (hasReadOnlyType) {
-        s"${request.typeName}Request"
-      } else {
-        request.typeName
-      }
-
-  }
-
-  final case class DeleteRequest(path: String, pathParams: List[PathParameter], response: Option[Map[String, Ref]])
-      extends RouteDefinition
-
-  // MARK: Helper functions -------------------------------------------
-
-  private def symbolRefResolution(incoming: List[NewTypeSymbol]): Map[Ref, Boolean] =
-    incoming.foldLeft(Map[Ref, Boolean]()) {
-      case (refTable: Map[Ref, Boolean], s @ NewTypeSymbol(_, data: PrimitiveProduct)) =>
-        // TODO: When found a NewTypeSymbol as a value of a product, add that to resolution list
-        data.values.foldLeft(refTable + (s.ref                                    -> true))(
-          (refChart: Map[Ref, Boolean], symbol: Symbol) => refChart + (symbol.ref -> true)
-        )
-      case (refTable: Map[Ref, Boolean], x) => refTable + (x.ref -> true)
-    }
-
-  // At the moment this function is not being used because the Scala compiler
-  // does the reference resolution checks
-  def validateReferences(in: List[NewTypeSymbol]): Unit = {
-    val failedResolutions: Iterable[Ref] = symbolRefResolution(in).filter(!_._2).keys
-    failedResolutions
-      .map(ref => s"ERROR: Could not resolve reference to ${ref.path}:${ref.typeName}")
-      .foreach(System.err.println)
-    System.exit(1)
   }
 
 }

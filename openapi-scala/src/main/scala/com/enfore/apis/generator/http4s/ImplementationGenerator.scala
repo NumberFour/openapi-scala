@@ -2,7 +2,8 @@ package com.enfore.apis.generator.http4s
 
 import com.enfore.apis.generator.ScalaGenerator.cleanScalaSymbol
 import com.enfore.apis.generator.ShowTypeTag._
-import com.enfore.apis.repr.TypeRepr.ReqWithContentType.{POST, PUT}
+import com.enfore.apis.repr.ReqWithContentType.{POST, PUT}
+import com.enfore.apis.repr._
 import com.enfore.apis.repr.TypeRepr._
 
 object ImplementationGenerator {
@@ -29,7 +30,7 @@ object ImplementationGenerator {
     case _: DeleteRequest                         => "DELETE"
   }
 
-  private def getParameters(route: RouteDefinition) = {
+  private def getParameters(route: RouteDefinition): String = {
     val pathParameters    = getPathParameters(route)
     val queryParamameters = getQueryParamameters(route)
     val body              = getRequestBody(route)
@@ -55,7 +56,7 @@ object ImplementationGenerator {
   }
 
   private def getResponseType(route: RouteDefinition): String = {
-    def getJsonOrFirstType(response: Option[Map[String, Ref]]) =
+    def getJsonOrFirstType(response: Option[Map[String, Ref]]): Option[Ref] =
       response.flatMap(
         mediaTypes => mediaTypes.get("application/json").orElse(mediaTypes.headOption.map(_._2))
       )
@@ -70,7 +71,7 @@ object ImplementationGenerator {
   }
 
   private def getPathParameters(route: RouteDefinition): List[(ArgumentName, ArgumentType)] = {
-    def extractFromPathParameters(parameters: List[PathParameter]) = {
+    def extractFromPathParameters(parameters: List[PathParameter]): List[(String, String)] = {
       assert(
         parameters.map(_.name).size == parameters.map(_.name).distinct.size,
         "Path parameter names must be unique"
@@ -86,8 +87,8 @@ object ImplementationGenerator {
     }
   }
 
-  private def getQueryParamameters(route: RouteDefinition): Seq[(ArgumentName, ArgumentType)] = {
-    def extractFromQueries(queries: Map[String, Primitive]) =
+  private def getQueryParamameters(route: RouteDefinition): List[(ArgumentName, ArgumentType)] = {
+    def extractFromQueries(queries: Map[String, Primitive]): List[(String, String)] =
       queries.mapValues(primitiveShowType.showType).toList.sortBy(_._1)
 
     route match {

@@ -4,6 +4,7 @@ import cats.data.NonEmptyList
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
 import com.enfore.apis.repr.TypeRepr
 import com.enfore.apis.repr.TypeRepr._
+import com.enfore.apis.repr._
 import simulacrum._
 
 @typeclass trait ScalaGenerator[T] {

@@ -1,8 +1,8 @@
 package com.enfore.apis.generator
 
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
-import com.enfore.apis.repr.TypeRepr
-import com.enfore.apis.repr.TypeRepr.{GetRequest, PathParameter, PutOrPostRequest, Ref => TypeReprRef}
+import com.enfore.apis.repr.TypeRepr.{Ref => TypeReprRef}
+import com.enfore.apis.repr.{GetRequest, PathParameter, PutOrPostRequest, ReqWithContentType}
 import org.scalatest._
 
 import scala.meta._
@@ -42,7 +42,7 @@ class PathsTypeReprSpec extends FlatSpec with Matchers {
   it should "be able to use the correct input/return type in post request" in {
     val request = PutOrPostRequest(
       "/products",
-      TypeRepr.ReqWithContentType.POST,
+      ReqWithContentType.POST,
       List.empty,
       Map.empty,
       TypeReprRef("#components/schemas/Product", "Product"),
@@ -73,7 +73,7 @@ class PathsTypeReprSpec extends FlatSpec with Matchers {
   it should "be able to deal with no return type for Post requests" in {
     val request = PutOrPostRequest(
       "/subscriptions",
-      TypeRepr.ReqWithContentType.POST,
+      ReqWithContentType.POST,
       List.empty,
       Map.empty,
       TypeReprRef("#components/schemas/Subscription", "Subscription"),

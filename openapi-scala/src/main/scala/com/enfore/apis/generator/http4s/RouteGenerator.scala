@@ -1,11 +1,11 @@
 package com.enfore.apis.generator.http4s
 
-import com.enfore.apis.repr.TypeRepr
+import com.enfore.apis.repr._
 import com.enfore.apis.repr.TypeRepr._
 import com.enfore.apis.generator.ShowTypeTag._
 import com.enfore.apis.generator.ShowTypeTag.ops._
 import com.enfore.apis.generator.ScalaGenerator._
-import com.enfore.apis.repr.TypeRepr.ReqWithContentType.{POST, PUT}
+import com.enfore.apis.repr.ReqWithContentType.{POST, PUT}
 
 object RouteGenerator {
   type =/>[A, B] = PartialFunction[A, B]

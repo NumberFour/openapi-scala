@@ -1,8 +1,7 @@
 package com.enfore.apis.generator.http4s
 
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
-import com.enfore.apis.repr.TypeRepr
-import com.enfore.apis.repr.TypeRepr._
+import com.enfore.apis.repr.{GetRequest, PathItemAggregation, TypeRepr}
 import org.scalatest.{Assertion, FreeSpec, Matchers}
 
 import scala.collection.immutable.ListMap

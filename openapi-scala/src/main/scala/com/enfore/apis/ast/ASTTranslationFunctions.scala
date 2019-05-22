@@ -5,6 +5,7 @@ import com.enfore.apis.ast.SwaggerAST.RequestType.{POST, PUT}
 import com.enfore.apis.ast.SwaggerAST._
 import com.enfore.apis.repr.TypeRepr
 import com.enfore.apis.repr.TypeRepr._
+import com.enfore.apis.repr._
 
 import scala.collection.immutable
 

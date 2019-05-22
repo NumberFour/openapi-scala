@@ -3,7 +3,7 @@ package com.enfore.apis.generator.http4s
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
 import com.enfore.apis.generator.RouteImplementation.FileName
 import com.enfore.apis.generator.ScalaGenerator
-import com.enfore.apis.repr.TypeRepr.PathItemAggregation
+import com.enfore.apis.repr.PathItemAggregation
 
 object Http4sGenerator {
 
