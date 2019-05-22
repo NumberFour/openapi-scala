@@ -29,12 +29,18 @@ class ErrorHandlerImplementation(convertThrowableToServiceExceptionFn: Throwable
     in.attempt
       .map(_.left.map(convertThrowableToServiceExceptionFn))
 
-  implicit val encoder1: Encoder[ServiceError]        = deriveEncoder[ServiceError](renaming.snakeCase)
-  implicit val encoder2: Encoder[ItemAlreadyExists]   = deriveEncoder[ItemAlreadyExists](renaming.snakeCase)
-  implicit val encoder3: Encoder[ItemDoesNotExist]    = deriveEncoder[ItemDoesNotExist](renaming.snakeCase)
-  implicit val encoder4: Encoder[RequestConflict]     = deriveEncoder[RequestConflict](renaming.snakeCase)
-  implicit val encoder5: Encoder[PermissionRequired]  = deriveEncoder[PermissionRequired](renaming.snakeCase)
-  implicit val encoder6: Encoder[WrongRequestContent] = deriveEncoder[WrongRequestContent](renaming.snakeCase)
+  implicit val encoderServiceError: Encoder[ServiceError] =
+    deriveEncoder[ServiceError](renaming.snakeCase)
+  implicit val encoderItemAlreadyExists: Encoder[ItemAlreadyExists] =
+    deriveEncoder[ItemAlreadyExists](renaming.snakeCase)
+  implicit val encoderItemDoesNotExist: Encoder[ItemDoesNotExist] =
+    deriveEncoder[ItemDoesNotExist](renaming.snakeCase)
+  implicit val encoderRequestConflict: Encoder[RequestConflict] =
+    deriveEncoder[RequestConflict](renaming.snakeCase)
+  implicit val encoderPermissionRequired: Encoder[PermissionRequired] =
+    deriveEncoder[PermissionRequired](renaming.snakeCase)
+  implicit val encoderWrongRequestContent: Encoder[WrongRequestContent] =
+    deriveEncoder[WrongRequestContent](renaming.snakeCase)
 
   private def mapServiceErrorsFn(err: ServiceException): IO[Response[IO]] = {
     logger.error("Error in request", err)
