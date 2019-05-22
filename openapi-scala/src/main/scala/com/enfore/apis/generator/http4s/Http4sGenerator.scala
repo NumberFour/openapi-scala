@@ -28,10 +28,10 @@ object Http4sGenerator {
     *
     *     HttpRoutes.of[F] {
     *       case GET -> Root / "contacts" / "individual" =>
-    *         impl.`GET /contacts/individual`.flatMap(Ok(_))
+    *         impl.`GET /contacts/individual`.flatMap(EntityGenerator(200)(_))
     *
     *       case request @ POST -> Root / "contacts" / "individual" =>
-    *         request.as[IndividualContact].flatMap(impl.`POST /contacts/individual`).flatMap(Ok(_))
+    *         request.as[IndividualContact].flatMap(impl.`POST /contacts/individual`).flatMap(EntityGenerator(200)(_))
     *     }
     *   }
     * }
@@ -57,7 +57,7 @@ object Http4sGenerator {
          |import org.http4s.circe.CirceEntityEncoder._
          |import org.http4s.circe.CirceEntityDecoder._
          |import org.http4s.dsl.Http4sDsl
-         |import com.enfore.apis.http4s.ErrorHandler
+         |import com.enfore.apis.http4s._
          |
          |object Routes {
          |  def apply[F[_] : Sync](impl: Http4sRoutesApi[F], errorHandler: ErrorHandler[F]): HttpRoutes[F] = {

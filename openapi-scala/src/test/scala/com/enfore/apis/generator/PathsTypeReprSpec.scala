@@ -16,7 +16,8 @@ class PathsTypeReprSpec extends FlatSpec with Matchers {
       "/products",
       List(PathParameter("id")),
       Map.empty,
-      Some(Map("application/json" -> TypeReprRef("#components/schemas/Product", "Product")))
+      Some(Map("application/json" -> TypeReprRef("#components/schemas/Product", "Product"))),
+      200
     )
     val expected =
       """
@@ -47,7 +48,8 @@ class PathsTypeReprSpec extends FlatSpec with Matchers {
       Map.empty,
       TypeReprRef("#components/schemas/Product", "Product"),
       Some(Map("application/json" -> TypeReprRef("#components/schemas/Product", "Product"))),
-      false
+      false,
+      200
     )
     val expected =
       """
@@ -78,7 +80,8 @@ class PathsTypeReprSpec extends FlatSpec with Matchers {
       Map.empty,
       TypeReprRef("#components/schemas/Subscription", "Subscription"),
       None,
-      false
+      false,
+      200
     )
     val expected =
       """
@@ -101,7 +104,8 @@ class PathsTypeReprSpec extends FlatSpec with Matchers {
       "/subscriptions/{subscription-id}",
       List(PathParameter("subscription-id")),
       Map.empty,
-      None
+      None,
+      200
     )
     val expected =
       """

@@ -37,7 +37,8 @@ class ReadRoutesToIneropSpec extends FlatSpec with Matchers {
                     "IndividualContact"
                   )
                 )
-              )
+              ),
+              200
             ),
             PutOrPostRequest(
               "/contacts/individual/{contact-id}",
@@ -53,7 +54,8 @@ class ReadRoutesToIneropSpec extends FlatSpec with Matchers {
                   )
                 )
               ),
-              false
+              false,
+              200
             )
           )
         )

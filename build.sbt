@@ -50,7 +50,6 @@ lazy val `openapi-http4s-lib` = (project in file("openapi-http4s-lib"))
     name := "openapi-http4s-lib",
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
     libraryDependencies ++= Seq(
-      "com.enfore"           %% "openapi-lib"      % "0.2.2",
       "com.beachape"         %% "enumeratum"       % "1.5.13",
       "com.beachape"         %% "enumeratum-circe" % "1.5.20",
       "io.circe"             %% "circe-derivation" % "0.11.0-M1",

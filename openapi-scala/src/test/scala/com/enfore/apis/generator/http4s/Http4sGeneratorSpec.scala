@@ -50,7 +50,8 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
           Map(
             "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
           )
-        )
+        ),
+        200
       )
     )
   )
@@ -66,7 +67,7 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
       |import org.http4s.circe.CirceEntityEncoder._
       |import org.http4s.circe.CirceEntityDecoder._
       |import org.http4s.dsl.Http4sDsl
-      |import com.enfore.apis.http4s.ErrorHandler
+      |import com.enfore.apis.http4s._
       |
       |object Routes {
       |  def apply[F[_] : Sync](impl: Http4sRoutesApi[F], errorHandler: ErrorHandler[F]): HttpRoutes[F] = {
@@ -75,7 +76,7 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
       |
       |    HttpRoutes.of[F] {
       |      case request @ GET -> Root / "contacts" / "individual" =>
-      |        errorHandler.resolve(impl.`GET /contacts/individual`(request), (x: IndividualContact) => Ok(x.asJson))
+      |        errorHandler.resolve(impl.`GET /contacts/individual`(request), (x: IndividualContact) => EntityGenerator(200)(x.asJson))
       |    }
       |  }
       |}

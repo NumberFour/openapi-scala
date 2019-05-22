@@ -95,7 +95,7 @@ object RouteGenerator {
 
   private def getImplementationCall(route: RouteDefinition): String = {
     val requestDecoding = route match {
-      case PutOrPostRequest(_, _, _, _, request, _, hasReadOnlyType) =>
+      case PutOrPostRequest(_, _, _, _, request, _, hasReadOnlyType, _) =>
         if (hasReadOnlyType) {
           s"request.as[${request.typeName}Request]"
         } else {
@@ -123,9 +123,9 @@ object RouteGenerator {
   }
 
   private val getListQueryParams: RouteDefinition =/> Map[String, TypeRepr.Primitive] = {
-    case GetRequest(_, _, queries, _)                => queries
-    case PutOrPostRequest(_, _, _, queries, _, _, _) => queries
-    case _: DeleteRequest                            => Map.empty
+    case GetRequest(_, _, queries, _, _)                => queries
+    case PutOrPostRequest(_, _, _, queries, _, _, _, _) => queries
+    case _: DeleteRequest                               => Map.empty
   }
 
   private val listParameterType: TypeRepr.Primitive =/> Boolean = {
@@ -163,34 +163,34 @@ object RouteGenerator {
       (fromPath.map(_.name) ++ fromQueries.sorted).map(sanitiseScalaName)
 
     route match {
-      case GetRequest(_, Nil, queries, _) if queries.isEmpty =>
+      case GetRequest(_, Nil, queries, _, _) if queries.isEmpty =>
         ""
 
-      case GetRequest(_, parameters, queries, _) =>
+      case GetRequest(_, parameters, queries, _, _) =>
         buildParameters(parameters, queries.keys.toList).mkString("(", ", ", ")")
 
-      case PutOrPostRequest(_, _, Nil, queries, request, _, _) if queries.isEmpty =>
+      case PutOrPostRequest(_, _, Nil, queries, request, _, _, _) if queries.isEmpty =>
         assert(request.typeName != "Unit", "Unit is not allowed as request type")
         "(_)"
 
-      case PutOrPostRequest(_, _, parameters, queries, request, _, _) =>
+      case PutOrPostRequest(_, _, parameters, queries, request, _, _, _) =>
         assert(request.typeName != "Unit", "Unit is not allowed as request type")
         (buildParameters(parameters, queries.keys.toList) :+ "_").mkString("(", ", ", ")")
 
-      case DeleteRequest(_, Nil, _) =>
+      case DeleteRequest(_, Nil, _, _) =>
         ""
 
-      case DeleteRequest(_, parameters, _) =>
+      case DeleteRequest(_, parameters, _, _) =>
         buildParameters(parameters, List.empty).mkString("(", ", ", ")")
     }
   }
 
   private def getVariableNameAndMethod(route: RouteDefinition): String =
     route match {
-      case _: GetRequest                            => "request @ GET"
-      case PutOrPostRequest(_, PUT, _, _, _, _, _)  => "request @ PUT"
-      case PutOrPostRequest(_, POST, _, _, _, _, _) => "request @ POST"
-      case _: DeleteRequest                         => "request @ DELETE"
+      case _: GetRequest                               => "request @ GET"
+      case PutOrPostRequest(_, PUT, _, _, _, _, _, _)  => "request @ PUT"
+      case PutOrPostRequest(_, POST, _, _, _, _, _, _) => "request @ POST"
+      case _: DeleteRequest                            => "request @ DELETE"
     }
 
   private def buildPath(route: RouteDefinition): String =
@@ -219,13 +219,17 @@ object RouteGenerator {
   private def firstResponseType(response: Option[Map[String, Ref]]): String =
     response.flatMap(_.headOption).map(_._2.typeName).getOrElse("Unit")
 
+  private def buildString(response: Option[Map[String, TypeRepr.Ref]], status: Int): String =
+    if (response.isEmpty) {
+      s"(_: ${firstResponseType(response)}) => EmptyGenerator($status)()"
+    } else {
+      s"(x: ${firstResponseType(response)}) => EntityGenerator($status)(x.asJson)"
+    }
+
   private def getResponseStatus(route: RouteDefinition): String =
     route match {
-      // TODO: NoContent should follow from response code 204. Also support more than Ok
-      case DeleteRequest(_, _, response) => s"(_: ${firstResponseType(response)}) => NoContent()"
-      case PutOrPostRequest(_, _, _, _, _, response, _) =>
-        s"(x: ${firstResponseType(response)}) => Ok(x.asJson)"
-      case GetRequest(_, _, _, response) =>
-        s"(x: ${firstResponseType(response)}) => Ok(x.asJson)"
+      case DeleteRequest(_, _, response, status)                => buildString(response, status)
+      case PutOrPostRequest(_, _, _, _, _, response, _, status) => buildString(response, status)
+      case GetRequest(_, _, _, response, status)                => buildString(response, status)
     }
 }

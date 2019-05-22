@@ -406,11 +406,11 @@ object ScalaGenerator {
   }
 
   private[generator] def routeDefGen(implicit p: PackageName): ScalaGenerator[RouteDefinition] = {
-    case GetRequest(path, pathParams, queries, response) =>
+    case GetRequest(path, pathParams, queries, response, _) =>
       getRequestGenerator(path, pathParams, queries, response)
-    case PutOrPostRequest(path, reqType, pathParams, queries, request, response, _) =>
+    case PutOrPostRequest(path, reqType, pathParams, queries, request, response, _, _) =>
       postRequestGenerator(path, reqType, pathParams, queries, request, response)
-    case DeleteRequest(path, pathParams, response) =>
+    case DeleteRequest(path, pathParams, response, _) =>
       deleteRequestGenerator(path, pathParams, response)
   }
 

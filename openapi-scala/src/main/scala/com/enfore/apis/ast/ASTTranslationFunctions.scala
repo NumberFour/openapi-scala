@@ -38,9 +38,8 @@ object ASTTranslationFunctions {
   private def getNameContentEncoding(
       mediaMap: Map[Int, MediaTypeObject],
       acceptMedia: Int => Boolean
-  ): Option[Map[String, Ref]] = mediaMap.find(x => acceptMedia(x._1)).map(x => getEncodedMap(x._2))
+  ): Option[(Int, Map[String, Ref])] = mediaMap.find(x => acceptMedia(x._1)).map(x => (x._1, getEncodedMap(x._2)))
 
-  // TODO: This is pretty hackey. Come up with a better solution for this
   private def translateReqContentType(in: RequestType): ReqWithContentType = in match {
     case POST => ReqWithContentType.POST
     case PUT  => ReqWithContentType.PUT
@@ -63,8 +62,9 @@ object ASTTranslationFunctions {
     val pathParameters: List[PathParameter] = extractPathParameters(parameters)
     val queryParams: Map[String, Primitive] = extractQueryParameters(parameters)
     val possibleBodies: List[Ref]           = route.requestBody.toList.flatMap(getEncodings)
-    val possibleResponse: Option[Map[String, Ref]] =
+    val possibleResponse: Option[(Int, Map[String, Ref])] =
       getNameContentEncoding(route.responses, x => x >= 200 && x < 300)
+    assert(possibleResponse.nonEmpty, "There has to be one successful (>=200 and <300) return code")
     requestType match {
       case RequestType.POST | RequestType.PUT =>
         assert(possibleBodies.size == 1, s"We only support one content type for $path $requestType request")
@@ -84,13 +84,14 @@ object ASTTranslationFunctions {
           pathParameters,
           queryParams,
           possibleBodies.head,
-          possibleResponse,
-          hasReadOnlyComponent(correspondingComponent.get)
+          possibleResponse.map(_._2),
+          hasReadOnlyComponent(correspondingComponent.get),
+          possibleResponse.get._1
         )
       case RequestType.GET =>
-        GetRequest(path, pathParameters, queryParams, possibleResponse)
+        GetRequest(path, pathParameters, queryParams, possibleResponse.map(_._2), possibleResponse.get._1)
       case RequestType.DELETE =>
-        DeleteRequest(path, pathParameters, possibleResponse)
+        DeleteRequest(path, pathParameters, possibleResponse.map(_._2), possibleResponse.get._1)
     }
   }
 

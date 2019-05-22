@@ -4,6 +4,7 @@ import com.enfore.apis.repr.TypeRepr.{Primitive, Ref}
 
 sealed trait RouteDefinition {
   val path: String
+  val pathParams: List[PathParameter]
 }
 
 final case class PathItemAggregation(path: String, items: List[RouteDefinition])
@@ -26,7 +27,8 @@ final case class GetRequest(
     path: String,
     pathParams: List[PathParameter],
     queries: Map[String, Primitive],
-    response: Option[Map[String, Ref]]
+    response: Option[Map[String, Ref]],
+    successStatusCode: Int
 ) extends RouteDefinition
 
 final case class PutOrPostRequest(
@@ -36,7 +38,8 @@ final case class PutOrPostRequest(
     queries: Map[String, Primitive],
     request: Ref,
     response: Option[Map[String, Ref]],
-    hasReadOnlyType: Boolean
+    hasReadOnlyType: Boolean,
+    successStatusCode: Int
 ) extends RouteDefinition {
 
   lazy val readOnlyTypeName: String =
@@ -48,5 +51,9 @@ final case class PutOrPostRequest(
 
 }
 
-final case class DeleteRequest(path: String, pathParams: List[PathParameter], response: Option[Map[String, Ref]])
-    extends RouteDefinition
+final case class DeleteRequest(
+    path: String,
+    pathParams: List[PathParameter],
+    response: Option[Map[String, Ref]],
+    successStatusCode: Int
+) extends RouteDefinition
