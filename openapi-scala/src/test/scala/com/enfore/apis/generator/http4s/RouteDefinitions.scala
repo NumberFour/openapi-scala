@@ -160,10 +160,10 @@ object RouteDefinitions {
     ListMap(
       "query1"         -> PrimitiveString(None),
       "query2"         -> PrimitiveInt(None),
-      "optional1"      -> PrimitiveOption(PrimitiveString(None)),
-      "optional2"      -> PrimitiveOption(PrimitiveInt(None)),
+      "optional1"      -> PrimitiveOption(PrimitiveString(None), None),
+      "optional2"      -> PrimitiveOption(PrimitiveInt(None), None),
       "list1"          -> PrimitiveArray(PrimitiveInt(None), None),
-      "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None), None))
+      "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None), None), None)
     ),
     Some(
       Map(
@@ -180,10 +180,10 @@ object RouteDefinitions {
     ListMap(
       "query1"         -> PrimitiveString(None),
       "query2"         -> PrimitiveInt(None),
-      "optional1"      -> PrimitiveOption(PrimitiveString(None)),
-      "optional2"      -> PrimitiveOption(PrimitiveInt(None)),
+      "optional1"      -> PrimitiveOption(PrimitiveString(None), None),
+      "optional2"      -> PrimitiveOption(PrimitiveInt(None), None),
       "list1"          -> PrimitiveArray(PrimitiveInt(None), None),
-      "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None), None))
+      "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None), None), None)
     ),
     TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"),
     Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
@@ -195,8 +195,8 @@ object RouteDefinitions {
     "/contacts/individual/{contacts-id}",
     List(PathParameter("contacts-id")),
     ListMap(
-      "optional1" -> PrimitiveOption(PrimitiveString(None)),
-      "optional2" -> PrimitiveOption(PrimitiveInt(None))
+      "optional1" -> PrimitiveOption(PrimitiveString(None), None),
+      "optional2" -> PrimitiveOption(PrimitiveInt(None), None)
     ),
     Some(
       Map(
@@ -211,8 +211,8 @@ object RouteDefinitions {
     PUT,
     List(PathParameter("contacts-id")),
     ListMap(
-      "optional1" -> PrimitiveOption(PrimitiveString(None)),
-      "optional2" -> PrimitiveOption(PrimitiveInt(None))
+      "optional1" -> PrimitiveOption(PrimitiveString(None), None),
+      "optional2" -> PrimitiveOption(PrimitiveInt(None), None)
     ),
     TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"),
     Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
@@ -313,8 +313,8 @@ object RouteDefinitions {
     "/contacts/individual",
     List.empty,
     ListMap(
-      "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None), None)),
-      "optional-list2" -> PrimitiveOption(PrimitiveArray(PrimitiveInt(None), None))
+      "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None), None), None),
+      "optional-list2" -> PrimitiveOption(PrimitiveArray(PrimitiveInt(None), None), None)
     ),
     Some(
       Map(
@@ -329,8 +329,8 @@ object RouteDefinitions {
     POST,
     List.empty,
     ListMap(
-      "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None), None)),
-      "optional-list2" -> PrimitiveOption(PrimitiveArray(PrimitiveInt(None), None))
+      "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None), None), None),
+      "optional-list2" -> PrimitiveOption(PrimitiveArray(PrimitiveInt(None), None), None)
     ),
     TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"),
     Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),

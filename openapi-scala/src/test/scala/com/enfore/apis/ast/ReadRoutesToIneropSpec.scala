@@ -1,18 +1,17 @@
 package com.enfore.apis.ast
 
 import com.enfore.apis.ast.SwaggerAST.{
-  Component,
+  ComponentsObject,
   CoreASTRepr,
   MediaTypeObject,
-  ParamObject,
-  PathObject,
-  Property,
+  OperationObject,
+  ParameterObject,
+  ReferenceObject,
+  RequestBodyObject,
+  ResponseObject,
   SchemaObject,
-  SchemaRefContainer,
-  SchemaStore
+  SchemaObjectType
 }
-import com.enfore.apis.ast.SwaggerAST.PropertyType.{`object` => _, _}
-import com.enfore.apis.ast.SwaggerAST.ComponentType.{`object`, string => componentString}
 import com.enfore.apis.ast.SwaggerAST.ParameterLocation.path
 import com.enfore.apis.repr.ReqWithContentType.PUT
 import com.enfore.apis.repr.TypeRepr.Ref
@@ -74,116 +73,118 @@ class ReadRoutesToIneropSpec extends FlatSpec with Matchers {
     }
 
   private lazy val ast = CoreASTRepr(
-    SchemaStore(
+    ComponentsObject(
       Map(
-        "Contact" -> Component(
+        "Contact" -> SchemaObject(
           Some("Base type for all contacts.\n"),
-          `object`,
+          Some(SchemaObjectType.`object`),
           Some(
             Map(
-              "id" -> Property(
-                Some(
+              "id" -> SchemaObject(
+                description = Some(
                   "The technical identifier of the contact. Assigned by the enfore platform on creation of the contact and not changeable afterwards."
                 ),
-                Some(string),
-                None,
-                None,
-                Some(true),
-                None,
-                None
+                `type` = Some(SchemaObjectType.string),
+                properties = None,
+                items = None,
+                readOnly = Some(true),
+                required = None
               ),
-              "type" -> Property(None, Some(string), None, None, None, None, None),
-              "name" -> Property(
+              "type" -> SchemaObject(None, Some(SchemaObjectType.string), None, None, None, None, None),
+              "name" -> SchemaObject(
                 Some(
                   "The name of the contact.\nFor individual contacts, this is the full name of the person, e.g., \"Barnabas Ludwig Johnson II Sr.\".\n" +
                     "For organization contacts, this is the \"common name\" of the organization. This may not necessarily be the registered business name, " +
                     "as that may either not exist or be too cumbersome to use.\n"
                 ),
-                Some(string),
-                None,
-                None,
-                None,
-                None,
-                None
+                Some(SchemaObjectType.string)
               )
             )
           ),
           None,
           Some(List("id", "type", "name"))
         ),
-        "IndividualContact" -> Component(
+        "IndividualContact" -> SchemaObject(
           Some("Represents a human person.\n"),
-          `object`,
+          Some(SchemaObjectType.`object`),
           Some(
             Map(
-              "name"        -> Property(None, Some(string), None, None, None, None, None),
-              "dateOfBirth" -> Property(None, Some(string), None, None, None, None, None),
-              "id"          -> Property(None, Some(string), None, None, None, None, None),
-              "anniversary" -> Property(None, Some(string), None, None, None, None, None),
-              "gender"      -> Property(None, None, None, Some("#/components/schemas/Gender"), None, None, None)
+              "name"        -> SchemaObject(`type` = Some(SchemaObjectType.string)),
+              "dateOfBirth" -> SchemaObject(`type` = Some(SchemaObjectType.string)),
+              "id"          -> SchemaObject(`type` = Some(SchemaObjectType.string)),
+              "anniversary" -> SchemaObject(`type` = Some(SchemaObjectType.string)),
+              "gender"      -> ReferenceObject("#/components/schemas/Gender")
             )
-          ),
-          None,
-          None
+          )
         ),
-        "Gender" -> Component(
-          Some("The gender of a human person"),
-          componentString,
-          None,
-          Some(List("FEMALE", "MALE")),
-          None
+        "Gender" -> SchemaObject(
+          description = Some("The gender of a human person"),
+          `type` = Some(SchemaObjectType.string),
+          enum = Some(List("FEMALE", "MALE"))
         )
       )
     ),
     Some(
       Map(
         "/contacts/individual/{contact-id}" -> Map(
-          "get" -> PathObject(
+          "get" -> OperationObject(
             Some("Load an IndividualContact by its identifier"),
             None,
             Map(
-              200 -> MediaTypeObject(
+              200 -> ResponseObject(
+                "foo desc",
+                None,
                 Some(
                   Map(
-                    "application/vnd.enfore.contacts+json" -> SchemaRefContainer(
-                      Some(SchemaObject(Some("#/components/schemas/IndividualContact")))
+                    "application/vnd.enfore.contacts+json" -> MediaTypeObject(
+                      Some(ReferenceObject("#/components/schemas/IndividualContact"))
                     )
                   )
                 )
               ),
-              403 -> MediaTypeObject(None),
-              404 -> MediaTypeObject(None)
+              403 -> ResponseObject("", None, None),
+              404 -> ResponseObject("", None, None)
             ),
-            Some(List(ParamObject("contact-id", path, Some(SchemaObject(None)), Some("ID of the contact to load"))))
+            Some(List(
+              ParameterObject("contact-id", path, Some(ReferenceObject("")), Some("ID of the contact to load"), None)))
           ),
-          "put" -> PathObject(
-            Some("Full update of an IndividualContact"),
-            Some(
-              MediaTypeObject(
-                Some(
-                  Map(
-                    "application/vnd.enfore.contacts+json" -> SchemaRefContainer(
-                      Some(SchemaObject(Some("#/components/schemas/IndividualContact")))
-                    )
+          "put" -> OperationObject(
+            summary = Some("Full update of an IndividualContact"),
+            requestBody = Some(
+              RequestBodyObject(
+                None,
+                Map(
+                  "application/vnd.enfore.contacts+json" -> MediaTypeObject(
+                    Some(ReferenceObject("#/components/schemas/IndividualContact"))
                   )
-                )
+                ),
+                None
               )
             ),
-            Map(
-              200 -> MediaTypeObject(
+            responses = Map(
+              200 -> ResponseObject(
+                "",
+                None,
                 Some(
                   Map(
-                    "application/vnd.enfore.contacts+json" -> SchemaRefContainer(
-                      Some(SchemaObject(Some("#/components/schemas/IndividualContact")))
+                    "application/vnd.enfore.contacts+json" -> MediaTypeObject(
+                      Some(ReferenceObject("#/components/schemas/IndividualContact"))
                     )
                   )
-                )
-              ),
-              400 -> MediaTypeObject(None),
-              403 -> MediaTypeObject(None),
-              404 -> MediaTypeObject(None)
+                )),
+              400 -> ResponseObject("", None, None),
+              403 -> ResponseObject("", None, None),
+              404 -> ResponseObject("", None, None)
             ),
-            Some(List(ParamObject("contact-id", path, Some(SchemaObject(None)), Some("ID of the contact to update"))))
+            parameters = Some(
+              List(
+                ParameterObject(
+                  "contact-id",
+                  path,
+                  Some(ReferenceObject("")),
+                  Some("ID of the contact to update"),
+                  None))
+            )
           )
         )
       )

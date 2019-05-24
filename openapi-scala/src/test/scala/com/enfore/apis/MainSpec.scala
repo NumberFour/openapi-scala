@@ -14,7 +14,6 @@ class MainSpec extends FlatSpec with Matchers {
         "test.package",
         List(GenericImplementation, Http4sImplementation)
       )
-
       result.left.map(x => println(x + s" in $source")) // For debugging the failing tests
       result.isRight shouldBe true
     }

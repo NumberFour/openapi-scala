@@ -129,9 +129,9 @@ object RouteGenerator {
   }
 
   private val listParameterType: TypeRepr.Primitive =/> Boolean = {
-    case _: PrimitiveArray                  => true
-    case PrimitiveOption(_: PrimitiveArray) => true
-    case _: Any                             => false
+    case _: PrimitiveArray                     => true
+    case PrimitiveOption(_: PrimitiveArray, _) => true
+    case _: Any                                => false
   }
 
   /**
@@ -154,8 +154,8 @@ object RouteGenerator {
   }
 
   private def queryParameterDecoderMatcher(dataType: Primitive): String = dataType match {
-    case PrimitiveOption(dataType) => s"OptionalQueryParamDecoderMatcher[${dataType.showType}]"
-    case other                     => s"QueryParamDecoderMatcher[${other.showType}]"
+    case PrimitiveOption(dataType, _) => s"OptionalQueryParamDecoderMatcher[${dataType.showType}]"
+    case other                        => s"QueryParamDecoderMatcher[${other.showType}]"
   }
 
   private def getArgumentList(route: RouteDefinition): String = {

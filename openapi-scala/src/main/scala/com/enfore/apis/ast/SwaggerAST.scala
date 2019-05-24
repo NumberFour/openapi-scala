@@ -1,7 +1,10 @@
 package com.enfore.apis.ast
 
 import enumeratum._
+
 import scala.collection.immutable
+
+// This is a 1 to 1 representation of https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md
 
 object SwaggerAST {
 
@@ -14,42 +17,40 @@ object SwaggerAST {
     case object DELETE extends RequestType
   }
 
-  //  --- Types for Components ---
+  //  --- Types for ComponentsObject ---
 
-  sealed trait ComponentType extends EnumEntry
-  object ComponentType extends Enum[ComponentType] with CirceEnum[ComponentType] {
-    val values: immutable.IndexedSeq[ComponentType] = findValues
-    case object `object` extends ComponentType
-    case object `string` extends ComponentType
+  sealed trait SchemaObjectType extends EnumEntry
+  object SchemaObjectType extends Enum[SchemaObjectType] with CirceEnum[SchemaObjectType] {
+    val values: immutable.IndexedSeq[SchemaObjectType] = findValues
+    case object `object`  extends SchemaObjectType
+    case object `string`  extends SchemaObjectType
+    case object `integer` extends SchemaObjectType
+    case object `number`  extends SchemaObjectType
+    case object `boolean` extends SchemaObjectType
+    case object `array`   extends SchemaObjectType
   }
 
-  sealed trait PropertyType extends EnumEntry
-  object PropertyType extends Enum[PropertyType] with CirceEnum[PropertyType] {
-    val values: immutable.IndexedSeq[PropertyType] = findValues
-    case object `object` extends PropertyType
-    case object string   extends PropertyType
-    case object boolean  extends PropertyType
-    case object array    extends PropertyType
-    case object number   extends PropertyType
-  }
+  sealed trait SchemaOrReferenceObject
 
-  final case class Property(
-      description: Option[String], // Optional field (docstring)
-      `type`: Option[PropertyType], // Only present when property is not a reference
-      items: Option[Property], // Only present when property is a sequence
-      $ref: Option[String], // Reference to another type
-      readOnly: Option[Boolean], // Points out whether a property is readOnly (defaults to false)
-      minLength: Option[Int], // Optional refinement of minimum length
-      maxLength: Option[Int] // Optional refinement of maximum length
-  )
-
-  final case class Component(
-      description: Option[String],
-      `type`: ComponentType,
-      properties: Option[Map[String, Property]],
-      enum: Option[List[String]],
-      required: Option[List[String]]
-  )
+  final case class SchemaObject(
+      description: Option[String] = None,      // Optional field (docstring)
+      `type`: Option[SchemaObjectType] = None, // Only present when property is not a reference
+      // CAVEAT: We allow a reference here, which according to the spec is not allowed but the way all OpenAPI tools work
+      properties: Option[Map[String, SchemaOrReferenceObject]] = None, // Only present when schema object is an object
+      // CAVEAT: We allow a reference here, which according to the spec is not allowed but the way all OpenAPI tools work
+      items: Option[SchemaOrReferenceObject] = None, // Only present when schema object is an array
+      enum: Option[List[String]] = None,
+      required: Option[List[String]] = None,
+      readOnly: Option[Boolean] = None, // Points out whether a property is readOnly (defaults to false)
+      minLength: Option[Int] = None, // Optional refinement
+      maxLength: Option[Int] = None, // Optional refinement
+      maxItems: Option[Int] = None, // Optional refinement
+      minItems: Option[Int] = None, // Optional refinement
+      maxProperties: Option[Int] = None, // Optional refinement
+      minProperties: Option[Int] = None, // Optional refinement
+      maximum: Option[Int] = None, // Optional refinement
+      minimum: Option[Int] = None // Optional refinement
+  ) extends SchemaOrReferenceObject
 
   // --- Types for Routes ---
 
@@ -59,7 +60,7 @@ object SwaggerAST {
    *     $ref: '...'
    *  }}}
    */
-  final case class SchemaObject($ref: Option[String])
+  final case class ReferenceObject($ref: String) extends SchemaOrReferenceObject
 
   /*
    * Example : {{{
@@ -68,16 +69,7 @@ object SwaggerAST {
    *       $ref: ...
    * }}}
    */
-  final case class SchemaRefContainer(schema: Option[SchemaObject])
-
-  /*
-   * Example : {{{
-   *   content:
-   *     application/json:
-   *       schema: ...
-   * }}}
-   */
-  final case class MediaTypeObject(content: Option[Map[String, SchemaRefContainer]])
+  final case class MediaTypeObject(schema: Option[SchemaOrReferenceObject])
 
   sealed trait ParameterLocation extends EnumEntry
   object ParameterLocation extends Enum[ParameterLocation] with CirceEnum[ParameterLocation] {
@@ -96,10 +88,19 @@ object SwaggerAST {
    *       description: ...
    * }}}
    */
-  final case class ParamObject(
+  final case class ParameterObject(
       name: String,
       in: ParameterLocation,
-      schema: Option[SchemaObject],
+      schema: Option[SchemaOrReferenceObject],
+      description: Option[String],
+      required: Option[Boolean] = None,
+      deprecated: Option[Boolean] = None,
+      allowEmptyValue: Option[Boolean] = None,
+      content: Option[Map[String, MediaTypeObject]] = None
+  )
+
+  final case class HeaderObject(
+      schema: Option[ReferenceObject],
       description: Option[String]
   )
 
@@ -114,17 +115,51 @@ object SwaggerAST {
    *          content: ...
    * }}}
    */
-  final case class PathObject(
+
+  type ResponsesObject = Map[Int, ResponseObject]
+
+  final case class OperationObject(
       summary: Option[String],
-      requestBody: Option[MediaTypeObject],
-      responses: Map[Int, MediaTypeObject],
-      parameters: Option[List[ParamObject]]
+      requestBody: Option[RequestBodyObject],
+      responses: ResponsesObject,
+      parameters: Option[List[ParameterObject]]
+  )
+
+  /*
+   * Example: {{{
+   *   description: A complex object array response
+   *   content:
+   *     application/json:
+   *       schema:
+   *         type: array
+   *         items:
+   *           $ref: '#/components/schemas/VeryComplexType'
+   * }}}
+   */
+  final case class ResponseObject(
+      description: String,
+      headers: Option[Map[String, HeaderObject]],
+      content: Option[Map[String, MediaTypeObject]]
+      // currently not supported:
+      // links: Map[String, LinkObject]
+  )
+
+  final case class RequestBodyObject(
+      description: Option[String],
+      content: Map[String, MediaTypeObject],
+      required: Option[Boolean]
   )
 
   // --- Aggregated types  ---
 
-  final case class SchemaStore(schemas: Map[String, Component])
+  final case class ComponentsObject(
+      schemas: Map[String, SchemaObject] = Map.empty,
+      responses: Option[Map[String, ResponseObject]] = None,
+      parameters: Option[Map[String, ParameterObject]] = None,
+      requestBodies: Option[Map[String, RequestBodyObject]] = None,
+      headers: Option[Map[String, HeaderObject]] = None
+  )
 
-  final case class CoreASTRepr(components: SchemaStore, paths: Option[Map[String, Map[String, PathObject]]])
+  final case class CoreASTRepr(components: ComponentsObject, paths: Option[Map[String, Map[String, OperationObject]]])
 
 }

@@ -19,12 +19,12 @@ object ShowTypeTag {
   import ops._
 
   implicit val primitiveShowType: ShowTypeTag[Primitive] = {
-    case PrimitiveString(_)                => "String"
-    case PrimitiveNumber(_)                => "Double"
-    case PrimitiveInt(_)                   => "Int"
-    case PrimitiveBoolean(_)               => "Boolean"
-    case PrimitiveArray(data: TypeRepr, _) => s"List[${data.showType}]"
-    case PrimitiveOption(data: TypeRepr)   => s"Option[${data.showType}]"
+    case PrimitiveString(_)                 => "String"
+    case PrimitiveNumber(_)                 => "Double"
+    case PrimitiveInt(_)                    => "Int"
+    case PrimitiveBoolean(_)                => "Boolean"
+    case PrimitiveArray(data: TypeRepr, _)  => s"List[${data.showType}]"
+    case PrimitiveOption(data: TypeRepr, _) => s"Option[${data.showType}]"
   }
 
   implicit private val newTypeShowType: ShowTypeTag[NewType] = {
@@ -75,14 +75,14 @@ object SymbolAnnotationMaker {
   }
 
   def refinedAnnotation(symbol: Symbol): String = symbol match {
-    case PrimitiveSymbol(_, PrimitiveOption(data: Primitive)) => s"Option[${dataRefinementMatcher(data)}]"
-    case PrimitiveSymbol(_, data: Primitive)                  => dataRefinementMatcher(data)
-    case x @ _                                                => makeAnnotation(x)
+    case PrimitiveSymbol(_, PrimitiveOption(data: Primitive, _)) => s"Option[${dataRefinementMatcher(data)}]"
+    case PrimitiveSymbol(_, data: Primitive)                     => dataRefinementMatcher(data)
+    case x @ _                                                   => makeAnnotation(x)
   }
 
   def refinementOnType(symbol: Symbol): String = symbol match {
-    case x @ PrimitiveSymbol(_, PrimitiveOption(data: Primitive)) => makeAnnotation(x.copy(dataType = data))
-    case x @ _                                                    => makeAnnotation(x)
+    case x @ PrimitiveSymbol(_, PrimitiveOption(data: Primitive, _)) => makeAnnotation(x.copy(dataType = data))
+    case x @ _                                                       => makeAnnotation(x)
   }
 
 }
@@ -162,9 +162,9 @@ object ScalaGenerator {
           if (refinements.flatMap(_.headOption).isDefined) Some(s) else None
         case a @ PrimitiveArray(_, refinements: Option[List[RefinedTags]]) =>
           if (refinements.flatMap(_.headOption).isDefined) Some(a) else None
-        case PrimitiveOption(data: Primitive) =>
+        case PrimitiveOption(data: Primitive, _) =>
           refinementExtractor(PrimitiveSymbol(in.valName, data))
-        case _ => None // TODO: Enable more refinements here
+        case _ => None // TODO: META-6086 Enable more refinements here
       }
     case _ => None
   }
@@ -173,7 +173,7 @@ object ScalaGenerator {
     val helpers = in
       .flatMap(sym => refinementExtractor(sym).map(_ => sym))
       .map {
-        case PrimitiveSymbol(vn, PrimitiveOption(typeRepr: Primitive)) =>
+        case PrimitiveSymbol(vn, PrimitiveOption(typeRepr: Primitive, _)) =>
           PrimitiveSymbol(vn, typeRepr)
         case t @ _ => t
       }
@@ -253,7 +253,6 @@ object ScalaGenerator {
         }
     }.toList
 
-  // TODO: Empty lists are not considered in this implementation, fix that.
   private def paramsMaker(queries: Map[String, Primitive], pathParams: List[String], reqType: Option[Ref])(
       implicit p: PackageName
   ): String = {

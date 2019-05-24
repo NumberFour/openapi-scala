@@ -9,7 +9,7 @@ import scala.meta._
 class ComponentsTypeReprSpec extends FlatSpec with Matchers {
   import TypeRepr._
 
-  "Components TypeRepr Generator" should "be able to generate a basic case class" in {
+  "ComponentsObject TypeRepr Generator" should "be able to generate a basic case class" in {
     val person: Symbol = NewTypeSymbol(
       "none",
       PrimitiveProduct(
@@ -99,10 +99,10 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         "com.enfore.apis",
         "ParamedType",
         List(
-          PrimitiveSymbol("optionalVal", PrimitiveOption(PrimitiveString(None))),
+          PrimitiveSymbol("optionalVal", PrimitiveOption(PrimitiveString(None), None)),
           PrimitiveSymbol("listVal", PrimitiveArray(PrimitiveInt(None), None)),
-          PrimitiveSymbol("opListVal", PrimitiveOption(PrimitiveArray(PrimitiveBoolean(None), None))),
-          PrimitiveSymbol("listOpVal", PrimitiveArray(PrimitiveOption(PrimitiveNumber(None)), None))
+          PrimitiveSymbol("opListVal", PrimitiveOption(PrimitiveArray(PrimitiveBoolean(None), None), None)),
+          PrimitiveSymbol("listOpVal", PrimitiveArray(PrimitiveOption(PrimitiveNumber(None), None), None))
         )
       )
     )
@@ -214,7 +214,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         "com.enfore.apis",
         "RefinedType",
         List(
-          PrimitiveSymbol("nested", PrimitiveOption(PrimitiveString(Some(List(MinLength(2), MaxLength(2))))))
+          PrimitiveSymbol("nested", PrimitiveOption(PrimitiveString(Some(List(MinLength(2), MaxLength(2)))), None))
         )
       )
     )

@@ -295,11 +295,11 @@ paths:
             Offset of invoices and problems of where to start the next page.
             Similar to limit and offset in SQL, one would obtain the second page with `limit=10&offset=10`.
             Note that this paging with limit and offset is within a time interval that is specified with `from` and `to`.
-            If not given, defaults to `0`.
           schema:
             type: integer
             format: int64
             minimum: 0
+            default: 0
 
       responses:
         200:

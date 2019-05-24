@@ -1,14 +1,34 @@
 package com.enfore.apis.ast
 
+import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
 import com.enfore.apis.ast.SwaggerAST._
-import io.circe
-import io.circe.yaml.parser
-import io.circe.generic.auto._
+import com.enfore.apis.repr.ReqWithContentType.POST
+import com.enfore.apis.repr.{PathItemAggregation, PutOrPostRequest, TypeRepr}
+import com.enfore.apis.repr.TypeRepr.{
+  PrimitiveInt,
+  PrimitiveNumber,
+  PrimitiveOption,
+  PrimitiveProduct,
+  PrimitiveString,
+  PrimitiveSymbol,
+  Ref
+}
 import org.scalatest._
+import io.circe
+import io.circe._
+import cats.syntax.functor._
+import io.circe.generic.auto._
+import io.circe.yaml.parser
 
 import scala.io.Source
 
 class AstTranslationSpec extends FlatSpec with Matchers {
+
+  implicit val decoder: Decoder[SchemaOrReferenceObject] =
+    List[Decoder[SchemaOrReferenceObject]](
+      Decoder[ReferenceObject].widen,
+      Decoder[SchemaObject].widen
+    ).reduceLeft(_ or _)
 
   val yamlCode: String =
     """
@@ -21,14 +41,23 @@ class AstTranslationSpec extends FlatSpec with Matchers {
       |        content:
       |          application/json:
       |            schema:
-      |              $ref: '#/components/schemas/Product'
+      |              $ref: '#/components/schemas/Money'
+      |      parameters:
+      |        - name: limit
+      |          in: query
+      |          description: Description text.
+      |          schema:
+      |            type: integer
+      |            format: int64
+      |            minimum: 1
+      |            maximum: 5000
       |      responses:
       |        201:
       |          description: Product has successfully been added
       |          content:
       |            application/json:
       |              schema:
-      |                $ref: '#/components/schemas/Product'
+      |                $ref: '#/components/schemas/Money'
       |      tags:
       |        - products
       |components:
@@ -44,7 +73,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
       |          type: number
       |          multipleOf: 0.000001
       |        unit:
-      |          $ref: '#/components/schemas/Currency'
+                  type: string
       |      required:
       |        - value
       |        - unit
@@ -53,6 +82,44 @@ class AstTranslationSpec extends FlatSpec with Matchers {
   "SwaggerAST" should "be translated properly to the routes" in {
     val ast = parser.parse(yamlCode).flatMap(_.as[CoreASTRepr])
     ast.left.map(println) // For debugging the failing tests
+    ast.map { representation =>
+      val componentsMap = ASTTranslationFunctions.readComponentsToInterop(representation)(PackageName("foo"))
+      val routesMap     = ASTTranslationFunctions.readRoutesToInerop(representation)
+      assert(
+        componentsMap == Map(
+          "Money" -> TypeRepr.NewTypeSymbol(
+            valName = "Money",
+            data = PrimitiveProduct(
+              packageName = "foo",
+              typeName = "Money",
+              values = List(
+                PrimitiveSymbol("value", PrimitiveNumber(Some(List()))),
+                PrimitiveSymbol("unit", PrimitiveString(Some(List())))
+              )
+            )
+          )
+        )
+      )
+      assert(
+        routesMap("_products") ==
+          PathItemAggregation(
+            path = "/products",
+            items = List(
+              PutOrPostRequest(
+                path = "/products",
+                `type` = POST,
+                pathParams = List(),
+                queries = Map("limit" -> PrimitiveOption(PrimitiveInt(None), None)),
+//                queries = Map("limit" -> PrimitiveOption(PrimitiveInt(Some(List(Minimum(1), Maximum(5000)))), None)),
+                request = Ref("#/components/schemas/Money", "Money"),
+                response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money"))),
+                hasReadOnlyType = false,
+                successStatusCode = 201
+              ))
+          )
+      )
+    }
+
     ast.isRight shouldBe true
   }
 
@@ -69,25 +136,23 @@ class AstTranslationSpec extends FlatSpec with Matchers {
 
   "readComponentsToInterop" should "be able to separate readOnly components from regular ones" in {
     val components = Map(
-      "readOnlyComponent" -> Component(
+      "readOnlyComponent" -> SchemaObject(
         description = None,
-        `type` = ComponentType.`object`,
+        `type` = Some(SchemaObjectType.`object`),
         properties = Some(
           Map(
-            "id" -> Property(
+            "id" -> SchemaObject(
               description = None,
-              `type` = Some(PropertyType.string),
+              `type` = Some(SchemaObjectType.string),
               items = None,
-              $ref = None,
               readOnly = Some(true),
               minLength = None,
               maxLength = None
             ),
-            "desc" -> Property(
+            "desc" -> SchemaObject(
               description = None,
-              `type` = Some(PropertyType.string),
+              `type` = Some(SchemaObjectType.string),
               items = None,
-              $ref = None,
               readOnly = None,
               minLength = None,
               maxLength = None
@@ -95,18 +160,18 @@ class AstTranslationSpec extends FlatSpec with Matchers {
           )
         ),
         enum = None,
-        required = Some(List("id"))
+        required = Some(List("id")),
+        items = None
       ),
-      "regularComponent" -> Component(
+      "regularComponent" -> SchemaObject(
         description = None,
-        `type` = ComponentType.`object`,
+        `type` = Some(SchemaObjectType.`object`),
         properties = Some(
           Map(
-            "id" -> Property(
+            "id" -> SchemaObject(
               description = None,
-              `type` = Some(PropertyType.string),
+              `type` = Some(SchemaObjectType.string),
               items = None,
-              $ref = None,
               readOnly = None,
               minLength = None,
               maxLength = None
@@ -114,10 +179,11 @@ class AstTranslationSpec extends FlatSpec with Matchers {
           )
         ),
         enum = None,
-        required = Some(List("id"))
+        required = Some(List("id")),
+        items = None
       )
     )
-    val filtered: Map[String, Component] = ASTTranslationFunctions.splitReadOnlyComponents(components)
+    val filtered: Map[String, SchemaObject] = ASTTranslationFunctions.splitReadOnlyComponents(components)
 
     filtered.size shouldBe 3
     filtered.keys should contain("readOnlyComponentRequest")

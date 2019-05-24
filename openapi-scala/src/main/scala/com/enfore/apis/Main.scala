@@ -6,11 +6,21 @@ import com.enfore.apis.ast.SwaggerAST._
 import com.enfore.apis.generator.RouteImplementation
 import com.enfore.apis.generator.ScalaGenerator.ops._
 import io.circe
+import io.circe._
+import cats.syntax.functor._
 import io.circe.generic.auto._
 import io.circe.yaml.parser
+
 import scala.io.Source
 
 object Main {
+
+  implicit val decoder: Decoder[SchemaOrReferenceObject] =
+    List[Decoder[SchemaOrReferenceObject]](
+      Decoder[ReferenceObject].widen,
+      Decoder[SchemaObject].widen
+    ).reduceLeft(_ or _)
+
   def loadRepresentationFromFile(filename: String): Either[circe.Error, CoreASTRepr] = {
     val file    = Source.fromFile(filename)
     val content = file.getLines.mkString("\n")
