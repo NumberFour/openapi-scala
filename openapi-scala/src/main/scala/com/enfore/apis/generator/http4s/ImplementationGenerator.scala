@@ -96,7 +96,7 @@ object ImplementationGenerator {
 
   private def getRequestBody(route: RouteDefinition): Option[(ArgumentName, ArgumentType)] = route match {
     case req: PutOrPostRequest =>
-      Some(("body", req.readOnlyTypeName))
+      req.readOnlyTypeName.map(ro => ("body", ro))
     case _: Any => None
   }
 }

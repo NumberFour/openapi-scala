@@ -95,20 +95,16 @@ object RouteGenerator {
 
   private def getImplementationCall(route: RouteDefinition): String = {
     val requestDecoding = route match {
-      case PutOrPostRequest(_, _, _, _, request, _, hasReadOnlyType, _) =>
-        if (hasReadOnlyType) {
-          s"request.as[${request.typeName}Request]"
-        } else {
-          s"request.as[${request.typeName}]"
-        }
+      case a: PutOrPostRequest =>
+        a.readOnlyTypeName.map(x => s"request.as[${x}]").getOrElse("")
       case _ => ""
     }
 
     val functionName = ImplementationGenerator.getFunctionName(route)
 
     def flatmapPutOrPost(s: String) = route match {
-      case _: PutOrPostRequest => s".flatMap($s)"
-      case _                   => s
+      case p: PutOrPostRequest if p.request.nonEmpty => s".flatMap($s)"
+      case _                                         => s
     }
 
     val arguments = getArgumentList(route) + "(request)"
@@ -161,27 +157,23 @@ object RouteGenerator {
   private def getArgumentList(route: RouteDefinition): String = {
     def buildParameters(fromPath: List[PathParameter], fromQueries: List[String]): List[String] =
       (fromPath.map(_.name) ++ fromQueries.sorted).map(sanitiseScalaName)
+    def applyOrNot(requestNonEmpty: Boolean): String =
+      if (requestNonEmpty) {
+        "(_)"
+      } else {
+        ""
+      }
 
     route match {
-      case GetRequest(_, Nil, queries, _, _) if queries.isEmpty =>
-        ""
-
+      case GetRequest(_, Nil, queries, _, _) if queries.isEmpty => ""
       case GetRequest(_, parameters, queries, _, _) =>
         buildParameters(parameters, queries.keys.toList).mkString("(", ", ", ")")
-
-      case PutOrPostRequest(_, _, Nil, queries, request, _, _, _) if queries.isEmpty =>
-        assert(request.typeName != "Unit", "Unit is not allowed as request type")
-        "(_)"
-
+      case PutOrPostRequest(_, _, Nil, queries, request, _, _, _) if queries.isEmpty => applyOrNot(request.nonEmpty)
       case PutOrPostRequest(_, _, parameters, queries, request, _, _, _) =>
-        assert(request.typeName != "Unit", "Unit is not allowed as request type")
-        (buildParameters(parameters, queries.keys.toList) :+ "_").mkString("(", ", ", ")")
-
-      case DeleteRequest(_, Nil, _, _) =>
-        ""
-
-      case DeleteRequest(_, parameters, _, _) =>
-        buildParameters(parameters, List.empty).mkString("(", ", ", ")")
+        (buildParameters(parameters, queries.keys.toList) ++ (if (request.nonEmpty) List("_") else List.empty))
+          .mkString("(", ", ", ")")
+      case DeleteRequest(_, Nil, _, _)        => ""
+      case DeleteRequest(_, parameters, _, _) => buildParameters(parameters, List.empty).mkString("(", ", ", ")")
     }
   }
 

@@ -1,5 +1,6 @@
 package com.enfore.apis.repr
 
+import cats.implicits._
 import com.enfore.apis.repr.TypeRepr.{Primitive, Ref}
 
 sealed trait RouteDefinition {
@@ -36,17 +37,20 @@ final case class PutOrPostRequest(
     `type`: ReqWithContentType,
     pathParams: List[PathParameter],
     queries: Map[String, Primitive],
-    request: Ref,
+    request: Option[Ref],
     response: Option[Map[String, Ref]],
-    hasReadOnlyType: Boolean,
+    hasReadOnlyType: Option[Boolean],
     successStatusCode: Int
 ) extends RouteDefinition {
 
-  lazy val readOnlyTypeName: String =
-    if (hasReadOnlyType) {
-      s"${request.typeName}Request"
-    } else {
-      request.typeName
+  lazy val readOnlyTypeName: Option[String] =
+    (request, hasReadOnlyType).tupled.map {
+      case (r, ro) =>
+        if (ro) {
+          s"${r.typeName}Request"
+        } else {
+          r.typeName
+        }
     }
 
 }

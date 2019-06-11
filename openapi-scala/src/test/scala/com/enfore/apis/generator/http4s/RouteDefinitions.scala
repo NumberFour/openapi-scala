@@ -36,9 +36,20 @@ object RouteDefinitions {
     POST,
     List.empty,
     Map.empty,
-    TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"),
+    Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")),
     Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
-    false,
+    Some(false),
+    200
+  )
+
+  lazy val `POST /contacts/individual/empty` = PutOrPostRequest(
+    "/contacts/individual/empty",
+    POST,
+    List.empty,
+    Map.empty,
+    None,
+    Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    None,
     200
   )
 
@@ -71,9 +82,20 @@ object RouteDefinitions {
     PUT,
     List(PathParameter("contacts-id")),
     Map.empty,
-    TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"),
+    Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")),
     Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
-    false,
+    Some(false),
+    200
+  )
+
+  lazy val `PUT /contacts/individual/empty/{contacts-id}` = PutOrPostRequest(
+    "/contacts/individual/empty/{contacts-id}",
+    PUT,
+    List(PathParameter("contacts-id")),
+    Map.empty,
+    None,
+    Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    None,
     200
   )
 
@@ -101,9 +123,9 @@ object RouteDefinitions {
     POST,
     List(PathParameter("contacts-id")),
     Map.empty,
-    TypeRepr.Ref("#/components/schemas/Address", "Address"),
+    Some(TypeRepr.Ref("#/components/schemas/Address", "Address")),
     Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address"))),
-    false,
+    Some(false),
     200
   )
 
@@ -130,13 +152,13 @@ object RouteDefinitions {
       PathParameter("address-id")
     ),
     Map.empty,
-    TypeRepr.Ref("#/components/schemas/Address", "Address"),
+    Some(TypeRepr.Ref("#/components/schemas/Address", "Address")),
     Some(
       Map(
         "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
       )
     ),
-    false,
+    Some(false),
     200
   )
 
@@ -185,9 +207,9 @@ object RouteDefinitions {
       "list1"          -> PrimitiveArray(PrimitiveInt(None), None),
       "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None), None), None)
     ),
-    TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"),
+    Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")),
     Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
-    false,
+    Some(false),
     200
   )
 
@@ -214,9 +236,9 @@ object RouteDefinitions {
       "optional1" -> PrimitiveOption(PrimitiveString(None), None),
       "optional2" -> PrimitiveOption(PrimitiveInt(None), None)
     ),
-    TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"),
+    Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")),
     Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
-    false,
+    Some(false),
     200
   )
 
@@ -250,9 +272,9 @@ object RouteDefinitions {
       "query1" -> PrimitiveString(None),
       "query2" -> PrimitiveInt(None)
     ),
-    TypeRepr.Ref("#/components/schemas/Address", "Address"),
+    Some(TypeRepr.Ref("#/components/schemas/Address", "Address")),
     Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address"))),
-    false,
+    Some(false),
     200
   )
 
@@ -285,13 +307,13 @@ object RouteDefinitions {
       "list1" -> PrimitiveArray(PrimitiveString(None), None),
       "list2" -> PrimitiveArray(PrimitiveInt(None), None)
     ),
-    TypeRepr.Ref("#/components/schemas/Address", "Address"),
+    Some(TypeRepr.Ref("#/components/schemas/Address", "Address")),
     Some(
       Map(
         "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
       )
     ),
-    false,
+    Some(false),
     200
   )
 
@@ -332,9 +354,9 @@ object RouteDefinitions {
       "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None), None), None),
       "optional-list2" -> PrimitiveOption(PrimitiveArray(PrimitiveInt(None), None), None)
     ),
-    TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"),
+    Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")),
     Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
-    false,
+    Some(false),
     200
   )
 

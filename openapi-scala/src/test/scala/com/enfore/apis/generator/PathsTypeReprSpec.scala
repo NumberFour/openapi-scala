@@ -46,9 +46,9 @@ class PathsTypeReprSpec extends FlatSpec with Matchers {
       ReqWithContentType.POST,
       List.empty,
       Map.empty,
-      TypeReprRef("#components/schemas/Product", "Product"),
+      Some(TypeReprRef("#components/schemas/Product", "Product")),
       Some(Map("application/json" -> TypeReprRef("#components/schemas/Product", "Product"))),
-      false,
+      Some(false),
       200
     )
     val expected =
@@ -78,9 +78,9 @@ class PathsTypeReprSpec extends FlatSpec with Matchers {
       ReqWithContentType.POST,
       List.empty,
       Map.empty,
-      TypeReprRef("#components/schemas/Subscription", "Subscription"),
+      Some(TypeReprRef("#components/schemas/Subscription", "Subscription")),
       None,
-      false,
+      Some(false),
       200
     )
     val expected =

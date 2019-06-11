@@ -309,7 +309,7 @@ object ScalaGenerator {
       reqType: ReqWithContentType,
       pathParams: List[PathParameter],
       queries: Map[String, Primitive],
-      request: Ref,
+      request: Option[Ref],
       response: Option[Map[String, Ref]]
   )(implicit p: PackageName): String = {
     val cleanEncodingReferences: Option[Map[String, Ref]] = response.map(_.map {
@@ -319,7 +319,7 @@ object ScalaGenerator {
     val queryMap: List[String]              = queryListMaker(queries)
     val querySyntax: String                 = queryMap.mkString("Map(", ", ", ")")
     val pathVars: List[String]              = pathParams map (_.name) map cleanScalaSymbol
-    val params: String                      = paramsMaker(queries, pathVars, Some(request))(p)
+    val params: String                      = paramsMaker(queries, pathVars, request)(p)
     val typelessParams: String              = typelessParamsMaker(queries, pathVars, true)
     val reqName: String = reqType match {
       case ReqWithContentType.POST => "Post"

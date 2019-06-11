@@ -85,27 +85,27 @@ object ASTTranslationFunctions {
     assert(possibleResponse.nonEmpty, "There has to be one successful (>=200 and <300) return code")
     requestType match {
       case RequestType.POST | RequestType.PUT =>
-        assert(
-          possibleBodies.size == 1,
-          s"We only support exactly one content type for '$path':'$requestType' request. Found: ${possibleBodies}")
-        val correspondingComponent: Option[SchemaObject] = components
-          .find {
-            case (key: String, _: SchemaObject) =>
-              key == possibleBodies.head.typeName
-          }
-          .map(_._2)
-        assert(
-          correspondingComponent.nonEmpty,
-          s"The component referenced in $path $requestType (${possibleBodies.head.typeName}) is not found in components"
-        )
+        val correspondingComponent: Option[SchemaObject] = possibleBodies.headOption.map { body =>
+          val cc = components
+            .find {
+              case (key: String, _: SchemaObject) =>
+                key == body.typeName
+            }
+            .map(_._2)
+          assert(
+            cc.nonEmpty,
+            s"The component referenced in $path $requestType (${possibleBodies.head.typeName}) is not found in components"
+          )
+          cc.get
+        }
         PutOrPostRequest(
           path = path,
           `type` = translateReqContentType(requestType),
           pathParams = pathParameters,
           queries = queryParams,
-          request = possibleBodies.head,
+          request = possibleBodies.headOption,
           response = possibleResponse.map(_._2),
-          hasReadOnlyType = hasReadOnlyComponent(correspondingComponent.get),
+          hasReadOnlyType = correspondingComponent.map(hasReadOnlyComponent),
           successStatusCode = possibleResponse.get._1
         )
       case RequestType.GET =>

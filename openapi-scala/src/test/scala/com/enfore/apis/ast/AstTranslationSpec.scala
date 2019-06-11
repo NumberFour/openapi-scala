@@ -111,9 +111,9 @@ class AstTranslationSpec extends FlatSpec with Matchers {
                 pathParams = List(),
                 queries = Map("limit" -> PrimitiveOption(PrimitiveInt(None), None)),
 //                queries = Map("limit" -> PrimitiveOption(PrimitiveInt(Some(List(Minimum(1), Maximum(5000)))), None)),
-                request = Ref("#/components/schemas/Money", "Money"),
+                request = Some(Ref("#/components/schemas/Money", "Money")),
                 response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money"))),
-                hasReadOnlyType = false,
+                hasReadOnlyType = Some(false),
                 successStatusCode = 201
               ))
           )

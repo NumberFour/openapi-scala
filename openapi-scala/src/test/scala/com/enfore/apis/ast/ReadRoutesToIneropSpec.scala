@@ -44,7 +44,7 @@ class ReadRoutesToIneropSpec extends FlatSpec with Matchers {
               PUT,
               List(PathParameter("contact-id")),
               Map(),
-              Ref("#/components/schemas/IndividualContact", "IndividualContact"),
+              Some(Ref("#/components/schemas/IndividualContact", "IndividualContact")),
               Some(
                 Map(
                   "application/vnd.enfore.contacts+json" -> Ref(
@@ -53,7 +53,7 @@ class ReadRoutesToIneropSpec extends FlatSpec with Matchers {
                   )
                 )
               ),
-              false,
+              Some(false),
               200
             )
           )

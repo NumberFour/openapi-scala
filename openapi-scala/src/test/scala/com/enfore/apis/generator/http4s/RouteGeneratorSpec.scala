@@ -15,9 +15,11 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
     `GET /contacts/individual`,
     `GET /org/{org-id}/contacts/individual`,
     `POST /contacts/individual`,
+    `POST /contacts/individual/empty`,
     `GET /contacts/individual/{contacts-id}`,
     `GET /org/{org-id}/contacts/individual/{contacts-id}`,
     `PUT /contacts/individual/{contacts-id}`,
+    `PUT /contacts/individual/empty/{contacts-id}`,
     `DELETE /contacts/individual/{contacts-id}`,
     `GET /contacts/organization/{contacts-id}/addresses`,
     `POST /contacts/organization/{contacts-id}/addresses`,
@@ -63,6 +65,14 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
     )
   )
 
+  lazy val `POST /contacts/individual/empty` = (
+    RouteDefinitions.`POST /contacts/individual/empty`,
+    List(
+      """case request @ POST -> Root / "contacts" / "individual" / "empty" =>""",
+      """  errorHandler.resolve(impl.`POST /contacts/individual/empty`(request), (x: IndividualContact) => EntityGenerator(200)(x.asJson))"""
+    )
+  )
+
   lazy val `GET /contacts/individual/{contacts-id}` = (
     RouteDefinitions.`GET /contacts/individual/{contacts-id}`,
     List(
@@ -84,6 +94,14 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
     List(
       """case request @ PUT -> Root / "contacts" / "individual" / contactsId =>""",
       "  errorHandler.resolve(request.as[IndividualContact].flatMap(impl.`PUT /contacts/individual/{contacts-id}`(contactsId, _)(request)), (x: IndividualContact) => EntityGenerator(200)(x.asJson))"
+    )
+  )
+
+  lazy val `PUT /contacts/individual/empty/{contacts-id}` = (
+    RouteDefinitions.`PUT /contacts/individual/empty/{contacts-id}`,
+    List(
+      """case request @ PUT -> Root / "contacts" / "individual" / "empty" / contactsId =>""",
+      "  errorHandler.resolve(impl.`PUT /contacts/individual/empty/{contacts-id}`(contactsId)(request), (x: IndividualContact) => EntityGenerator(200)(x.asJson))"
     )
   )
 
