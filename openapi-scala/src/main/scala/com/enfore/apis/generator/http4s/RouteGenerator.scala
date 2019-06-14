@@ -29,7 +29,7 @@ object RouteGenerator {
 
   /**
     * Get the list decoder matcher if there is any query parameter with list / array type.
-    * Array querry string is assumed to be split with comma, i.e. ?q=a,b,c,d
+    * Array query string is assumed to be split with comma, i.e. ?q=a,b,c,d
     */
   def listDecoder(routes: List[RouteDefinition], indentationLevel: Int): List[String] = {
     val decoder =
@@ -41,13 +41,44 @@ object RouteGenerator {
          |          )""".stripMargin
         .split('\n')
         .toList
-        .map(_ + `\t` * indentationLevel)
 
     if (routes.exists(anyListQueryParameter)) {
-      decoder
+
+      val refDecoders =
+        routes
+          .flatMap(getEnumListQueryParameter)
+          .flatten
+          .flatMap(typeName => enumDecoder(typeName, indentationLevel))
+      if (refDecoders.nonEmpty) {
+        println("Generating http4s decoders for request references, assuming they all are enums")
+        val importLine = List("import org.http4s.QueryParamDecoder.fromUnsafeCast\n")
+        (importLine ++ refDecoders ++ decoder).map(`\t` * indentationLevel + _)
+      } else {
+        decoder.map(`\t` * indentationLevel + _)
+      }
     } else {
       Nil
     }
+  }
+
+  /**
+    *  Generating http4s decoders for request enumerations
+    *
+    * @param enumFullTypeName full enum name including package
+    * @param indentationLevel
+    *
+    * @return generated decoder string lines
+    */
+  def enumDecoder(enumFullTypeName: String, indentationLevel: Int): List[String] = {
+    val typeNameLowerCase = enumFullTypeName.toLowerCase
+      .split("\\.")
+      .last
+    s"""implicit lazy val ${typeNameLowerCase}QueryParamDecoder: QueryParamDecoder[$enumFullTypeName] =
+          fromUnsafeCast[$enumFullTypeName](x => $enumFullTypeName.withName(x.value))("$enumFullTypeName enum")
+    """.stripMargin
+      .split('\n')
+      .toList
+      .map(_ + `\t` * indentationLevel)
   }
 
   /**
@@ -96,7 +127,7 @@ object RouteGenerator {
   private def getImplementationCall(route: RouteDefinition): String = {
     val requestDecoding = route match {
       case a: PutOrPostRequest =>
-        a.readOnlyTypeName.map(x => s"request.as[${x}]").getOrElse("")
+        a.readOnlyTypeName.map(x => s"request.as[$x]").getOrElse("")
       case _ => ""
     }
 
@@ -118,10 +149,20 @@ object RouteGenerator {
     getListQueryParams(_).values.toList.exists(listParameterType)
   }
 
+  private val getEnumListQueryParameter: RouteDefinition => List[Option[String]] = {
+    getListQueryParams(_).values.toList.map(enumListParameterType)
+  }
+
   private val getListQueryParams: RouteDefinition =/> Map[String, TypeRepr.Primitive] = {
     case GetRequest(_, _, queries, _, _)                => queries
     case PutOrPostRequest(_, _, _, queries, _, _, _, _) => queries
     case _: DeleteRequest                               => Map.empty
+  }
+
+  private val enumListParameterType: TypeRepr.Primitive =/> Option[String] = {
+    case PrimitiveArray(ref: Ref, _)                     => Some(ref.path + "." + ref.typeName)
+    case PrimitiveOption(PrimitiveArray(ref: Ref, _), _) => Some(ref.path + "." + ref.typeName)
+    case _: Any                                          => None
   }
 
   private val listParameterType: TypeRepr.Primitive =/> Boolean = {

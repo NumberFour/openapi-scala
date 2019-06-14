@@ -83,8 +83,9 @@ class AstTranslationSpec extends FlatSpec with Matchers {
     val ast = parser.parse(yamlCode).flatMap(_.as[CoreASTRepr])
     ast.left.map(println) // For debugging the failing tests
     ast.map { representation =>
-      val componentsMap = ASTTranslationFunctions.readComponentsToInterop(representation)(PackageName("foo"))
-      val routesMap     = ASTTranslationFunctions.readRoutesToInerop(representation)
+      implicit val packageName = PackageName("foo")
+      val componentsMap        = ASTTranslationFunctions.readComponentsToInterop(representation)(packageName)
+      val routesMap            = ASTTranslationFunctions.readRoutesToInerop(representation)
       assert(
         componentsMap == Map(
           "Money" -> TypeRepr.NewTypeSymbol(

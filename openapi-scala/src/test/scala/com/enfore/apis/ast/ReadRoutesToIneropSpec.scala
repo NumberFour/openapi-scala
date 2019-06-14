@@ -1,5 +1,6 @@
 package com.enfore.apis.ast
 
+import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
 import com.enfore.apis.ast.SwaggerAST.{
   ComponentsObject,
   CoreASTRepr,
@@ -60,7 +61,7 @@ class ReadRoutesToIneropSpec extends FlatSpec with Matchers {
         )
     )
 
-    val actual = ASTTranslationFunctions.readRoutesToInerop(ast)
+    val actual = ASTTranslationFunctions.readRoutesToInerop(ast)(PackageName("foo"))
 
     normalise(actual) should equal(normalise(expected))
   }

@@ -52,7 +52,8 @@ object ASTTranslationFunctions {
   private def extractPathParameters(parameters: List[SwaggerAST.ParameterObject]): List[PathParameter] =
     parameters.filter(_.in == ParameterLocation.path).map(x => PathParameter(x.name))
 
-  private def extractQueryParameters(parameters: List[SwaggerAST.ParameterObject]): Map[String, Primitive] =
+  private def extractQueryParameters(parameters: List[SwaggerAST.ParameterObject])(
+      implicit packageName: PackageName): Map[String, Primitive] =
     parameters
       .filter(_.in == ParameterLocation.query)
       .map((y: ParameterObject) =>
@@ -61,7 +62,8 @@ object ASTTranslationFunctions {
             case a: SchemaObject =>
               val isRequired: Boolean = y.required.getOrElse(false)
               // TODO: META-6088 Add support for refinements here
-              val value: Primitive = buildPrimitiveFromSchemaObjectType(refinements = None)(a.`type`.get).get
+              val value: Primitive =
+                buildPrimitiveFromSchemaObjectType(refinements = None, a.items)(packageName)(a.`type`.get).get
               if (!isRequired) {
                 PrimitiveOption(value, None)
               } else {
@@ -75,7 +77,7 @@ object ASTTranslationFunctions {
 
   private def routeDefFromSwaggerAST(path: String)(route: OperationObject, requestType: RequestType)(
       components: Map[String, SchemaObject]
-  ): RouteDefinition = {
+  )(implicit packageName: PackageName): RouteDefinition = {
     val parameters                          = route.parameters.getOrElse(List.empty[ParameterObject])
     val pathParameters: List[PathParameter] = extractPathParameters(parameters)
     val queryParams: Map[String, Primitive] = extractQueryParameters(parameters)
@@ -128,7 +130,7 @@ object ASTTranslationFunctions {
 
   private def readToRoutes(paths: Map[String, Map[String, OperationObject]])(
       components: Map[String, SchemaObject]
-  ): List[RouteDefinition] =
+  )(implicit packageName: PackageName): List[RouteDefinition] =
     paths.flatMap {
       case (path: String, routes: Map[String, OperationObject]) =>
         val put: Option[RouteDefinition] =
@@ -157,23 +159,31 @@ object ASTTranslationFunctions {
   )(
       implicit packageName: PackageName
   ): SchemaObjectType => Option[TypeRepr] = {
-    case schemaObject @ SchemaObjectType.`object` => {
-      println(s"Ignoring inline object: ${schemaObject}")
+    case schemaObject @ SchemaObjectType.`object` =>
+      println(s"Ignoring inline object: $schemaObject")
       None
-    }
     case SchemaObjectType.array =>
       assert(items.isDefined, "A parameter type for an array is not defined")
       loadSingleProperty(items.get).map(PrimitiveArray(_, refinements))
-    case x => buildPrimitiveFromSchemaObjectType(refinements)(x)
+    case x => buildPrimitiveFromSchemaObjectType(refinements)(packageName)(x)
   }
 
   private def buildPrimitiveFromSchemaObjectType(
-      refinements: Option[List[TypeRepr.RefinedTags]]
-  ): SchemaObjectType => Option[Primitive] = {
+      refinements: Option[List[TypeRepr.RefinedTags]],
+      items: Option[SchemaOrReferenceObject] = None
+  )(implicit packageName: PackageName): SchemaObjectType => Option[Primitive] = {
     case SchemaObjectType.string    => Some(PrimitiveString(refinements))
     case SchemaObjectType.boolean   => Some(PrimitiveBoolean(refinements))
     case SchemaObjectType.number    => Some(PrimitiveNumber(refinements))
     case SchemaObjectType.`integer` => Some(PrimitiveInt(refinements))
+    case SchemaObjectType.`array` =>
+      val someType: Option[TypeRepr] = items.flatMap {
+        case so: SchemaObject =>
+          so.`type`.flatMap(sot => buildPrimitiveFromSchemaObjectType(refinements)(packageName)(sot))
+        case ro: ReferenceObject =>
+          loadSingleProperty(ro)
+      }
+      Some(PrimitiveArray(someType.get, None))
     case x => {
       println(s"Ignoring '$x' which is not supported in buildPrimitiveFromSchemaObjectType")
       None
@@ -288,7 +298,7 @@ object ASTTranslationFunctions {
         case (key, value) => cleanFilename(key) -> PathItemAggregation(key, value)
       }
 
-  def readRoutesToInerop(ast: CoreASTRepr): Map[String, PathItemAggregation] =
+  def readRoutesToInerop(ast: CoreASTRepr)(implicit packageName: PackageName): Map[String, PathItemAggregation] =
     ast.paths.map(p => aggregateRoutes(readToRoutes(p)(ast.components.schemas))).getOrElse(Map.empty)
 
 }
