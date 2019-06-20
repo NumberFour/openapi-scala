@@ -2,7 +2,6 @@ package com.enfore.apis.generator
 
 import cats.data.NonEmptyList
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
-import com.enfore.apis.repr.TypeRepr
 import com.enfore.apis.repr.TypeRepr._
 import com.enfore.apis.repr._
 import simulacrum._
@@ -253,7 +252,7 @@ object ScalaGenerator {
         }
     }.toList
 
-  private def paramsMaker(queries: Map[String, Primitive], pathParams: List[String], reqType: Option[Ref])(
+  private def paramsMaker(queries: Map[String, Primitive], pathParams: List[String], reqType: Option[TypeRepr])(
       implicit p: PackageName
   ): String = {
     val querySyntax: Option[String] = NonEmptyList
@@ -263,7 +262,10 @@ object ScalaGenerator {
       .map(_.toList.mkString(", "))
     val pathParamsSyntax: Option[String] =
       NonEmptyList.fromList(pathParams.map(param => s"$param: String")).map(_.toList.mkString(", "))
-    val reqSyntax: Option[String] = reqType.map(request => s"request: ${resolveRef(request)(p)}")
+    val reqSyntax: Option[String] = reqType.map {
+      case request @ Ref(_, _) => s"request: ${resolveRef(request)(p)}"
+      case x                   => s"request: ${x.typeName}"
+    }
     List(querySyntax, pathParamsSyntax, reqSyntax).flatten
       .mkString(", ")
   }
@@ -309,7 +311,7 @@ object ScalaGenerator {
       reqType: ReqWithContentType,
       pathParams: List[PathParameter],
       queries: Map[String, Primitive],
-      request: Option[Ref],
+      request: Option[TypeRepr],
       response: Option[Map[String, Ref]]
   )(implicit p: PackageName): String = {
     val cleanEncodingReferences: Option[Map[String, Ref]] = response.map(_.map {

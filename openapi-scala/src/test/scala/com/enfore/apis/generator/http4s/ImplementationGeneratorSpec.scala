@@ -35,7 +35,8 @@ class ImplementationGeneratorSpec extends FreeSpec with Matchers {
     `DELETE /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2`,
     `GET /contacts/individual?optional-list1&optional-list2`,
     `POST /contacts/individual?optionaoListl1&optional-list2`,
-    `GET /contacts/individual/funny.,argument/type/?other:@funny&trait`
+    `GET /contacts/individual/funny.,argument/type/?other:@funny&trait`,
+    `POST /contacts/single`
   )
 
   lazy val `GET /contacts/individual` = (
@@ -153,5 +154,10 @@ class ImplementationGeneratorSpec extends FreeSpec with Matchers {
   lazy val `GET /contacts/individual/funny.,argument/type/?other:@funny&trait` = (
     RouteDefinitions.`GET /contacts/individual/funny.,argument/type/?other:@funny&trait`,
     """def `GET /contacts/individual/{funny.,argument}/{type}`(`funny.,argument`: String, `type`: String, `other:@funny`: String, `trait`: String)(implicit request: Request[F]): F[IndividualContact]"""
+  )
+
+  lazy val `POST /contacts/single` = (
+    RouteDefinitions.`POST /contacts/single`,
+    """def `POST /contacts/single`(body: String)(implicit request: Request[F]): F[IndividualContact]"""
   )
 }

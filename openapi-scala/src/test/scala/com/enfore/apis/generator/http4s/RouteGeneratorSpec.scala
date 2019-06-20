@@ -38,7 +38,8 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
     `DELETE /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2`,
     `GET /contacts/individual?optional-list1&optional-list2`,
     `POST /contacts/individual?optionaoListl1&optional-list2`,
-    `GET /contacts/individual/funny.,argument/type/?other:@funny&trait`
+    `GET /contacts/individual/funny.,argument/type/?other:@funny&trait`,
+    `POST /contacts/single`
   )
 
   lazy val `GET /contacts/individual` = (
@@ -254,6 +255,14 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
     List(
       """case request @ GET -> Root / "contacts" / "individual" / funny_Argument / typeParameter :? `other:@funny String Matcher`(other_Funny) +& `trait String Matcher`(traitParameter) =>""",
       "  errorHandler.resolve(impl.`GET /contacts/individual/{funny.,argument}/{type}`(funny_Argument, typeParameter, other_Funny, traitParameter)(request), (x: IndividualContact) => EntityGenerator(200)(x.asJson))"
+    )
+  )
+
+  lazy val `POST /contacts/single` = (
+    RouteDefinitions.`POST /contacts/single`,
+    List(
+      """case request @ POST -> Root / "contacts" / "single" =>""",
+      """  errorHandler.resolve(request.as[String].flatMap(impl.`POST /contacts/single`(_)(request)), (x: IndividualContact) => EntityGenerator(200)(x.asJson))"""
     )
   )
 }

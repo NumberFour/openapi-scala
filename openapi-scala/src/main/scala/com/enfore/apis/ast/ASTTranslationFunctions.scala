@@ -21,6 +21,10 @@ object ASTTranslationFunctions {
 
   // Functions for translating routes
 
+  private def extractMediaTypeObject(schemaObject: MediaTypeObject)(
+      implicit packageName: PackageName): Option[TypeRepr] =
+    schemaObject.schema.flatMap { loadSingleProperty }
+
   private def extractRefOfMediaTypeObject(schemaObject: MediaTypeObject): Option[Ref] =
     schemaObject.schema
       .flatMap {
@@ -29,8 +33,8 @@ object ASTTranslationFunctions {
       }
       .map(x => Ref(x, x.split("/").last))
 
-  private def getEncodings(media: RequestBodyObject): List[Ref] =
-    media.content.values.toList.map { extractRefOfMediaTypeObject }.sequence.toList.flatten
+  private def getBodyEncodings(media: RequestBodyObject)(implicit packageName: PackageName): List[TypeRepr] =
+    media.content.values.toList.map { extractMediaTypeObject }.sequence.toList.flatten
 
   private def getEncodedMap(media: ResponseObject): Map[String, Ref] =
     mapValues(
@@ -81,33 +85,38 @@ object ASTTranslationFunctions {
     val parameters                          = route.parameters.getOrElse(List.empty[ParameterObject])
     val pathParameters: List[PathParameter] = extractPathParameters(parameters)
     val queryParams: Map[String, Primitive] = extractQueryParameters(parameters)
-    val possibleBodies: List[Ref]           = route.requestBody.toList.flatMap(getEncodings)
+    val possibleBodies: List[TypeRepr]      = route.requestBody.toList.flatMap(getBodyEncodings)
     val possibleResponse: Option[(Int, Map[String, Ref])] =
       getNameContentEncoding(route.responses, x => x >= 200 && x < 300)
     assert(possibleResponse.nonEmpty, "There has to be one successful (>=200 and <300) return code")
     requestType match {
       case RequestType.POST | RequestType.PUT =>
-        val correspondingComponent: Option[SchemaObject] = possibleBodies.headOption.map { body =>
-          val cc = components
-            .find {
-              case (key: String, _: SchemaObject) =>
-                key == body.typeName
-            }
-            .map(_._2)
-          assert(
-            cc.nonEmpty,
-            s"The component referenced in $path $requestType (${possibleBodies.head.typeName}) is not found in components"
-          )
-          cc.get
+        val bodyOption: Option[TypeRepr] = possibleBodies.headOption
+
+        val hasReadOnlyTypeValue = bodyOption.flatMap { body =>
+          if (body.isInstanceOf[Primitive]) Some(false)
+          else {
+            val cc: Option[SchemaObject] = components
+              .find {
+                case (key: String, _: SchemaObject) =>
+                  key == body.typeName
+              }
+              .map(_._2)
+            assert(
+              cc.nonEmpty,
+              s"The component referenced in $path $requestType (${body.typeName}) is not found in components"
+            )
+            cc.map(hasReadOnlyComponent)
+          }
         }
         PutOrPostRequest(
           path = path,
           `type` = translateReqContentType(requestType),
           pathParams = pathParameters,
           queries = queryParams,
-          request = possibleBodies.headOption,
+          request = bodyOption,
           response = possibleResponse.map(_._2),
-          hasReadOnlyType = correspondingComponent.map(hasReadOnlyComponent),
+          hasReadOnlyType = hasReadOnlyTypeValue,
           successStatusCode = possibleResponse.get._1
         )
       case RequestType.GET =>

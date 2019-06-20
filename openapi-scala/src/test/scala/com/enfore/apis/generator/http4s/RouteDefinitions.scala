@@ -42,6 +42,17 @@ object RouteDefinitions {
     200
   )
 
+  lazy val `POST /contacts/single` = PutOrPostRequest(
+    "/contacts/single",
+    POST,
+    List.empty,
+    Map.empty,
+    Some(TypeRepr.PrimitiveString(Some(List()))),
+    Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    Some(false),
+    200
+  )
+
   lazy val `POST /contacts/individual/empty` = PutOrPostRequest(
     "/contacts/individual/empty",
     POST,

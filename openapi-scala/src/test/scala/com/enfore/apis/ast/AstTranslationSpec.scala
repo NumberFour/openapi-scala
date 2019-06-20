@@ -30,8 +30,9 @@ class AstTranslationSpec extends FlatSpec with Matchers {
       Decoder[SchemaObject].widen
     ).reduceLeft(_ or _)
 
-  val yamlCode: String =
-    """
+  "SwaggerAST" should "be translated properly to the routes" in {
+    val yamlCode: String =
+      """
       |paths:
       |  '/products':
       |    post:
@@ -79,7 +80,6 @@ class AstTranslationSpec extends FlatSpec with Matchers {
       |        - unit
     """.stripMargin
 
-  "SwaggerAST" should "be translated properly to the routes" in {
     val ast = parser.parse(yamlCode).flatMap(_.as[CoreASTRepr])
     ast.left.map(println) // For debugging the failing tests
     ast.map { representation =>
@@ -112,10 +112,94 @@ class AstTranslationSpec extends FlatSpec with Matchers {
                 pathParams = List(),
                 queries = Map("limit" -> PrimitiveOption(PrimitiveInt(None), None)),
 //                queries = Map("limit" -> PrimitiveOption(PrimitiveInt(Some(List(Minimum(1), Maximum(5000)))), None)),
-                request = Some(Ref("#/components/schemas/Money", "Money")),
+                request = Some(Ref("foo", "Money")),
                 response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money"))),
                 hasReadOnlyType = Some(false),
                 successStatusCode = 201
+              ))
+          )
+      )
+    }
+
+    ast.isRight shouldBe true
+  }
+
+  "SwaggerAST" should "be translated properly for POST requests with simple string body" in {
+    val yamlCode: String =
+      """
+      |paths:
+      |  '/products':
+      |    post:
+      |      summary: Add a existing product to something
+      |      requestBody:
+      |        required: true
+      |        content:
+      |          application/text:
+      |            schema:
+      |              type: string
+      |      responses:
+      |        200:
+      |          description: Product has successfully been added
+      |          content:
+      |            application/json:
+      |              schema:
+      |                $ref: '#/components/schemas/Money'
+      |      tags:
+      |        - products
+      |components:
+      |  schemas:
+      |    Money:
+      |      description: A Money represents a monetary value (i.e., a currency and an amount), for example "120 EUR" or "2,500.75 USD".
+      |      type: object
+      |      properties:
+      |        value:
+      |          description: |
+      |            The numerical value of the Money.
+      |            Must be in the range of -9,000,000,000,000 to 9,000,000,000,000 and may use up to 6 decimal digits.
+      |          type: number
+      |          multipleOf: 0.000001
+      |        unit:
+                  type: string
+      |      required:
+      |        - value
+      |        - unit
+    """.stripMargin
+
+    val ast = parser.parse(yamlCode).flatMap(_.as[CoreASTRepr])
+    ast.left.map(println) // For debugging the failing tests
+    ast.map { representation =>
+      implicit val packageName = PackageName("foo")
+      val componentsMap        = ASTTranslationFunctions.readComponentsToInterop(representation)(packageName)
+      val routesMap            = ASTTranslationFunctions.readRoutesToInerop(representation)
+      assert(
+        componentsMap == Map(
+          "Money" -> TypeRepr.NewTypeSymbol(
+            valName = "Money",
+            data = PrimitiveProduct(
+              packageName = "foo",
+              typeName = "Money",
+              values = List(
+                PrimitiveSymbol("value", PrimitiveNumber(Some(List()))),
+                PrimitiveSymbol("unit", PrimitiveString(Some(List())))
+              )
+            )
+          )
+        )
+      )
+      assert(
+        routesMap("_products") ==
+          PathItemAggregation(
+            path = "/products",
+            items = List(
+              PutOrPostRequest(
+                path = "/products",
+                `type` = POST,
+                pathParams = List(),
+                queries = Map.empty,
+                request = Some(PrimitiveString(Some(List()))),
+                response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money"))),
+                hasReadOnlyType = Some(false),
+                successStatusCode = 200
               ))
           )
       )

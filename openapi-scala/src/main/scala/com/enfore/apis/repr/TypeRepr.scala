@@ -2,7 +2,9 @@ package com.enfore.apis.repr
 
 import com.enfore.apis.generator.ShowTypeTag
 
-sealed trait TypeRepr
+sealed trait TypeRepr {
+  val typeName: String
+}
 
 object TypeRepr {
 
@@ -14,13 +16,25 @@ object TypeRepr {
   final case class PrimitiveIntValue(value: Int)         extends PrimitiveValue
   final case class PrimitiveBooleanValue(value: Boolean) extends PrimitiveValue
 
-  sealed trait Primitive                                                                      extends TypeRepr
-  final case class PrimitiveString(refinements: Option[List[RefinedTags]])                    extends Primitive
-  final case class PrimitiveNumber(refinements: Option[List[RefinedTags]])                    extends Primitive
-  final case class PrimitiveInt(refinements: Option[List[RefinedTags]])                       extends Primitive
-  final case class PrimitiveBoolean(refinements: Option[List[RefinedTags]])                   extends Primitive
-  final case class PrimitiveArray(dataType: TypeRepr, refinements: Option[List[RefinedTags]]) extends Primitive
-  final case class PrimitiveOption(dataType: TypeRepr, defaultValue: Option[PrimitiveValue])  extends Primitive
+  sealed trait Primitive extends TypeRepr
+  final case class PrimitiveString(refinements: Option[List[RefinedTags]]) extends Primitive {
+    override val typeName: String = "String"
+  }
+  final case class PrimitiveNumber(refinements: Option[List[RefinedTags]]) extends Primitive {
+    override val typeName: String = "Double"
+  }
+  final case class PrimitiveInt(refinements: Option[List[RefinedTags]]) extends Primitive {
+    override val typeName: String = "Int"
+  }
+  final case class PrimitiveBoolean(refinements: Option[List[RefinedTags]]) extends Primitive {
+    override val typeName: String = "Boolean"
+  }
+  final case class PrimitiveArray(dataType: TypeRepr, refinements: Option[List[RefinedTags]]) extends Primitive {
+    override val typeName: String = s"Array[${dataType.typeName}]"
+  }
+  final case class PrimitiveOption(dataType: TypeRepr, defaultValue: Option[PrimitiveValue]) extends Primitive {
+    override val typeName: String = s"Option[${dataType.typeName}]"
+  }
 
   sealed trait RefinedTags
   sealed trait CollectionRefinements      extends RefinedTags

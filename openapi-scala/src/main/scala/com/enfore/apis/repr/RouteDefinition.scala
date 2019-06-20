@@ -37,7 +37,7 @@ final case class PutOrPostRequest(
     `type`: ReqWithContentType,
     pathParams: List[PathParameter],
     queries: Map[String, Primitive],
-    request: Option[Ref],
+    request: Option[TypeRepr],
     response: Option[Map[String, Ref]],
     hasReadOnlyType: Option[Boolean],
     successStatusCode: Int
