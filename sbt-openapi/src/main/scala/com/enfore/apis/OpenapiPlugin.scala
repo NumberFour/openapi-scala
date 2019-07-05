@@ -17,6 +17,8 @@ object OpenapiPlugin extends AutoPlugin {
     sourceDir.listFiles.flatMap { sourceFile =>
       Main
         .generateScala(sourceFile.getAbsolutePath, packageName, routesImplementations)
+        .left
+        .map(err => println(s"Error while converting: $err"))
         .right
         .get
         .map {

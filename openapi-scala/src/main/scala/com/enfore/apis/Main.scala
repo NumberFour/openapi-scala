@@ -22,8 +22,11 @@ object Main {
     ).reduceLeft(_ or _)
 
   def loadRepresentationFromFile(filename: String): Either[circe.Error, CoreASTRepr] = {
-    val file    = Source.fromFile(filename)
-    val content = file.getLines.mkString("\n")
+    val file = Source.fromFile(filename)
+    val content = file.getLines
+    // God bless you. i.e., if you believe in God. If not, well...
+      .map(line => if (line == "      - NO") "      - \"NO\"" else line)
+      .mkString("\n")
     file.close()
     parser
       .parse(content)
