@@ -41,6 +41,8 @@ class ErrorHandlerImplementation(convertThrowableToServiceExceptionFn: Throwable
     deriveEncoder[PermissionRequired](renaming.snakeCase)
   implicit val encoderWrongRequestContent: Encoder[WrongRequestContent] =
     deriveEncoder[WrongRequestContent](renaming.snakeCase)
+  implicit val encoderUnprocessableContent: Encoder[UnprocessableContent] =
+    deriveEncoder[UnprocessableContent](renaming.snakeCase)
 
   private def mapServiceErrorsFn(err: ServiceException): IO[Response[IO]] = {
     logger.error("Error in request", err)
@@ -57,6 +59,8 @@ class ErrorHandlerImplementation(convertThrowableToServiceExceptionFn: Throwable
         Forbidden(e.asJson)
       case e: WrongRequestContent =>
         BadRequest(e.asJson)
+      case e: UnprocessableContent =>
+        UnprocessableEntity(e.asJson)
     }
   }
 

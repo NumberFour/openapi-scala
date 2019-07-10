@@ -49,3 +49,10 @@ final case class WrongRequestContent(
     detail: String,
     onResource: Option[String]
 ) extends ServiceException
+
+final case class UnprocessableContent(
+    `type`: String,
+    title: String = "Specified data is semantically incorrect.",
+    detail: String,
+    onResource: Option[String]
+) extends ServiceException
