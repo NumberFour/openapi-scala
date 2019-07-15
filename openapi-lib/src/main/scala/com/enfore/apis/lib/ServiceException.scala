@@ -6,6 +6,8 @@ sealed trait ServiceException extends RuntimeException {
   val title: String
   val detail: String
   val onResource: Option[String]
+
+  override def getMessage: String = s"type: ${`type`} title: $title, detail: $detail, onResource: $onResource,"
 }
 
 final case class ServiceError(
