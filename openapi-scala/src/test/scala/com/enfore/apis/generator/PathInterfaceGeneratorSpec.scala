@@ -7,7 +7,7 @@ import org.scalatest._
 
 import scala.meta._
 
-class PathsTypeReprSpec extends FlatSpec with Matchers {
+class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
 
   implicit val packageName: PackageName = PackageName("com.enfore.apis")
 
@@ -36,7 +36,7 @@ class PathsTypeReprSpec extends FlatSpec with Matchers {
         |}
       """.stripMargin.parse[Source]
 
-    val generated = ScalaGenerator.routeDefGen.generateScala(request).parse[Source].get
+    val generated = PathInterfaceGenerator.routeDefGen.generateScala(request).parse[Source].get
     generated.structure shouldBe expected.get.structure
   }
 
@@ -68,7 +68,7 @@ class PathsTypeReprSpec extends FlatSpec with Matchers {
         |}
       """.stripMargin.parse[Source]
 
-    val generated = ScalaGenerator.routeDefGen.generateScala(request)
+    val generated = PathInterfaceGenerator.routeDefGen.generateScala(request)
     generated.parse[Source].get.structure shouldBe expected.get.structure
   }
 
@@ -95,7 +95,7 @@ class PathsTypeReprSpec extends FlatSpec with Matchers {
         |}
       """.stripMargin.trim.parse[Source]
 
-    val generated = ScalaGenerator.routeDefGen.generateScala(request)
+    val generated = PathInterfaceGenerator.routeDefGen.generateScala(request)
     generated.parse[Source].get.structure shouldBe expected.get.structure
   }
 
@@ -119,7 +119,7 @@ class PathsTypeReprSpec extends FlatSpec with Matchers {
       |}
     """.stripMargin.parse[Source]
 
-    val generated = ScalaGenerator.routeDefGen.generateScala(request)
+    val generated = PathInterfaceGenerator.routeDefGen.generateScala(request)
     generated.parse[Source].get.structure shouldBe expected.get.structure
   }
 

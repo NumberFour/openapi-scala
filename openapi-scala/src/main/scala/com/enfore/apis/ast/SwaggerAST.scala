@@ -41,15 +41,15 @@ object SwaggerAST {
       items: Option[SchemaOrReferenceObject] = None, // Only present when schema object is an array
       enum: Option[List[String]] = None,
       required: Option[List[String]] = None,
-      readOnly: Option[Boolean] = None, // Points out whether a property is readOnly (defaults to false)
-      minLength: Option[Int] = None, // Optional refinement
-      maxLength: Option[Int] = None, // Optional refinement
-      maxItems: Option[Int] = None, // Optional refinement
-      minItems: Option[Int] = None, // Optional refinement
+      readOnly: Option[Boolean] = None,  // Points out whether a property is readOnly (defaults to false)
+      minLength: Option[Int] = None,     // Optional refinement
+      maxLength: Option[Int] = None,     // Optional refinement
+      maxItems: Option[Int] = None,      // Optional refinement
+      minItems: Option[Int] = None,      // Optional refinement
       maxProperties: Option[Int] = None, // Optional refinement
       minProperties: Option[Int] = None, // Optional refinement
-      maximum: Option[Int] = None, // Optional refinement
-      minimum: Option[Int] = None // Optional refinement
+      maximum: Option[Int] = None,       // Optional refinement
+      minimum: Option[Int] = None        // Optional refinement
   ) extends SchemaOrReferenceObject
 
   // --- Types for Routes ---

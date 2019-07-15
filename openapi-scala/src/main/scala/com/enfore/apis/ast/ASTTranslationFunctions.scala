@@ -21,8 +21,9 @@ object ASTTranslationFunctions {
 
   // Functions for translating routes
 
-  private def extractMediaTypeObject(schemaObject: MediaTypeObject)(
-      implicit packageName: PackageName): Option[TypeRepr] =
+  private def extractMediaTypeObject(
+      schemaObject: MediaTypeObject
+  )(implicit packageName: PackageName): Option[TypeRepr] =
     schemaObject.schema.flatMap { loadSingleProperty }
 
   private def extractRefOfMediaTypeObject(schemaObject: MediaTypeObject): Option[Ref] =
@@ -56,28 +57,47 @@ object ASTTranslationFunctions {
   private def extractPathParameters(parameters: List[SwaggerAST.ParameterObject]): List[PathParameter] =
     parameters.filter(_.in == ParameterLocation.path).map(x => PathParameter(x.name))
 
-  private def extractQueryParameters(parameters: List[SwaggerAST.ParameterObject])(
-      implicit packageName: PackageName): Map[String, Primitive] =
+  private def extractQueryParameters(
+      parameters: List[SwaggerAST.ParameterObject]
+  )(implicit packageName: PackageName): Map[String, Primitive] =
     parameters
       .filter(_.in == ParameterLocation.query)
-      .map((y: ParameterObject) =>
-        y.name -> {
-          y.schema.get match {
-            case a: SchemaObject =>
-              val isRequired: Boolean = y.required.getOrElse(false)
-              // TODO: META-6088 Add support for refinements here
-              val value: Primitive =
-                buildPrimitiveFromSchemaObjectType(refinements = None, a.items)(packageName)(a.`type`.get).get
-              if (!isRequired) {
-                PrimitiveOption(value, None)
-              } else {
-                value
-              }
-            case ReferenceObject(_) =>
-              throw new NotImplementedError("ReferenceObjects in query parameters are not supported.")
-          }
-      })
+      .map(
+        (y: ParameterObject) =>
+          y.name -> {
+            y.schema.get match {
+              case a: SchemaObject =>
+                val isRequired: Boolean = y.required.getOrElse(false)
+                // TODO: META-6088 Add support for refinements here
+                val value: Primitive =
+                  buildPrimitiveFromSchemaObjectType(refinements = None, a.items)(packageName)(a.`type`.get).get
+                if (!isRequired) {
+                  PrimitiveOption(value, None)
+                } else {
+                  value
+                }
+              case ReferenceObject(_) =>
+                throw new NotImplementedError("ReferenceObjects in query parameters are not supported.")
+            }
+        }
+      )
       .toMap
+
+  private def findRefInComponents(
+      components: Map[String, SchemaObject],
+      typeName: String,
+      context: String = ""): SchemaObject =
+    components
+      .collectFirst { case (key: String, schemaObject: SchemaObject) if key == typeName => schemaObject }
+      .getOrElse(
+        throw new Exception(s"The component $typeName is not found in components ($context)")
+      )
+
+  private def hasReadOnlyType(context: String, components: Map[String, SchemaObject]): TypeRepr => Boolean = {
+    case _: Primitive => false
+    case body: TypeRepr =>
+      schemaObjectHasReadOnlyComponent(components)(findRefInComponents(components, body.typeName, context))
+  }
 
   private def routeDefFromSwaggerAST(path: String)(route: OperationObject, requestType: RequestType)(
       components: Map[String, SchemaObject]
@@ -91,32 +111,16 @@ object ASTTranslationFunctions {
     assert(possibleResponse.nonEmpty, "There has to be one successful (>=200 and <300) return code")
     requestType match {
       case RequestType.POST | RequestType.PUT =>
-        val bodyOption: Option[TypeRepr] = possibleBodies.headOption
-
-        val hasReadOnlyTypeValue = bodyOption.flatMap { body =>
-          if (body.isInstanceOf[Primitive]) Some(false)
-          else {
-            val cc: Option[SchemaObject] = components
-              .find {
-                case (key: String, _: SchemaObject) =>
-                  key == body.typeName
-              }
-              .map(_._2)
-            assert(
-              cc.nonEmpty,
-              s"The component referenced in $path $requestType (${body.typeName}) is not found in components"
-            )
-            cc.map(hasReadOnlyComponent)
-          }
-        }
         PutOrPostRequest(
           path = path,
           `type` = translateReqContentType(requestType),
           pathParams = pathParameters,
           queries = queryParams,
-          request = bodyOption,
+          request = possibleBodies.headOption,
           response = possibleResponse.map(_._2),
-          hasReadOnlyType = hasReadOnlyTypeValue,
+          hasReadOnlyType = possibleBodies.headOption.map(
+            hasReadOnlyType(s"referenced in $path $requestType", components)
+          ),
           successStatusCode = possibleResponse.get._1
         )
       case RequestType.GET =>
@@ -199,8 +203,9 @@ object ASTTranslationFunctions {
     }
   }
 
-  private def loadSingleProperty(property: SchemaOrReferenceObject)(
-      implicit packageName: PackageName): Option[TypeRepr] =
+  private def loadSingleProperty(
+      property: SchemaOrReferenceObject
+  )(implicit packageName: PackageName): Option[TypeRepr] =
     property match {
       case so: SchemaObject =>
         val refinements: Option[List[CollectionRefinements]] =
@@ -224,7 +229,8 @@ object ASTTranslationFunctions {
   private def loadObjectProperties(
       typeName: String,
       properties: Map[String, SchemaOrReferenceObject],
-      required: List[String])(
+      required: List[String]
+  )(
       implicit packageName: PackageName
   ): Option[NewType] = {
     val mapped: immutable.Iterable[Option[Symbol]] = properties.mapValues(loadSingleProperty) map {
@@ -240,7 +246,8 @@ object ASTTranslationFunctions {
     PrimitiveEnum(packageName.name, typeName, values.toSet)
 
   private def evalSchema(name: String, schemaObject: SchemaObject)(
-      implicit packageName: PackageName): Option[Symbol] = {
+      implicit packageName: PackageName
+  ): Option[Symbol] = {
     val required = schemaObject.required.getOrElse(List.empty[String])
     val newType: Option[NewType] = schemaObject.`type`.get match {
       case SchemaObjectType.`object`  => schemaObject.properties.flatMap(loadObjectProperties(name, _, required))
@@ -259,30 +266,52 @@ object ASTTranslationFunctions {
     newType.map(NewTypeSymbol(name, _))
   }
 
-  private def hasReadOnlyComponent(schemaObject: SchemaObject): Boolean =
-    schemaObject.properties.exists { _.values.exists { hasReadOnly } }
+  private def schemaObjectHasReadOnlyComponent(components: Map[String, SchemaObject])(
+      schemaOrReferenceObject: SchemaOrReferenceObject
+  ): Boolean = schemaOrReferenceObject match {
+    case so: SchemaObject =>
+      so.readOnly.getOrElse(
+        so.properties.exists { _.values.exists { schemaObjectHasReadOnlyComponent(components) } }
+      )
+    case ReferenceObject(ref) =>
+      schemaObjectHasReadOnlyComponent(components)(findRefInComponents(components, ref.split("/").last))
+  }
 
-  private def hasReadOnly: SchemaOrReferenceObject => Boolean = {
+  private def hasReadOnlyBase: SchemaOrReferenceObject => Boolean = {
     case so: SchemaObject   => so.readOnly.getOrElse(false)
     case ReferenceObject(_) => false
   }
 
+  private def enrichSublevelPropsWithRequest(
+      stringToObject: Map[String, SchemaOrReferenceObject]
+  )(components: Map[String, SchemaObject]): Map[String, SchemaOrReferenceObject] =
+    stringToObject
+      .map {
+        case (k, v: ReferenceObject) =>
+          if (schemaObjectHasReadOnlyComponent(components)(v)) {
+            (k, ReferenceObject(v.$ref + "Request"))
+          } else {
+            (k, v)
+          }
+        case z => z
+      }
+
   private[ast] def splitReadOnlyComponents(components: Map[String, SchemaObject]): Map[String, SchemaObject] = {
     val (hasReadOnlyProps: Map[String, SchemaObject], hasNoReadOnlyProps: Map[String, SchemaObject]) =
-      components.partition(x => hasReadOnlyComponent(x._2))
-    val withoutReadOnlyFields = hasReadOnlyProps.map {
+      components.partition(x => schemaObjectHasReadOnlyComponent(components)(x._2))
+    val withRequestPostfix = hasReadOnlyProps.map {
       case (typeName: String, sor: SchemaOrReferenceObject) =>
         s"${typeName}Request" -> sor.copy(
           properties = sor.properties.map(
             (x: Map[String, SchemaOrReferenceObject]) =>
-              x.filterNot {
+              enrichSublevelPropsWithRequest(x.filterNot {
                 case (_, v) =>
-                  hasReadOnly(v)
-            }
+                  hasReadOnlyBase(v)
+              })(components)
           )
         )
     }
-    hasNoReadOnlyProps ++ hasReadOnlyProps ++ withoutReadOnlyFields
+    hasNoReadOnlyProps ++ hasReadOnlyProps ++ withRequestPostfix
   }
 
   def readComponentsToInterop(ast: CoreASTRepr)(implicit packageName: PackageName): Map[String, Symbol] =

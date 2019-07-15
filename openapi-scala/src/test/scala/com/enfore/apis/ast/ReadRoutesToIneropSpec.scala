@@ -146,8 +146,11 @@ class ReadRoutesToIneropSpec extends FlatSpec with Matchers {
               403 -> ResponseObject("", None, None),
               404 -> ResponseObject("", None, None)
             ),
-            Some(List(
-              ParameterObject("contact-id", path, Some(ReferenceObject("")), Some("ID of the contact to load"), None)))
+            Some(
+              List(
+                ParameterObject("contact-id", path, Some(ReferenceObject("")), Some("ID of the contact to load"), None)
+              )
+            )
           ),
           "put" -> OperationObject(
             summary = Some("Full update of an IndividualContact"),
@@ -172,7 +175,8 @@ class ReadRoutesToIneropSpec extends FlatSpec with Matchers {
                       Some(ReferenceObject("#/components/schemas/IndividualContact"))
                     )
                   )
-                )),
+                )
+              ),
               400 -> ResponseObject("", None, None),
               403 -> ResponseObject("", None, None),
               404 -> ResponseObject("", None, None)
@@ -184,7 +188,9 @@ class ReadRoutesToIneropSpec extends FlatSpec with Matchers {
                   path,
                   Some(ReferenceObject("")),
                   Some("ID of the contact to update"),
-                  None))
+                  None
+                )
+              )
             )
           )
         )

@@ -23,7 +23,7 @@ object GenericImplementation extends RouteImplementation {
       routesMap: Map[FileName, PathItemAggregation],
       packageName: PackageName
   ): Map[FileName, ScalaSourceContent] = {
-    implicit val routesGenerator: ScalaGenerator[PathItemAggregation] = ScalaGenerator.pathInterfaceGen(packageName)
+    implicit val routesGenerator: ScalaGenerator[PathItemAggregation] = PathInterfaceGenerator(packageName)
     routesMap.mapValues(_.generateScala)
   }
 }

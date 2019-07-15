@@ -116,7 +116,8 @@ class AstTranslationSpec extends FlatSpec with Matchers {
                 response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money"))),
                 hasReadOnlyType = Some(false),
                 successStatusCode = 201
-              ))
+              )
+            )
           )
       )
     }
@@ -200,7 +201,8 @@ class AstTranslationSpec extends FlatSpec with Matchers {
                 response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money"))),
                 hasReadOnlyType = Some(false),
                 successStatusCode = 200
-              ))
+              )
+            )
           )
       )
     }

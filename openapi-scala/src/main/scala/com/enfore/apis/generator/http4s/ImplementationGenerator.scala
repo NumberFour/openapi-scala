@@ -1,12 +1,14 @@
 package com.enfore.apis.generator.http4s
 
-import com.enfore.apis.generator.ScalaGenerator.cleanScalaSymbol
 import com.enfore.apis.generator.ShowTypeTag._
 import com.enfore.apis.repr.ReqWithContentType.{POST, PUT}
 import com.enfore.apis.repr._
 import com.enfore.apis.repr.TypeRepr._
 
 object ImplementationGenerator {
+
+  import com.enfore.apis.generator.Utilities._
+
   private type ArgumentName = String
   private type ArgumentType = String
 
