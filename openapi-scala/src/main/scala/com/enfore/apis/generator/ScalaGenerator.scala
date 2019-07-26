@@ -59,11 +59,14 @@ object Utilities {
       m.group(1).toUpperCase()
     })
 
-  def cleanScalaSymbol(in: String): String = {
-    val containsIllegal = illegalScalaSymbols.foldLeft(false)((buf, value) => buf || in.contains(value))
-    if (forbiddenSymbols.contains(in) || containsIllegal) underscoreToCamel(s"`$in`")
-    else underscoreToCamel(in)
-  }
+  def containsIllegal(in: String): Boolean =
+    illegalScalaSymbols.foldLeft(false)((buf, value) => buf || in.contains(value))
+
+  def cleanScalaSymbol(in: String): String =
+    if (forbiddenSymbols.contains(in) || containsIllegal(in)) {
+      val newVal = hyphenAndUnderscoreToCamel(s"$in")
+      if (forbiddenSymbols.contains(newVal) || containsIllegal(newVal)) s"`$newVal`" else newVal
+    } else hyphenAndUnderscoreToCamel(in)
 
 }
 

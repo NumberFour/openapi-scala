@@ -14,6 +14,7 @@ class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
   "Paths TypeRepr Generator" should "be able to generate basic Get requests" in {
     val request = GetRequest(
       "/products",
+      Some("dummyFunction"),
       List(PathParameter("id")),
       Map.empty,
       Some(Map("application/json" -> TypeReprRef("#components/schemas/Product", "Product"))),
@@ -43,6 +44,7 @@ class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
   it should "be able to use the correct input/return type in post request" in {
     val request = PutOrPostRequest(
       "/products",
+      Some("dummyFunction"),
       ReqWithContentType.POST,
       List.empty,
       Map.empty,
@@ -75,6 +77,7 @@ class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
   it should "be able to deal with no return type for Post requests" in {
     val request = PutOrPostRequest(
       "/subscriptions",
+      Some("dummyFunction"),
       ReqWithContentType.POST,
       List.empty,
       Map.empty,
@@ -102,7 +105,8 @@ class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
   it should "be able to deal with no return type for Get requests" in {
     val request = GetRequest(
       "/subscriptions/{subscription-id}",
-      List(PathParameter("subscription-id")),
+      Some("dummyFunction"),
+      List(PathParameter("subscriptionId")),
       Map.empty,
       None,
       200
@@ -112,10 +116,12 @@ class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
       |trait Get[F[_]] extends GetRequest {
       | val path = "/subscriptions/{subscription-id}"
       | val queries = Map()
-      | val pathVariables = List("`subscription-id`")
+      | val pathVariables = List("subscriptionId")
       | 
       | type Response = Unit
-      | def impl(`subscription-id`: String): F[Response]
+      | def impl(subsc
+      |
+      | : String): F[Response]
       |}
     """.stripMargin.parse[Source]
 

@@ -46,7 +46,7 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
     RouteDefinitions.`GET /contacts/individual`,
     List(
       """case request @ GET -> Root / "contacts" / "individual" =>""",
-      """  errorHandler.resolve(impl.`GET /contacts/individual`(request), (x: IndividualContact) => EntityGenerator(200)(x.asJson))"""
+      """  errorHandler.resolve(impl.dummyFunction(request), (x: IndividualContact) => EntityGenerator(200)(x.asJson))"""
     )
   )
 

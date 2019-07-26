@@ -19,7 +19,7 @@ import com.enfore.apis.repr.TypeRepr.Ref
 import com.enfore.apis.repr.{GetRequest, PathItemAggregation, PathParameter, PutOrPostRequest}
 import org.scalatest.{FlatSpec, Matchers}
 
-class ReadRoutesToIneropSpec extends FlatSpec with Matchers {
+class ReadRoutesToInteropSpec extends FlatSpec with Matchers {
   "readRoutesToInerop" should "be able to read multiple methods per route" in {
     val expected = Map(
       "_contacts_individual_{contact-id}" ->
@@ -28,6 +28,7 @@ class ReadRoutesToIneropSpec extends FlatSpec with Matchers {
           List(
             GetRequest(
               "/contacts/individual/{contact-id}",
+              Some("dummyFunction"),
               List(PathParameter("contact-id")),
               Map(),
               Some(
@@ -42,6 +43,7 @@ class ReadRoutesToIneropSpec extends FlatSpec with Matchers {
             ),
             PutOrPostRequest(
               "/contacts/individual/{contact-id}",
+              Some("dummyFunction"),
               PUT,
               List(PathParameter("contact-id")),
               Map(),
@@ -61,7 +63,7 @@ class ReadRoutesToIneropSpec extends FlatSpec with Matchers {
         )
     )
 
-    val actual = ASTTranslationFunctions.readRoutesToInerop(ast)(PackageName("foo"))
+    val actual = ASTTranslationFunctions.readRoutesToInterop(ast)(PackageName("foo"))
 
     normalise(actual) should equal(normalise(expected))
   }
@@ -130,6 +132,7 @@ class ReadRoutesToIneropSpec extends FlatSpec with Matchers {
         "/contacts/individual/{contact-id}" -> Map(
           "get" -> OperationObject(
             Some("Load an IndividualContact by its identifier"),
+            Some("dummyFunction"),
             None,
             Map(
               200 -> ResponseObject(
@@ -154,6 +157,7 @@ class ReadRoutesToIneropSpec extends FlatSpec with Matchers {
           ),
           "put" -> OperationObject(
             summary = Some("Full update of an IndividualContact"),
+            Some("dummyFunction"),
             requestBody = Some(
               RequestBodyObject(
                 None,

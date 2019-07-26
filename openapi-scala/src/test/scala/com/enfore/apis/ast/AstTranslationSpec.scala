@@ -37,6 +37,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
       |  '/products':
       |    post:
       |      summary: Add a new product to the organisation
+      |      operationId: dummyFunction
       |      requestBody:
       |        required: true
       |        content:
@@ -85,7 +86,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
     ast.map { representation =>
       implicit val packageName = PackageName("foo")
       val componentsMap        = ASTTranslationFunctions.readComponentsToInterop(representation)(packageName)
-      val routesMap            = ASTTranslationFunctions.readRoutesToInerop(representation)
+      val routesMap            = ASTTranslationFunctions.readRoutesToInterop(representation)
       assert(
         componentsMap == Map(
           "Money" -> TypeRepr.NewTypeSymbol(
@@ -108,6 +109,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
             items = List(
               PutOrPostRequest(
                 path = "/products",
+                operationId = Some("dummyFunction"),
                 `type` = POST,
                 pathParams = List(),
                 queries = Map("limit" -> PrimitiveOption(PrimitiveInt(None), None)),
@@ -132,6 +134,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
       |  '/products':
       |    post:
       |      summary: Add a existing product to something
+      |      operationId: dummyFunction
       |      requestBody:
       |        required: true
       |        content:
@@ -171,7 +174,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
     ast.map { representation =>
       implicit val packageName = PackageName("foo")
       val componentsMap        = ASTTranslationFunctions.readComponentsToInterop(representation)(packageName)
-      val routesMap            = ASTTranslationFunctions.readRoutesToInerop(representation)
+      val routesMap            = ASTTranslationFunctions.readRoutesToInterop(representation)
       assert(
         componentsMap == Map(
           "Money" -> TypeRepr.NewTypeSymbol(
@@ -194,6 +197,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
             items = List(
               PutOrPostRequest(
                 path = "/products",
+                operationId = Some("dummyFunction"),
                 `type` = POST,
                 pathParams = List(),
                 queries = Map.empty,

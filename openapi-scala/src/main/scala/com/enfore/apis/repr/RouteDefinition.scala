@@ -5,6 +5,7 @@ import com.enfore.apis.repr.TypeRepr.{Primitive, Ref}
 
 sealed trait RouteDefinition {
   val path: String
+  val operationId: Option[String]
   val pathParams: List[PathParameter]
 }
 
@@ -26,6 +27,7 @@ final case class PathParameter(
 
 final case class GetRequest(
     path: String,
+    operationId: Option[String],
     pathParams: List[PathParameter],
     queries: Map[String, Primitive],
     response: Option[Map[String, Ref]],
@@ -34,6 +36,7 @@ final case class GetRequest(
 
 final case class PutOrPostRequest(
     path: String,
+    operationId: Option[String],
     `type`: ReqWithContentType,
     pathParams: List[PathParameter],
     queries: Map[String, Primitive],
@@ -57,6 +60,7 @@ final case class PutOrPostRequest(
 
 final case class DeleteRequest(
     path: String,
+    operationId: Option[String],
     pathParams: List[PathParameter],
     response: Option[Map[String, Ref]],
     successStatusCode: Int

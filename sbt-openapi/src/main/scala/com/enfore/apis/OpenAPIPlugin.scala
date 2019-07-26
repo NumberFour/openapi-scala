@@ -5,7 +5,7 @@ import Keys._
 import com.enfore.apis.generator.RouteImplementation
 import java.io.{File, FileWriter}
 
-object OpenapiPlugin extends AutoPlugin {
+object OpenAPIPlugin extends AutoPlugin {
 
   def compileOpenAPI(
       sourceDir: File,

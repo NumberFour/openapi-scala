@@ -44,6 +44,7 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
     List(
       GetRequest(
         "/contacts/individual",
+        Some("dummyFunction"),
         List.empty,
         Map.empty,
         Some(
@@ -76,7 +77,7 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
       |
       |    HttpRoutes.of[F] {
       |      case request @ GET -> Root / "contacts" / "individual" =>
-      |        errorHandler.resolve(impl.`GET /contacts/individual`(request), (x: IndividualContact) => EntityGenerator(200)(x.asJson))
+      |        errorHandler.resolve(impl.`dummyFunction`(request), (x: IndividualContact) => EntityGenerator(200)(x.asJson))
       |    }
       |  }
       |}
@@ -90,7 +91,7 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
       |import org.http4s.Request
       |
       |trait Http4sRoutesApi[F[_]] {
-      |  def `GET /contacts/individual`(implicit request: Request[F]): F[IndividualContact]
+      |  def `dummyFunction`(implicit request: Request[F]): F[IndividualContact]
       |}
      """.stripMargin.trim.parse[Source].get.structure
 }

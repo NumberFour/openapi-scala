@@ -108,6 +108,7 @@ object SwaggerAST {
    * Example:  {{{
    *   post:
    *     summary: Some description
+   *     operationId: createSomething
    *     requestBody:
    *       content: ...
    *     responses:
@@ -120,6 +121,7 @@ object SwaggerAST {
 
   final case class OperationObject(
       summary: Option[String],
+      operationId: Option[String],
       requestBody: Option[RequestBodyObject],
       responses: ResponsesObject,
       parameters: Option[List[ParameterObject]]

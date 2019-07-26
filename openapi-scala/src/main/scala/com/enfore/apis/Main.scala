@@ -42,7 +42,7 @@ object Main {
     for {
       representation <- loadRepresentationFromFile(filePath)
       componentsMap = ASTTranslationFunctions.readComponentsToInterop(representation)(pn)
-      routesMap     = ASTTranslationFunctions.readRoutesToInerop(representation)(pn)
+      routesMap     = ASTTranslationFunctions.readRoutesToInterop(representation)(pn)
     } yield {
       componentsMap.mapValues(_.generateScala) ++
         routeImplementations.flatMap(_.generateScala(routesMap, pn))

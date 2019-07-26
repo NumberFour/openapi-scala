@@ -107,12 +107,13 @@ object ASTTranslationFunctions {
     val queryParams: Map[String, Primitive] = extractQueryParameters(parameters)
     val possibleBodies: List[TypeRepr]      = route.requestBody.toList.flatMap(getBodyEncodings)
     val possibleResponse: Option[(Int, Map[String, Ref])] =
-      getNameContentEncoding(route.responses, x => x >= 200 && x < 300)
+      getNameContentEncoding(route.responses, httpStatus => httpStatus >= 200 && httpStatus < 300)
     assert(possibleResponse.nonEmpty, "There has to be one successful (>=200 and <300) return code")
     requestType match {
       case RequestType.POST | RequestType.PUT =>
         PutOrPostRequest(
           path = path,
+          operationId = route.operationId,
           `type` = translateReqContentType(requestType),
           pathParams = pathParameters,
           queries = queryParams,
@@ -126,6 +127,7 @@ object ASTTranslationFunctions {
       case RequestType.GET =>
         GetRequest(
           path = path,
+          operationId = route.operationId,
           pathParams = pathParameters,
           queries = queryParams,
           response = possibleResponse.map(_._2),
@@ -134,6 +136,7 @@ object ASTTranslationFunctions {
       case RequestType.DELETE =>
         DeleteRequest(
           path = path,
+          operationId = route.operationId,
           pathParams = pathParameters,
           response = possibleResponse.map(_._2),
           successStatusCode = possibleResponse.get._1
@@ -336,7 +339,7 @@ object ASTTranslationFunctions {
         case (key, value) => cleanFilename(key) -> PathItemAggregation(key, value)
       }
 
-  def readRoutesToInerop(ast: CoreASTRepr)(implicit packageName: PackageName): Map[String, PathItemAggregation] =
+  def readRoutesToInterop(ast: CoreASTRepr)(implicit packageName: PackageName): Map[String, PathItemAggregation] =
     ast.paths.map(p => aggregateRoutes(readToRoutes(p)(ast.components.schemas))).getOrElse(Map.empty)
 
 }
