@@ -28,6 +28,7 @@ class ReadRoutesToInteropSpec extends FlatSpec with Matchers {
           List(
             GetRequest(
               "/contacts/individual/{contact-id}",
+              Some("Load an IndividualContact by its identifier"),
               Some("dummyFunction"),
               List(PathParameter("contact-id")),
               Map(),
@@ -43,6 +44,7 @@ class ReadRoutesToInteropSpec extends FlatSpec with Matchers {
             ),
             PutOrPostRequest(
               "/contacts/individual/{contact-id}",
+              Some("Full update of an IndividualContact"),
               Some("dummyFunction"),
               PUT,
               List(PathParameter("contact-id")),

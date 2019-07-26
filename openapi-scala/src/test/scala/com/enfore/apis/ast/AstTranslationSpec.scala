@@ -109,6 +109,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
             items = List(
               PutOrPostRequest(
                 path = "/products",
+                summary = Some("Add a new product to the organisation"),
                 operationId = Some("dummyFunction"),
                 `type` = POST,
                 pathParams = List(),
@@ -197,6 +198,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
             items = List(
               PutOrPostRequest(
                 path = "/products",
+                summary = Some("Add a existing product to something"),
                 operationId = Some("dummyFunction"),
                 `type` = POST,
                 pathParams = List(),

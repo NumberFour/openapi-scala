@@ -44,6 +44,7 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
     List(
       GetRequest(
         "/contacts/individual",
+        None,
         Some("dummyFunction"),
         List.empty,
         Map.empty,

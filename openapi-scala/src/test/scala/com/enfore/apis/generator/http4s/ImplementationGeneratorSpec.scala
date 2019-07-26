@@ -41,7 +41,11 @@ class ImplementationGeneratorSpec extends FreeSpec with Matchers {
 
   lazy val `GET /contacts/individual` = (
     RouteDefinitions.`GET /contacts/individual`,
-    """def dummyFunction(implicit request: Request[F]): F[IndividualContact]"""
+    """/**
+      | * Dummy documentation
+      | * Dummy documentation next line.
+      |**/
+      |def dummyFunction(implicit request: Request[F]): F[IndividualContact]""".stripMargin
   )
 
   lazy val `POST /contacts/individual` = (

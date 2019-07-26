@@ -9,6 +9,7 @@ import scala.collection.immutable.ListMap
 object RouteDefinitions {
   lazy val `GET /contacts/individual` = GetRequest(
     "/contacts/individual",
+    Some("Dummy documentation\nDummy documentation next line."),
     Some("dummyFunction"),
     List.empty,
     Map.empty,
@@ -23,6 +24,7 @@ object RouteDefinitions {
   lazy val `GET /org/{org-id}/contacts/individual` = GetRequest(
     "/org/{org-id}/contacts/individual",
     None,
+    None,
     List(PathParameter("org-id")),
     Map.empty,
     Some(
@@ -36,6 +38,7 @@ object RouteDefinitions {
   lazy val `POST /contacts/individual` = PutOrPostRequest(
     "/contacts/individual",
     None,
+    None,
     POST,
     List.empty,
     Map.empty,
@@ -47,6 +50,7 @@ object RouteDefinitions {
 
   lazy val `POST /contacts/single` = PutOrPostRequest(
     "/contacts/single",
+    None,
     None,
     POST,
     List.empty,
@@ -60,6 +64,7 @@ object RouteDefinitions {
   lazy val `POST /contacts/individual/empty` = PutOrPostRequest(
     "/contacts/individual/empty",
     None,
+    None,
     POST,
     List.empty,
     Map.empty,
@@ -71,6 +76,7 @@ object RouteDefinitions {
 
   lazy val `GET /contacts/individual/{contacts-id}` = GetRequest(
     "/contacts/individual/{contacts-id}",
+    None,
     None,
     List(PathParameter("contacts-id")),
     Map.empty,
@@ -85,6 +91,7 @@ object RouteDefinitions {
   lazy val `GET /org/{org-id}/contacts/individual/{contacts-id}` = GetRequest(
     "/org/{org-id}/contacts/individual/{contacts-id}",
     None,
+    None,
     List(PathParameter("org-id"), PathParameter("contacts-id")),
     Map.empty,
     Some(
@@ -98,6 +105,7 @@ object RouteDefinitions {
   lazy val `PUT /contacts/individual/{contacts-id}` = PutOrPostRequest(
     "/contacts/individual/{contacts-id}",
     None,
+    None,
     PUT,
     List(PathParameter("contacts-id")),
     Map.empty,
@@ -109,6 +117,7 @@ object RouteDefinitions {
 
   lazy val `PUT /contacts/individual/empty/{contacts-id}` = PutOrPostRequest(
     "/contacts/individual/empty/{contacts-id}",
+    None,
     None,
     PUT,
     List(PathParameter("contacts-id")),
@@ -122,6 +131,7 @@ object RouteDefinitions {
   lazy val `DELETE /contacts/individual/{contacts-id}` = DeleteRequest(
     "/contacts/individual/{contacts-id}",
     None,
+    None,
     List(PathParameter("contacts-id")),
     Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
     200
@@ -129,6 +139,7 @@ object RouteDefinitions {
 
   lazy val `GET /contacts/organization/{contacts-id}/addresses` = GetRequest(
     "/contacts/organization/{contacts-id}/addresses",
+    None,
     None,
     List(PathParameter("contacts-id")),
     Map.empty,
@@ -143,6 +154,7 @@ object RouteDefinitions {
   lazy val `POST /contacts/organization/{contacts-id}/addresses` = PutOrPostRequest(
     "/contacts/organization/{contacts-id}/addresses",
     None,
+    None,
     POST,
     List(PathParameter("contacts-id")),
     Map.empty,
@@ -154,6 +166,7 @@ object RouteDefinitions {
 
   lazy val `GET /contacts/organization/{contacts-id}/addresses/{address-id}` = GetRequest(
     "/contacts/organization/{contacts-id}/addresses/{address-id}",
+    None,
     None,
     List(
       PathParameter("contacts-id"),
@@ -170,6 +183,7 @@ object RouteDefinitions {
 
   lazy val `PUT /contacts/organization/{contacts-id}/addresses/{address-id}` = PutOrPostRequest(
     "/contacts/organization/{contacts-id}/addresses/{address-id}",
+    None,
     None,
     PUT,
     List(
@@ -190,6 +204,7 @@ object RouteDefinitions {
   lazy val `DELETE /contacts/organization/{contacts-id}/addresses/{address-id}` = DeleteRequest(
     "/contacts/organization/{contacts-id}/addresses/{address-id}",
     None,
+    None,
     List(
       PathParameter("contacts-id"),
       PathParameter("address-id")
@@ -204,6 +219,7 @@ object RouteDefinitions {
 
   lazy val `GET /contacts/individual?query1&query2&optional1&optional2&list1&optional-list1` = GetRequest(
     "/contacts/individual",
+    None,
     None,
     List.empty,
     ListMap(
@@ -225,6 +241,7 @@ object RouteDefinitions {
   lazy val `POST /contacts/individual?query1&query2&optional1&optional2&list1&optional-list1` = PutOrPostRequest(
     "/contacts/individual",
     None,
+    None,
     POST,
     List.empty,
     ListMap(
@@ -244,6 +261,7 @@ object RouteDefinitions {
   lazy val `GET /contacts/individual/{contacts-id}?optional1&optional2` = GetRequest(
     "/contacts/individual/{contacts-id}",
     None,
+    None,
     List(PathParameter("contacts-id")),
     ListMap(
       "optional1" -> PrimitiveOption(PrimitiveString(None), None),
@@ -260,6 +278,7 @@ object RouteDefinitions {
   lazy val `PUT /contacts/individual/{contacts-id}?optional1&optional2` = PutOrPostRequest(
     "/contacts/individual/{contacts-id}",
     None,
+    None,
     PUT,
     List(PathParameter("contacts-id")),
     ListMap(
@@ -275,6 +294,7 @@ object RouteDefinitions {
   lazy val `DELETE /contacts/individual/{contacts-id}?optional1&optional2` = DeleteRequest(
     "/contacts/individual/{contacts-id}",
     None,
+    None,
     List(PathParameter("contacts-id")),
     Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
     200
@@ -282,6 +302,7 @@ object RouteDefinitions {
 
   lazy val `GET /contacts/organization/{contacts-id}/addresses?query1&query2` = GetRequest(
     "/contacts/organization/{contacts-id}/addresses",
+    None,
     None,
     List(PathParameter("contacts-id")),
     ListMap(
@@ -299,6 +320,7 @@ object RouteDefinitions {
   lazy val `POST /contacts/organization/{contacts-id}/addresses?query1&query2` = PutOrPostRequest(
     "/contacts/organization/{contacts-id}/addresses",
     None,
+    None,
     POST,
     List(PathParameter("contacts-id")),
     ListMap(
@@ -313,6 +335,7 @@ object RouteDefinitions {
 
   lazy val `GET /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2` = GetRequest(
     "/contacts/organization/{contacts-id}/addresses/{address-id}",
+    None,
     None,
     List(
       PathParameter("contacts-id"),
@@ -332,6 +355,7 @@ object RouteDefinitions {
 
   lazy val `PUT /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2` = PutOrPostRequest(
     "/contacts/organization/{contacts-id}/addresses/{address-id}",
+    None,
     None,
     PUT,
     List(
@@ -355,6 +379,7 @@ object RouteDefinitions {
   lazy val `DELETE /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2` = DeleteRequest(
     "/contacts/organization/{contacts-id}/addresses/{address-id}",
     None,
+    None,
     List(
       PathParameter("contacts-id"),
       PathParameter("address-id")
@@ -369,6 +394,7 @@ object RouteDefinitions {
 
   lazy val `GET /contacts/individual?optional-list1&optional-list2` = GetRequest(
     "/contacts/individual",
+    None,
     None,
     List.empty,
     ListMap(
@@ -386,6 +412,7 @@ object RouteDefinitions {
   lazy val `POST /contacts/individual?optionaoListl1&optional-list2` = PutOrPostRequest(
     "/contacts/individual",
     None,
+    None,
     POST,
     List.empty,
     ListMap(
@@ -400,6 +427,7 @@ object RouteDefinitions {
 
   lazy val `GET /contacts/individual/funny.,argument/type/?other:@funny&trait` = GetRequest(
     "/contacts/individual/{funny.,argument}/{type}",
+    None,
     None,
     List(
       PathParameter("funny.,argument"),

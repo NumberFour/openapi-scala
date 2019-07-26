@@ -14,6 +14,7 @@ class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
   "Paths TypeRepr Generator" should "be able to generate basic Get requests" in {
     val request = GetRequest(
       "/products",
+      None,
       Some("dummyFunction"),
       List(PathParameter("id")),
       Map.empty,
@@ -44,6 +45,7 @@ class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
   it should "be able to use the correct input/return type in post request" in {
     val request = PutOrPostRequest(
       "/products",
+      None,
       Some("dummyFunction"),
       ReqWithContentType.POST,
       List.empty,
@@ -77,6 +79,7 @@ class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
   it should "be able to deal with no return type for Post requests" in {
     val request = PutOrPostRequest(
       "/subscriptions",
+      None,
       Some("dummyFunction"),
       ReqWithContentType.POST,
       List.empty,
@@ -105,6 +108,7 @@ class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
   it should "be able to deal with no return type for Get requests" in {
     val request = GetRequest(
       "/subscriptions/{subscription-id}",
+      None,
       Some("dummyFunction"),
       List(PathParameter("subscriptionId")),
       Map.empty,

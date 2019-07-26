@@ -113,6 +113,7 @@ object ASTTranslationFunctions {
       case RequestType.POST | RequestType.PUT =>
         PutOrPostRequest(
           path = path,
+          summary = route.summary,
           operationId = route.operationId,
           `type` = translateReqContentType(requestType),
           pathParams = pathParameters,
@@ -127,6 +128,7 @@ object ASTTranslationFunctions {
       case RequestType.GET =>
         GetRequest(
           path = path,
+          summary = route.summary,
           operationId = route.operationId,
           pathParams = pathParameters,
           queries = queryParams,
@@ -136,6 +138,7 @@ object ASTTranslationFunctions {
       case RequestType.DELETE =>
         DeleteRequest(
           path = path,
+          summary = route.summary,
           operationId = route.operationId,
           pathParams = pathParameters,
           response = possibleResponse.map(_._2),
