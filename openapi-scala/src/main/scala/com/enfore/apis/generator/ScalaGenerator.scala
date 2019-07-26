@@ -5,6 +5,8 @@ import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
 import com.enfore.apis.repr.TypeRepr._
 import simulacrum._
 
+import scala.annotation.tailrec
+
 @typeclass trait ScalaGenerator[T] {
   def generateScala(in: T): String
 }
@@ -80,7 +82,7 @@ object ScalaGenerator {
   private def refSymbolGenerator(symbol: RefSymbol): String =
     s"${symbol.valName}: ${SymbolAnnotationMaker.makeAnnotation(symbol)}".trim
 
-  private def refinementExtractor(in: Symbol): Option[Primitive] = in match {
+  @tailrec private def refinementExtractor(in: Symbol): Option[Primitive] = in match {
     case PrimitiveSymbol(_, data) =>
       data match {
         case s @ PrimitiveString(refinements: Option[List[RefinedTags]]) =>

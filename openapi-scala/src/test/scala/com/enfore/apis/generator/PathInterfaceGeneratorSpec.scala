@@ -119,9 +119,7 @@ class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
       | val pathVariables = List("subscriptionId")
       | 
       | type Response = Unit
-      | def impl(subsc
-      |
-      | : String): F[Response]
+      | def impl(subscriptionId: String): F[Response]
       |}
     """.stripMargin.parse[Source]
 
