@@ -44,24 +44,29 @@ class ErrorHandlerImplementation(convertThrowableToServiceExceptionFn: Throwable
   implicit val encoderUnprocessableContent: Encoder[UnprocessableContent] =
     deriveEncoder[UnprocessableContent](renaming.snakeCase)
 
-  private def mapServiceErrorsFn(err: ServiceException): IO[Response[IO]] = {
-    logger.error("Error in request", err)
+  private def mapServiceErrorsFn(err: ServiceException): IO[Response[IO]] =
     err match {
       case e: ServiceError =>
+        logger.error("ServiceError", err)
         InternalServerError(e.asJson)
       case e: ItemAlreadyExists =>
+        logger.info("ItemAlreadyExists", err)
         Conflict(e.asJson)
       case e: ItemDoesNotExist =>
+        logger.info("ItemDoesNotExist", err)
         NotFound(e.asJson)
       case e: RequestConflict =>
+        logger.warn("RequestConflict", err)
         Conflict(e.asJson)
       case e: PermissionRequired =>
+        logger.info("PermissionRequired", err)
         Forbidden(e.asJson)
       case e: WrongRequestContent =>
+        logger.info("WrongRequestContent", err)
         BadRequest(e.asJson)
       case e: UnprocessableContent =>
+        logger.info("UnprocessableContent", err)
         UnprocessableEntity(e.asJson)
     }
-  }
 
 }
