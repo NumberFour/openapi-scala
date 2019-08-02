@@ -259,15 +259,14 @@ object ASTTranslationFunctions {
       case SchemaObjectType.`object`  => schemaObject.properties.flatMap(loadObjectProperties(name, _, required))
       case SchemaObjectType.`string`  => schemaObject.enum.map(loadEnum(name, _))
       case SchemaObjectType.`integer` => schemaObject.enum.map(loadEnum(name, _))
-      case SchemaObjectType.`array` => {
-        throw new AssertionError("Top-level (components/schemas) schemas should not be arrays")
-      }
-      case SchemaObjectType.`boolean` => {
-        throw new AssertionError("Top-level (components/schemas) schemas should not be booleans")
-      }
-      case SchemaObjectType.`number` => {
-        throw new AssertionError("Top-level (components/schemas) schemas should not be numbers")
-      }
+      case SchemaObjectType.`array` =>
+        throw new AssertionError(s"Top-level (components/schemas) schemas should not be arrays ($name : $schemaObject)")
+      case SchemaObjectType.`boolean` =>
+        throw new AssertionError(
+          s"Top-level (components/schemas) schemas should not be booleans ($name : $schemaObject)")
+      case SchemaObjectType.`number` =>
+        throw new AssertionError(
+          s"Top-level (components/schemas) schemas should not be numbers ($name : $schemaObject)")
     }
     newType.map(NewTypeSymbol(name, _))
   }
