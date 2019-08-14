@@ -101,6 +101,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         List(
           PrimitiveSymbol("optionalVal", PrimitiveOption(PrimitiveString(None), None)),
           PrimitiveSymbol("listVal", PrimitiveArray(PrimitiveInt(None), None)),
+          PrimitiveSymbol("dictVal", PrimitiveDict(PrimitiveInt(None), None)),
           PrimitiveSymbol("opListVal", PrimitiveOption(PrimitiveArray(PrimitiveBoolean(None), None), None)),
           PrimitiveSymbol("listOpVal", PrimitiveArray(PrimitiveOption(PrimitiveNumber(None), None), None))
         )
@@ -116,6 +117,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         |
         |final case class ParamedType(optionalVal: Option[String],
         | listVal: List[Int],
+        | dictVal: Map[String, Int],
         | opListVal: Option[List[Boolean]],
         | listOpVal: List[Option[Double]])
         |

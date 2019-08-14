@@ -107,6 +107,7 @@ class ReadRoutesToInteropSpec extends FlatSpec with Matchers {
             )
           ),
           None,
+          None,
           Some(List("id", "type", "name"))
         ),
         "IndividualContact" -> SchemaObject(

@@ -184,6 +184,9 @@ object ASTTranslationFunctions {
     case SchemaObjectType.array =>
       assert(items.isDefined, "A parameter type for an array is not defined")
       loadSingleProperty(items.get).map(PrimitiveArray(_, refinements))
+    case SchemaObjectType.`dict` =>
+      assert(items.isDefined, "A parameter type for a dictionary is not defined")
+      loadSingleProperty(items.get).map(PrimitiveDict(_, refinements))
     case x => buildPrimitiveFromSchemaObjectType(refinements)(packageName)(x)
   }
 
@@ -214,11 +217,14 @@ object ASTTranslationFunctions {
   )(implicit packageName: PackageName): Option[TypeRepr] =
     property match {
       case so: SchemaObject =>
-        val refinements: Option[List[CollectionRefinements]] =
-          List(so.minLength.map(MinLength), so.maxLength.map(MaxLength))
-            .filter(_.isDefined)
-            .sequence
-        so.`type`.flatMap(buildPrimitiveFromSchemaObjectTypeForComponents(so.items, refinements))
+        so.additionalProperties.fold {
+          val refinements: Option[List[CollectionRefinements]] =
+            List(so.minLength.map(MinLength), so.maxLength.map(MaxLength))
+              .filter(_.isDefined)
+              .sequence
+          so.`type`
+            .flatMap(buildPrimitiveFromSchemaObjectTypeForComponents(so.items, refinements))
+        }(loadSingleProperty(_).map(PrimitiveDict(_, None)))
       case ReferenceObject(ref) => {
         val name: String = ref.split("/").last
         val path: String = ref.split("/").dropRight(1).mkString(".")
@@ -261,6 +267,8 @@ object ASTTranslationFunctions {
       case SchemaObjectType.`integer` => schemaObject.enum.map(loadEnum(name, _))
       case SchemaObjectType.`array` =>
         throw new AssertionError(s"Top-level (components/schemas) schemas should not be arrays ($name : $schemaObject)")
+      case SchemaObjectType.`dict` =>
+        throw new AssertionError(s"Top-level (components/schemas) schemas should not be dicts ($name : $schemaObject)")
       case SchemaObjectType.`boolean` =>
         throw new AssertionError(
           s"Top-level (components/schemas) schemas should not be booleans ($name : $schemaObject)")

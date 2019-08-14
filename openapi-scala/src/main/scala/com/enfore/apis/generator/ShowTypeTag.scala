@@ -18,6 +18,7 @@ object ShowTypeTag {
     case PrimitiveBoolean(_)                => "Boolean"
     case PrimitiveArray(data: TypeRepr, _)  => s"List[${data.showType}]"
     case PrimitiveOption(data: TypeRepr, _) => s"Option[${data.showType}]"
+    case PrimitiveDict(data: TypeRepr, _)   => s"Map[String, ${data.showType}]"
   }
 
   implicit private val newTypeShowType: ShowTypeTag[NewType] = {

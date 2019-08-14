@@ -35,6 +35,9 @@ object TypeRepr {
   final case class PrimitiveOption(dataType: TypeRepr, defaultValue: Option[PrimitiveValue]) extends Primitive {
     override val typeName: String = s"Option[${dataType.typeName}]"
   }
+  final case class PrimitiveDict(dataType: TypeRepr, defaultValue: Option[List[RefinedTags]]) extends Primitive {
+    override val typeName: String = s"Map[String, ${dataType.typeName}]"
+  }
 
   sealed trait RefinedTags
   sealed trait CollectionRefinements      extends RefinedTags

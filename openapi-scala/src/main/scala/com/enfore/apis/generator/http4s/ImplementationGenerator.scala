@@ -38,7 +38,7 @@ object ImplementationGenerator {
 
   private def getParameters(route: RouteDefinition): String = {
     val pathParameters  = getPathParameters(route)
-    val queryParameters = getQueryParamameters(route)
+    val queryParameters = getQueryParams(route)
     val body            = getRequestBody(route)
 
     val allParameters = pathParameters ++ queryParameters ++ body
@@ -89,7 +89,7 @@ object ImplementationGenerator {
     extractFromPathParameters(route.pathParams)
   }
 
-  private def getQueryParamameters(route: RouteDefinition): List[(ArgumentName, ArgumentType)] = {
+  private def getQueryParams(route: RouteDefinition): List[(ArgumentName, ArgumentType)] = {
     def extractFromQueries(queries: Map[String, Primitive]): List[(String, String)] =
       queries.mapValues(primitiveShowType.showType).toList.sortBy(_._1)
 
