@@ -1,0 +1,94 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "title" : "enfore Marketplace Purchasing API",
+    "description" : "This is a first design version of the enfore Marketplace API\n",
+    "version" : "0.0.2"
+  },
+  "servers" : [ {
+    "url" : "/"
+  } ],
+  "paths" : {
+    "/purchase-order-status-update" : {
+      "post" : {
+        "summary" : "Submit a new status for a purchase order",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PurchaseOrderStatusUpdate"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Updated status accepted"
+          },
+          "400" : {
+            "description" : "Invalid request"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "PurchaseOrderStatusUpdate" : {
+        "required" : [ "@type", "n4PurchaseOrderNumber", "status", "subSupplierId", "supplierCustomerId", "supplierGroupId" ],
+        "type" : "object",
+        "properties" : {
+          "@type" : {
+            "type" : "string",
+            "description" : "Constant name of the enfore DataModel Type\n",
+            "enum" : [ "n4.marketplace.purchasing.external.orderstatus.edi.OrderStatusUpdateEDIFormat" ]
+          },
+          "n4PurchaseOrderNumber" : {
+            "type" : "string",
+            "description" : "The Number of the Purchase Order within the enfore Organization\n"
+          },
+          "supplierPurchaseOrderId" : {
+            "type" : "string",
+            "description" : "Tracking ID for this purchase order on the supplier side\n"
+          },
+          "supplierGroupId" : {
+            "type" : "string",
+            "description" : "An opaque ID of the Supplier Group (e.g. ServiceBund)\n"
+          },
+          "subSupplierId" : {
+            "type" : "string",
+            "description" : "An opaque ID of a specific supplier within the Supplier Group (e.g. WebshopFBR)\n"
+          },
+          "supplierCustomerId" : {
+            "type" : "string",
+            "description" : "ID of the Customer at the supplier\n"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/PurchaseOrderStatus"
+          },
+          "note" : {
+            "type" : "string",
+            "description" : "A note from the supplier accompanying the status change\n"
+          }
+        },
+        "description" : "When the status of a Marketplace Purchase Order is changed,  use this endpoint to signal that change to the Organization\non the enfore platform that has placed the purchase order.\n"
+      },
+      "PurchaseOrderStatus" : {
+        "required" : [ "@type" ],
+        "type" : "object",
+        "properties" : {
+          "@type" : {
+            "type" : "string",
+            "description" : "Constant name of the enfore DataModel Type\n",
+            "enum" : [ "n4.marketplace.purchasing.external.orderstatus.edi.OrderStatus" ]
+          },
+          "value" : {
+            "type" : "string",
+            "enum" : [ "SUBMITTED", "RECEIVED", "SHIPPED", "SUBMISSION_FAILED" ]
+          }
+        }
+      }
+    }
+  }
+}

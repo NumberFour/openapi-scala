@@ -1,0 +1,941 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "title" : "enfore ERP API",
+    "description" : "This is a first design version of the enforePOS-API\n",
+    "version" : "0.0.1"
+  },
+  "servers" : [ {
+    "url" : "https://virtserver.swaggerhub.com/enfore.com/enfore-ERP-API/0.0.1",
+    "description" : "SwaggerHub API Auto Mocking"
+  }, {
+    "url" : "https://erp-api.ci-stable.enfore.de/",
+    "description" : "enforePOS Development"
+  } ],
+  "tags" : [ {
+    "name" : "products",
+    "description" : "Products are things that are sold by the organization.\nThey are identified by a unique ID but may have additional identifiers such as a GTIN or ASIN.\n"
+  }, {
+    "name" : "invoices",
+    "description" : "Invoices are created whenever one or multiple products are sold.\nThey are created from Orders (which are not available via the API yet) and represent the accounting/ledger-side view of the sale.\n"
+  }, {
+    "name" : "subscriptions",
+    "description" : "The API provides the capability to build fast, real-time streams using events.\nFor this, users must register an endpoint and will then be called when new events occur.\nAs event consumer you must be able to process duplicate events.\nIt is recommended to validate from time to time that no data is missing by using the specific query APIs.\nCurrently, the only type of events that are supported are \"invoice\".\n"
+  } ],
+  "paths" : {
+    "/org/{org-id}/products" : {
+      "post" : {
+        "tags" : [ "products" ],
+        "summary" : "Add a new product to the organisation",
+        "parameters" : [ {
+          "name" : "org-id",
+          "in" : "path",
+          "description" : "ID of the organization",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Product"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Product has successfully been added",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "When payload contains an external ID and a product with the same external ID already exists",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{product-id}" : {
+      "get" : {
+        "tags" : [ "products" ],
+        "summary" : "Load a product by its identifier",
+        "parameters" : [ {
+          "name" : "product-id",
+          "in" : "path",
+          "description" : "ID of the product to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Product is successfully returned",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Product not found or invalid identifier",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422" : {
+            "description" : "Failure on converting resource to API format",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "products" ],
+        "summary" : "Full update of a product",
+        "parameters" : [ {
+          "name" : "product-id",
+          "in" : "path",
+          "description" : "ID of the product to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Product"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Product was successfully updated",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Product not found or invalid identifier",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422" : {
+            "description" : "Failure on converting resource to API format",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/external-id/{external-id}" : {
+      "get" : {
+        "tags" : [ "products" ],
+        "summary" : "Load a product by its external ID",
+        "parameters" : [ {
+          "name" : "external-id",
+          "in" : "path",
+          "description" : "External ID of the product to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Product is successfully returned",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Product not found or invalid identifier",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422" : {
+            "description" : "Failure on converting resource to API format",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "products" ],
+        "summary" : "Update or create a product addressed by its external ID",
+        "parameters" : [ {
+          "name" : "external-id",
+          "in" : "path",
+          "description" : "External ID of the product to update/create",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Product"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Product was successfully updated",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "201" : {
+            "description" : "Product was successfully created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422" : {
+            "description" : "Failure on converting resource to API format",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/invoices" : {
+      "get" : {
+        "tags" : [ "invoices" ],
+        "summary" : "Returns invoices",
+        "description" : "Returns invoices for the specified interval, sorted in ascending order by transaction date and time.\n<br><br>\n<strong>\nSince our platform was built as a distributed system, we are subject to the laws of the \"Eventual consistency\" model. This means that time periods close to the present may be unstable and could contain new items if the same time interval is queried again.\n<br><br>\nWe therefore recommend that intervals that are close to the present time should be re-requested and verified at a later time.\n</strong>\n",
+        "parameters" : [ {
+          "name" : "from",
+          "in" : "query",
+          "description" : "Defines the time from which invoices are to be returned.\nInvoices with exactly this date are also returned - this means that the start of a left-closed interval is defined.\nTimestamp in UTC. The date-time notation as defined by RFC 3339 (https://www.ietf.org/rfc/rfc3339.txt), section 5.6, with the \"Z\" as time-offset. For example, 2017-07-21T17:32:28.123Z\n",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }, {
+          "name" : "to",
+          "in" : "query",
+          "description" : "Defines the time up to which the invoices are to be returned.\nInvoices with exactly this date are not returned - this means that the end of a right-open interval is defined.\nTimestamp in UTC. The date-time notation as defined by RFC 3339 (https://www.ietf.org/rfc/rfc3339.txt), section 5.6, with the \"Z\" as time-offset. For example, 2017-07-21T17:32:28.123Z\n",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "description" : "Max number of invoices to be returned per page.\nNote that both the `invoices` as well as the `problems` arrays of `Invoices` count towards this number to allow a simple,\nconsistent paging over all invoices (and problems) of a given timeframe.\nIf not given, defaults to `200`.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "maximum" : 5000,
+            "minimum" : 1,
+            "type" : "integer",
+            "format" : "int64"
+          }
+        }, {
+          "name" : "offset",
+          "in" : "query",
+          "description" : "Offset of invoices and problems of where to start the next page.\nSimilar to limit and offset in SQL, one would obtain the second page with `limit=10&offset=10`.\nNote that this paging with limit and offset is within a time interval that is specified with `from` and `to`.\n",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "minimum" : 0,
+            "type" : "integer",
+            "format" : "int64",
+            "default" : 0
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Invoice information is successfully returned",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Invoices"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Invalid or missing parameters",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions" : {
+      "post" : {
+        "tags" : [ "subscriptions" ],
+        "summary" : "Register an event consumer with the API. If the callback URL is already registered, we return the original registration ID. We will continue attempting to send new items to registered subscriptions until they are deleted. In case we cannot reach the endpoint, we will apply an exponential backoff.",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/EventConsumerRegistration"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Successful Registration. Body contains the registration ID.",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/EventConsumerRegistration"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        },
+        "callbacks" : {
+          "newInvoice" : {
+            "{$request.body#/callback_url}" : {
+              "post" : {
+                "requestBody" : {
+                  "description" : "A new block of Invoices.\nAs the Invoices type containts a list of invoices, a short amount of buffering can be applied.\n",
+                  "content" : {
+                    "application/json" : {
+                      "schema" : {
+                        "$ref" : "#/components/schemas/Invoices"
+                      }
+                    }
+                  },
+                  "required" : true
+                },
+                "responses" : {
+                  "202" : {
+                    "description" : "Event notification successfully received"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/subscriptions/{registration-id}" : {
+      "delete" : {
+        "tags" : [ "subscriptions" ],
+        "summary" : "Delete an event consumer registration",
+        "parameters" : [ {
+          "name" : "registration-id",
+          "in" : "path",
+          "description" : "ID of the registration to delete",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Registration was successfully deleted"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Registration not found or invalid identifier",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Product" : {
+        "required" : [ "id", "management_unit", "name", "tax_category" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The technical identifier of the product. Assigned by the enfore platform on creation of the\nproduct and not changeable afterwards.\n",
+            "readOnly" : true
+          },
+          "name" : {
+            "maxLength" : 256,
+            "type" : "string",
+            "description" : "The name of the product."
+          },
+          "external_id" : {
+            "maxLength" : 256,
+            "type" : "string",
+            "description" : "An identifier for use by the external system.\nCan also be used to address the product via the \"/products/external-id/{external-id}\" resource.\n"
+          },
+          "article_id" : {
+            "maxLength" : 256,
+            "type" : "string",
+            "description" : "The identifier by which the article is addressed by the business when communicating internally\nor with customers or suppliers.\n\nOnce specified, the article ID cannot be modified anymore. Otherwise, business documents such\nas invoices or packaging lists created at different points in time may list the same article\nID for different products.\n"
+          },
+          "management_unit" : {
+            "$ref" : "#/components/schemas/UnitOfMeasure"
+          },
+          "sales_price_and_quantity" : {
+            "$ref" : "#/components/schemas/ProductPriceAndQuantity"
+          },
+          "product_identifiers" : {
+            "$ref" : "#/components/schemas/ProductIdentifiers"
+          },
+          "tax_category" : {
+            "$ref" : "#/components/schemas/TaxCategory"
+          },
+          "tax_exemption_reason" : {
+            "$ref" : "#/components/schemas/TaxExemptionReason"
+          }
+        },
+        "description" : "Represents a resource that is sold by the business.\n"
+      },
+      "ProductPriceAndQuantity" : {
+        "required" : [ "price", "price_is_gross", "quantity" ],
+        "type" : "object",
+        "properties" : {
+          "price" : {
+            "$ref" : "#/components/schemas/Money"
+          },
+          "price_is_gross" : {
+            "type" : "boolean",
+            "description" : "Flag indicating whether the price is gross (true) or net (false)"
+          },
+          "quantity" : {
+            "$ref" : "#/components/schemas/Quantity"
+          }
+        },
+        "description" : "The set of information defining the price of a product.\nA product's price is always relative to a specific quantity of the product.\nFor example, if a single bottle of water costs 1€, 5 bottles cost 5€.\nAdditionally, a given price might be including tax or not.\nTherefore, the ProductPriceAndQuantity is a combination of a quantity, a price and a \"price is gross\"-flag.\n"
+      },
+      "ProductIdentifiers" : {
+        "type" : "object",
+        "properties" : {
+          "ean" : {
+            "maxLength" : 13,
+            "minLength" : 8,
+            "type" : "string",
+            "description" : "EAN-8, EAN-12 or EAN-13"
+          },
+          "gtin" : {
+            "maxLength" : 14,
+            "minLength" : 14,
+            "type" : "string",
+            "description" : "GTIN-14"
+          }
+        },
+        "description" : "The set of additional identifiers that can be specified for a product."
+      },
+      "Invoice" : {
+        "required" : [ "discounts", "id", "items", "number", "payments", "store_id", "transaction_date_and_time" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The technical identifier of the invoice. Assigned by the enfore platform on creation of the\ninvoice and not changeable afterwards.\n",
+            "readOnly" : true
+          },
+          "store_id" : {
+            "type" : "string",
+            "description" : "ID of the store where the invoice was generated"
+          },
+          "register_id" : {
+            "type" : "string",
+            "description" : "ID of the register where the invoice was generated"
+          },
+          "operator_id" : {
+            "type" : "string",
+            "description" : "ID of the operator where the invoice was generated"
+          },
+          "number" : {
+            "type" : "string",
+            "description" : "Invoice number (as printed on the invoice document)"
+          },
+          "transaction_date_and_time" : {
+            "type" : "string",
+            "description" : "Invoice date in date-time notation in UTC. The date-time notation as defined by RFC 3339 (https://www.ietf.org/rfc/rfc3339.txt), section 5.6, with the \"Z\" as time-offset. For example, 2017-07-21T17:32:28.123Z",
+            "format" : "date-time"
+          },
+          "total_gross_amount" : {
+            "$ref" : "#/components/schemas/Money"
+          },
+          "total_net_amount" : {
+            "$ref" : "#/components/schemas/Money"
+          },
+          "items" : {
+            "type" : "array",
+            "description" : "The items of the invoice",
+            "items" : {
+              "$ref" : "#/components/schemas/InvoiceItem"
+            }
+          },
+          "payments" : {
+            "type" : "array",
+            "description" : "The payments for the invoice",
+            "items" : {
+              "$ref" : "#/components/schemas/Payment"
+            }
+          },
+          "discounts" : {
+            "type" : "array",
+            "description" : "The invoice-level discounts that have been applied to the invoice",
+            "items" : {
+              "$ref" : "#/components/schemas/Discount"
+            }
+          }
+        }
+      },
+      "Invoices" : {
+        "required" : [ "items" ],
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "description" : "The invoices contained in the sequence",
+            "items" : {
+              "$ref" : "#/components/schemas/Invoice"
+            }
+          },
+          "problems" : {
+            "type" : "array",
+            "description" : "Any problems that occurred when handling the query",
+            "items" : {
+              "$ref" : "../shared/problem.yaml#/components/schemas/Problem"
+            }
+          }
+        },
+        "description" : "A list of invoices together with any problems that could have occurred.\n"
+      },
+      "InvoiceItem" : {
+        "required" : [ "depending_items", "discounts", "gross_amount", "id", "net_amount", "product_id", "quantity", "taxes", "undiscounted_gross_amount", "undiscounted_net_amount" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The technical identifier of the invoice item. Assigned by the enfore platform on creation\nof the item and not changeable afterwards.\n",
+            "readOnly" : true
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the invoice item. Usually, this is simply the name of the product."
+          },
+          "product_id" : {
+            "type" : "string",
+            "description" : "The identifier of the product that was sold."
+          },
+          "product_external_id" : {
+            "type" : "string",
+            "description" : "The external ID of the product that was sold."
+          },
+          "quantity" : {
+            "$ref" : "#/components/schemas/Quantity"
+          },
+          "gross_amount" : {
+            "$ref" : "#/components/schemas/Money"
+          },
+          "net_amount" : {
+            "$ref" : "#/components/schemas/Money"
+          },
+          "undiscounted_gross_amount" : {
+            "$ref" : "#/components/schemas/Money"
+          },
+          "undiscounted_net_amount" : {
+            "$ref" : "#/components/schemas/Money"
+          },
+          "discounts" : {
+            "type" : "array",
+            "description" : "The item-level discounts that have been applied to this item",
+            "items" : {
+              "$ref" : "#/components/schemas/Discount"
+            }
+          },
+          "taxes" : {
+            "type" : "array",
+            "description" : "List of taxes that were applied to the item",
+            "items" : {
+              "$ref" : "#/components/schemas/Tax"
+            }
+          },
+          "depending_items" : {
+            "type" : "array",
+            "description" : "List of items that depend on this item.\n\nAn item depends on another item, if it cannot exist alone. There are different types\nof dependencies, therefore each element in the list is a pair of the id of the depending\nitem and the type of the dependency.\n",
+            "items" : {
+              "$ref" : "#/components/schemas/InvoiceItemDependency"
+            }
+          }
+        }
+      },
+      "Payment" : {
+        "required" : [ "amount", "method", "timestamp" ],
+        "type" : "object",
+        "properties" : {
+          "method" : {
+            "$ref" : "#/components/schemas/PaymentMethod"
+          },
+          "amount" : {
+            "$ref" : "#/components/schemas/Money"
+          },
+          "timestamp" : {
+            "type" : "string",
+            "description" : "Time when the payment was performed. Timestamp is in UTC.",
+            "format" : "date-time"
+          }
+        }
+      },
+      "Discount" : {
+        "required" : [ "gross_amount", "name", "net_amount" ],
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the discount rule/promotion that was applied"
+          },
+          "gross_amount" : {
+            "$ref" : "#/components/schemas/Money"
+          },
+          "net_amount" : {
+            "$ref" : "#/components/schemas/Money"
+          }
+        }
+      },
+      "InvoiceItemDependency" : {
+        "required" : [ "dependency_type", "depending_item_id" ],
+        "type" : "object",
+        "properties" : {
+          "depending_item_id" : {
+            "type" : "string",
+            "description" : "The ID of the depending item."
+          },
+          "dependency_type" : {
+            "$ref" : "#/components/schemas/InvoiceItemDependencyType"
+          }
+        }
+      },
+      "InvoiceItemDependencyType" : {
+        "type" : "string",
+        "description" : "Defines the different types of dependencies that can exist between invoice items.\n\n* UNKNOWN - The dependency type is not known\n* OPTION - The depending item is an option of its dependee\n* DEPOSIT - The depending item is a deposit item of its dependee\n",
+        "enum" : [ "UNKNOWN", "OPTION", "DEPOSIT" ]
+      },
+      "EventConsumerRegistration" : {
+        "required" : [ "callback_url", "id", "types" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The technical identifier of the event consumer registration.\nAssigned by the enfore platform on creation of the registration.\n",
+            "readOnly" : true
+          },
+          "types" : {
+            "minItems" : 1,
+            "type" : "array",
+            "description" : "The list of event types that the user wants to consume.",
+            "items" : {
+              "$ref" : "#/components/schemas/EventType"
+            }
+          },
+          "callback_url" : {
+            "type" : "string",
+            "description" : "The callback URL where event notifications are to be delivered. It *must* be HTTPS to prevent man-in-the-middle attacks.",
+            "format" : "uri",
+            "example" : "https://myserver.com/send/events/here"
+          }
+        }
+      },
+      "EventType" : {
+        "type" : "string",
+        "description" : "List of supported event types.\n\n`INVOICES` - Invoices have been created and are send to the consumer as `Invoice`.\n",
+        "enum" : [ "INVOICES" ]
+      },
+      "Currency" : {
+        "type" : "string",
+        "description" : "Represents a currency. Uses the ISO 4217 codes.",
+        "enum" : [ "AUD", "BRL", "CAD", "CHF", "CNY", "DKK", "EUR", "GBP", "HKD", "IDR", "INR", "JPY", "KRW", "MXN", "MYR", "NOK", "NZD", "PHP", "RUB", "SEK", "SGD", "TRY", "TWD", "USD", "ZAR" ]
+      },
+      "PaymentMethod" : {
+        "type" : "string",
+        "description" : "Methods of payment.",
+        "enum" : [ "CASH", "CREDIT_CARD", "DEBIT_CARD", "DIRECT_DEBIT", "BANK_TRANSFER", "PAYPAL", "GOOGLE_PAY", "AMAZON_PAYMENTS", "MPASS", "CHECK", "ACCOUNT", "SALES_VOUCHER" ]
+      },
+      "TaxCategory" : {
+        "type" : "string",
+        "description" : "Represents the locale-independent representation of a specific type of tax.\n\nThe category does not represent a specifix tax. This is needed as taxes are a) different depending\non country (and sometimes even within a single country) and b) tax rates may change over time but\nthe actual Tax objects must not change as they are referenced by existing invoices.\n\nFor example, the tax category STANDARD is mapped to currently mapped to \"DE/19%\" for Germany and to \"UK/20%\"\nfor the UK. If Germany would increase the standard tax rate to 21%, the mapping for Germany would be updated,\nbut the products would still use the same STANDARD category as before.\n\nAdditional factors may also influcence the mapping, for example the category REDUCED_TAKE_AWAY normally gets\nmapped to \"DE/19%\" for Germany. But when the sale is flagged as \"to go\", the category is mapped to \"DE/7%\"\ninstead.\n",
+        "enum" : [ "STANDARD", "REDUCED", "REDUCED_TAKE_AWAY", "NO_TAX" ]
+      },
+      "Tax" : {
+        "type" : "string",
+        "description" : "A Tax represents a specific and unchangeable tax. Whenever a tax (rate) changes due to new legislation\nor other reasons, a new Tax must be defined and used from then on.\n\nFor example, the standard VAT rates in Germany have been changed multiple times in the last 50 years:\n* 01.01.1968 – 30.06.1968 = 10%\n* 01.07.1968 – 31.12.1977 = 11%\n* 01.01.1978 – 30.06.1979 = 12%\n* 01.07.1979 – 30.06.1983 = 13%\n* 01.07.1983 – 31.12.1992 = 14%\n* 01.01.1993 – 31.03.1998 = 15%\n* 01.04.1998 – 31.12.2006 = 16%\n* 01.01.2007 – current    = 19%\n\nFor now, we only use the tax DE_STANDARD_VAT_2007. But if, hypothetically, Germany would increase its\nstandard VAT rate to 21% on 1/JAN/2020, we would define a new tax DE_STANDARD_VAT_2020 and use that from\n1/JAN/2020 on.\n",
+        "enum" : [ "DE_STANDARD_VAT_2007", "DE_REDUCED_VAT_2007", "DE_NO_VAT" ]
+      },
+      "TaxExemptionReason" : {
+        "type" : "string",
+        "description" : "Reasons for not applying tax on a product sale.",
+        "enum" : [ "UNIVERSAL_POSTAL_SERVICE_DE", "INTRA_COMMUNITY_TRADE_EU", "THIRD_PARTY_COUNTRY_DELIVERY_EU", "REVERSE_CHARGE_EU" ]
+      },
+      "UnitOfMeasure" : {
+        "type" : "string",
+        "description" : "Describes a unit of measure. Commonly uses as part of Quantity values.\n",
+        "enum" : [ "ENERGY_JOULES", "ENERGY_GIGAJOULES", "ENERGY_MEGAJOULES", "ENERGY_KILOJOULES", "ENERGY_CENTIJOULES", "ENERGY_MILLIJOULES", "ENERGY_MICROJOULES", "ENERGY_CALORIES", "ENERGY_KILOCALORIES", "ENERGY_WATTHOURS", "ENERGY_GIGAWATTHOURS", "ENERGY_MEGAWATTHOURS", "ENERGY_KILOWATTHOURS", "ENERGY_CENTIWATTHOURS", "ENERGY_MILLIWATTHOURS", "ENERGY_MICROWATTHOURS", "LENGTH_KILOMETERS", "LENGTH_METERS", "LENGTH_DECIMETERS", "LENGTH_CENTIMETERS", "LENGTH_MILLIMETERS", "LENGTH_POINTS", "LENGTH_INCHES", "LENGTH_FEET", "LENGTH_YARDS", "MASS_TONS", "MASS_KILOGRAMS", "MASS_GRAMS", "MASS_MILLIGRAMS", "MASS_POUNDS", "QUANTITY_PIECES", "TIME_SECONDS", "TIME_MINUTES", "TIME_HOURS", "TIME_DAYS", "TIME_WEEKS", "DIGITALINFORMATION_BYTES", "DIGITALINFORMATION_KILOBYTES", "DIGITALINFORMATION_KIBIBYTES", "DIGITALINFORMATION_MEGABYTES", "DIGITALINFORMATION_MEBIBYTES", "DIGITALINFORMATION_GIGABYTES", "DIGITALINFORMATION_GIBIBYTES", "DIGITALINFORMATION_TERABYTES", "DIGITALINFORMATION_TEBIBYTES", "DIGITALINFORMATION_PETABYTES", "DIGITALINFORMATION_PEBIBYTES", "TIME_MONTHS", "TIME_YEARS", "VOLUME_CUBIC_MILLIMETERS", "VOLUME_CUBIC_CENTIMETERS", "VOLUME_CUBIC_DECIMETERS", "VOLUME_CUBIC_METERS", "VOLUME_MILLILITERS", "VOLUME_CENTILITERS", "VOLUME_DECILITERS", "VOLUME_LITERS", "VOLUME_HECTOLITERS", "VOLUME_FLUID_OUNCES", "VOLUME_PINTS", "VOLUME_QUARTS", "VOLUME_GALLONS", "VOLUME_BARRELS" ]
+      },
+      "Quantity" : {
+        "required" : [ "unit", "value" ],
+        "type" : "object",
+        "properties" : {
+          "value" : {
+            "multipleOf" : 0.0000010,
+            "type" : "number",
+            "description" : "The numerical value of the Quantity.\nMust be in the range of -9,000,000,000,000 to 9,000,000,000,000 and may use up to 6 decimal digits.\n"
+          },
+          "unit" : {
+            "$ref" : "#/components/schemas/UnitOfMeasure"
+          }
+        },
+        "description" : "A Quantity represents a quantity value (i.e., a unit and an amount), for example \"3 pcs\" or \"2.5 kg\"."
+      },
+      "Money" : {
+        "required" : [ "unit", "value" ],
+        "type" : "object",
+        "properties" : {
+          "value" : {
+            "multipleOf" : 0.0000010,
+            "type" : "number",
+            "description" : "The numerical value of the Money.\nMust be in the range of -9,000,000,000,000 to 9,000,000,000,000 and may use up to 6 decimal digits.\n"
+          },
+          "unit" : {
+            "$ref" : "#/components/schemas/Currency"
+          }
+        },
+        "description" : "A Money represents a monetary value (i.e., a currency and an amount), for example \"120 EUR\" or \"2,500.75 USD\"."
+      }
+    }
+  }
+}

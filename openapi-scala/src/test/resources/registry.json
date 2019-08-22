@@ -1,0 +1,285 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "title" : "enfore Marketplace Registry API",
+    "description" : "This is a first design version of the enfore Marketplace API\n",
+    "version" : "0.0.2"
+  },
+  "servers" : [ {
+    "url" : "/"
+  } ],
+  "paths" : {
+    "/registry_entry" : {
+      "post" : {
+        "summary" : "Create a Registry Entry",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RegisterSupplierRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Registry entry created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RegistryEntry"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid request"
+          }
+        }
+      }
+    },
+    "/supplier-group" : {
+      "post" : {
+        "summary" : "Register a Supplier Group",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RegisterSupplierGroup"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Supplier Group Created"
+          },
+          "400" : {
+            "description" : "Invalid request"
+          }
+        }
+      }
+    },
+    "/supplier" : {
+      "post" : {
+        "summary" : "Register a SubSupplier",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RegisterSubSupplier"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "SubSupplier Created"
+          },
+          "400" : {
+            "description" : "Invalid request"
+          }
+        }
+      }
+    },
+    "/customer" : {
+      "post" : {
+        "summary" : "Register a customer",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RegisterCustomer"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Customer Created"
+          },
+          "400" : {
+            "description" : "Invalid request"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "RegisterSupplierRequest" : {
+        "required" : [ "@type", "n4SupplierContactRef" ],
+        "type" : "object",
+        "properties" : {
+          "@type" : {
+            "$ref" : "#/components/schemas/RegistrySupplierRequestAnnotation"
+          },
+          "n4SupplierContactRef" : {
+            "type" : "string"
+          }
+        },
+        "description" : "Create a Supplier\n"
+      },
+      "RegisterCustomerRequest" : {
+        "required" : [ "@type", "subSupplierId", "supplierCustomerId", "supplierGroupId" ],
+        "type" : "object",
+        "properties" : {
+          "@type" : {
+            "type" : "string",
+            "description" : "Constant name of the enfore DataModel Type\n",
+            "enum" : [ "n4.marketplace.registry.internal.info.supplier.RegistryCustomerRequest" ]
+          },
+          "supplierCustomerId" : {
+            "type" : "string"
+          },
+          "supplierGroupId" : {
+            "type" : "string"
+          },
+          "subSupplierId" : {
+            "type" : "string"
+          }
+        },
+        "description" : "Create a Customer at a Supplier\n"
+      },
+      "RegistryEntry" : {
+        "required" : [ "@type", "credentials", "n4SupplierContactRef", "subSupplierId", "supplierAdapterOrderEndpoint", "supplierCustomerId", "supplierGroupId", "whitelistedProductsOnly" ],
+        "type" : "object",
+        "properties" : {
+          "@type" : {
+            "type" : "string",
+            "description" : "Constant name of the enfore DataModel Type\n",
+            "enum" : [ "n4.coreservices.registry.RegistryEntry" ]
+          },
+          "supplierCustomerId" : {
+            "type" : "string",
+            "description" : "ID of the Customer at the Supplier\n"
+          },
+          "supplierGroupId" : {
+            "type" : "string",
+            "description" : "ID of the Supplier Group\n"
+          },
+          "subSupplierId" : {
+            "type" : "string",
+            "description" : "ID of the subsupplier within the Supplier Group\n"
+          },
+          "n4SupplierContactRef" : {
+            "type" : "string",
+            "description" : "enfore datamodel reference to the contact of the organization representing the supplier\n"
+          },
+          "supplierAdapterOrderEndpoint" : {
+            "type" : "string",
+            "description" : "Supplier callback HTTP Endpoint for Purchase Order Submissions\n"
+          },
+          "credentials" : {
+            "type" : "string",
+            "description" : "An opaque string that can store arbitrary information the supplier might need to persist between calls. Usually this would be \nsome identifiers or passwords needed for the customer to be properly identified in the Supplier's system.\n"
+          },
+          "whitelistedProductsOnly" : {
+            "type" : "boolean",
+            "description" : "If this is true, the customer can only see products that have been whitelisted for them, not the entire Marketplace catalog.\n"
+          }
+        },
+        "description" : "An entry in ther Registry that represents a relationship between a customer, a supplier and an enfore Organization\n"
+      },
+      "RegisterSupplierGroup" : {
+        "required" : [ "@type", "supplierAdapterOnboardEndpoint", "supplierAdapterPurchaseEndpoint", "supplierGroupId" ],
+        "type" : "object",
+        "properties" : {
+          "@type" : {
+            "type" : "string",
+            "description" : "Constant name of the enfore DataModel Type\n",
+            "enum" : [ "n4.marketplace.registry.external.registration.edi.RegisterSupplierGroupEDIFormat" ]
+          },
+          "supplierGroupId" : {
+            "type" : "string",
+            "description" : "ID of the Supplier Group\n"
+          },
+          "supplierAdapterPurchaseEndpoint" : {
+            "type" : "string"
+          },
+          "supplierAdapterOnboardEndpoint" : {
+            "type" : "string"
+          }
+        },
+        "description" : "Register a supplier group into the Marketplace\n"
+      },
+      "RegisterSubSupplier" : {
+        "required" : [ "@type", "subSupplierId", "supplierGroupId", "supplierInfo" ],
+        "type" : "object",
+        "properties" : {
+          "@type" : {
+            "type" : "string",
+            "description" : "Constant name of the enfore DataModel Type\n",
+            "enum" : [ "n4.marketplace.registry.external.registration.edi.RegisterSubSupplierEDIFormat" ]
+          },
+          "supplierGroupId" : {
+            "type" : "string",
+            "description" : "ID of the Supplier Group\n"
+          },
+          "subSupplierId" : {
+            "type" : "string",
+            "description" : "ID of the subsupplier within the Supplier Group\n"
+          },
+          "supplierInfo" : {
+            "$ref" : "#/components/schemas/SupplierInfo"
+          }
+        },
+        "description" : "Register A supplier into a supplier Group\n"
+      },
+      "SupplierInfo" : {
+        "required" : [ "name" ],
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string"
+          }
+        },
+        "description" : "User-facing information about the supplier\n"
+      },
+      "RegistrySupplierRequestAnnotation" : {
+        "type" : "string",
+        "description" : "Contains the annotation for fixed data type\n",
+        "enum" : [ "n4.marketplace.registry.internal.info.supplier.RegistrySupplierRequest" ]
+      },
+      "RegisterCustomer" : {
+        "required" : [ "@type", "credentials", "organizationId", "subSupplierId", "supplierCustomerId", "supplierGroupId", "whitelistedProductsOnly" ],
+        "type" : "object",
+        "properties" : {
+          "@type" : {
+            "type" : "string",
+            "description" : "Constant name of the enfore DataModel Type\n",
+            "enum" : [ "n4.marketplace.registry.external.registration.edi.RegisterSupplierCustomerEDIFormat" ]
+          },
+          "organizationId" : {
+            "type" : "string"
+          },
+          "supplierGroupId" : {
+            "type" : "string",
+            "description" : "ID of the Supplier Group\n"
+          },
+          "subSupplierId" : {
+            "type" : "string",
+            "description" : "ID of the subsupplier within the Supplier Group\n"
+          },
+          "credentials" : {
+            "type" : "string",
+            "description" : "Some opaque string that can be stored here with the customer and then is sent along with requests to the adapters.\nThis allows to store additional customer-identifying information along the customer id\n"
+          },
+          "supplierCustomerId" : {
+            "type" : "string",
+            "description" : "ID of the Customer at the Supplier\n"
+          },
+          "whitelistedProductsOnly" : {
+            "type" : "boolean",
+            "description" : "If this is true, the customer can only see products that have been whitelisted for them, not the entire Marketplace catalog.\n"
+          }
+        },
+        "description" : "Register a customer. This creates a binding from the supplier notion of customer to the customer as an enfore organizations\n"
+      }
+    }
+  }
+}

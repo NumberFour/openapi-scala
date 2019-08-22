@@ -9,7 +9,6 @@ import io.circe
 import io.circe._
 import cats.syntax.functor._
 import io.circe.generic.auto._
-import io.circe.yaml.parser
 
 import scala.io.Source
 

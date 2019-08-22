@@ -1,0 +1,5619 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "title" : "enfore Contacts API",
+    "description" : "enfore API for managing contacts (incl. customers, suppliers and staff)\n\nContacts are entities that the organization has dealings with.\nContacts can be split into individual contacts (i.e., human persons) and organization contacts (i.e., other organizations/businesses).\nAdditionally, contacts can have roles such as being a supplier, a customer, or a staff member. A single contact can have multiple roles, for example staff members are often also customers.\n",
+    "version" : "0.0.1"
+  },
+  "servers" : [ {
+    "url" : "https://virtserver.swaggerhub.com/enfore.com/enfore-ERP-API/1.0.0",
+    "description" : "SwaggerHub API Auto Mocking"
+  } ],
+  "tags" : [ {
+    "name" : "individual_contacts",
+    "description" : "Individual contacts are private persons that the organization has dealings with.\n"
+  }, {
+    "name" : "individual_contacts_professional_identities"
+  }, {
+    "name" : "individual_contacts_personal_relationships"
+  }, {
+    "name" : "individual_contacts_roles"
+  }, {
+    "name" : "organization_contacts",
+    "description" : "Organization contacts are businesses and other organizations that the organization has dealings with.\n"
+  }, {
+    "name" : "organization_contacts_departments"
+  }, {
+    "name" : "organization_contacts_locations"
+  }, {
+    "name" : "organization_contacts_memberships"
+  }, {
+    "name" : "organization_contacts_roles"
+  } ],
+  "paths" : {
+    "/contacts/individual" : {
+      "post" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Add a new IndividualContact to the organization",
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/IndividualContact"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Contact has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/IndividualContact"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "409" : {
+            "description" : "When payload contains an external ID and an IndividualContact with the same external ID already exists"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}" : {
+      "get" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Load an IndividualContact by its identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Contact is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/IndividualContact"
+                }
+              },
+              "application/vnd.enfore.contacts.full+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/IndividualContactWithSubresources"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Full update of an IndividualContact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/IndividualContact"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Contact was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/IndividualContact"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/addresses" : {
+      "get" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Get all addresses of a contact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose addresses to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Address information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Address"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Add a new address to a contact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the address is to be added to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Address"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Address has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/addresses/{address-id}" : {
+      "get" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Load an address by parent contact and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "address-id",
+          "in" : "path",
+          "description" : "ID of the address to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Address is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or address not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Full update of an address",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "address-id",
+          "in" : "path",
+          "description" : "ID of the address to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Address"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Address was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or address not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/emails" : {
+      "get" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Get all emails of a contact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose emails to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Email information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Email"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Add a new email to a contact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the email is to be added to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Email"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Email has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Email"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/emails/{email-id}" : {
+      "get" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Load an email by parent contact and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the email belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "email-id",
+          "in" : "path",
+          "description" : "ID of the email to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Email is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Email"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or email not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Full update of an email",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the email belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "email-id",
+          "in" : "path",
+          "description" : "ID of the email to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Email"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Email was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Email"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or email not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/phones" : {
+      "get" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Get all phones of a contact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose phones to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Phone information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Phone"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Add a new phone to a contact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the phone is to be added to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Phone"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Phone has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Phone"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/phones/{phone-id}" : {
+      "get" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Load an phone by parent contact and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the phone belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "phone-id",
+          "in" : "path",
+          "description" : "ID of the phone to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Phone is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Phone"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or phone not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Full update of an phone",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the phone belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "phone-id",
+          "in" : "path",
+          "description" : "ID of the phone to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Phone"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Phone was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Phone"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or phone not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/web-addresses" : {
+      "get" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Get all web addresses of a contact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose web addresses to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Web address information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/WebAddress"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Add a new web address to a contact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the web address is to be added to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/WebAddress"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Web address has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WebAddress"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/web-addresses/{web-address-id}" : {
+      "get" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Load a web address by parent contact and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "web-address-id",
+          "in" : "path",
+          "description" : "ID of the address to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Web address is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WebAddress"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or web address not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Full update of a web address",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the web address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "web-address-id",
+          "in" : "path",
+          "description" : "ID of the web address to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/WebAddress"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Address was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WebAddress"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or web address not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/professional-identities" : {
+      "get" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Get all professional identities of an IndividualContact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the IndividualContact whose PIs to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Professional identity information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProfessionalIdentity"
+                  }
+                }
+              },
+              "application/vnd.enfore.contacts.full+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/ProfessionalIdentityWithSubresources"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "IndividualContact not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Add a new professional identity to an IndividualContact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the IndividualContact to add the PI to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ProfessionalIdentity"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "ProfessionalIdentity has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProfessionalIdentity"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "IndividualContact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/professional-identities/{professional-identity-id}" : {
+      "get" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Load a ProfessionalIdentity by parent contact and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the IndividualContact the PI belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "professional-identity-id",
+          "in" : "path",
+          "description" : "ID of the ProfessionalIdentity to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "ProfessionalIdentity is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProfessionalIdentity"
+                }
+              },
+              "application/vnd.enfore.contacts.full+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProfessionalIdentityWithSubresources"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "IndividualContact or ProfessionalIdentity not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Full update of a ProfessionalIdentity",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the IndividualContact the PI belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "professional-identity-id",
+          "in" : "path",
+          "description" : "ID of the ProfessionalIdentity to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ProfessionalIdentity"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "ProfessionalIdentity was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProfessionalIdentity"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "IndividualContact or ProfessionalIdentity not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/professional-identities/{professional-identity-id}/addresses" : {
+      "get" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Get all addresses of a professional identity of a contact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose professional identity's addresses to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "professional-identity-id",
+          "in" : "path",
+          "description" : "ID of the professional identity whose addresses to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Address information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Address"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or professional identity not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Add a new address to a professional identity of a contact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose professional identity the address is to be added to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "professional-identity-id",
+          "in" : "path",
+          "description" : "ID of the professional identity to add the address to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Address"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Address has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or professional identity not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/professional-identities/{professional-identity-id}/addresses/{address-id}" : {
+      "get" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Load an address by parent contact, professional identity and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the professional identity owning the address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "professional-identity-id",
+          "in" : "path",
+          "description" : "ID of the professional identity the address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "address-id",
+          "in" : "path",
+          "description" : "ID of the address to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Address is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact, professional identity or address not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Full update of an address",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the professional identity owning the address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "professional-identity-id",
+          "in" : "path",
+          "description" : "ID of the professional identity the address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "address-id",
+          "in" : "path",
+          "description" : "ID of the address to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Address"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Address was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact, professional identity or address not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/professional-identities/{professional-identity-id}/emails" : {
+      "get" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Get all emails of a professional identity of a contact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose professional identity's emails to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "professional-identity-id",
+          "in" : "path",
+          "description" : "ID of the professional identity whose emails to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Email information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Email"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or professional identity not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Add a new email to a professional identity of a contact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose professional identity the email is to be added to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "professional-identity-id",
+          "in" : "path",
+          "description" : "ID of the professional identity to add the email to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Email"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Email has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Email"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or professional identity not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/professional-identities/{professional-identity-id}/emails/{email-id}" : {
+      "get" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Load an email by parent contact, professional identity and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the professional identity owning the email belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "professional-identity-id",
+          "in" : "path",
+          "description" : "ID of the professional identity the email belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "email-id",
+          "in" : "path",
+          "description" : "ID of the email to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Email is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Email"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact, professional identity or email not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Full update of an email",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the professional identity owning the email belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "professional-identity-id",
+          "in" : "path",
+          "description" : "ID of the professional identity the email belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "email-id",
+          "in" : "path",
+          "description" : "ID of the email to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Email"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Email was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Email"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact, professional identity or email not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/professional-identities/{professional-identity-id}/phones" : {
+      "get" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Get all phones of a professional identity of a contact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose professional identity's phones to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "professional-identity-id",
+          "in" : "path",
+          "description" : "ID of the professional identity whose phones to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Phone information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Phone"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or professional identity not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Add a new phone to a professional identity of a contact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose professional identity the phone is to be added to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "professional-identity-id",
+          "in" : "path",
+          "description" : "ID of the professional identity to add the phone to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Phone"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Phone has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Phone"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or professional identity not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/professional-identities/{professional-identity-id}/phones/{phone-id}" : {
+      "get" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Load an phone by parent contact, professional identity and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the professional identity owning the phone belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "professional-identity-id",
+          "in" : "path",
+          "description" : "ID of the professional identity the phone belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "phone-id",
+          "in" : "path",
+          "description" : "ID of the phone to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Phone is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Phone"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact, professional identity or phone not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Full update of an phone",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the professional identity owning the phone belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "professional-identity-id",
+          "in" : "path",
+          "description" : "ID of the professional identity the phone belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "phone-id",
+          "in" : "path",
+          "description" : "ID of the phone to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Phone"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Phone was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Phone"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact, professional identity or phone not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/professional-identities/{professional-identity-id}/web-addresses" : {
+      "get" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Get all web addresses of a professional identity of a contact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose professional identity's web addresses to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "professional-identity-id",
+          "in" : "path",
+          "description" : "ID of the professional identity whose web addresses to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Web address information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/WebAddress"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or professional identity not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Add a new web address to a professional identity of a contact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose professional identity the web address is to be added to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "professional-identity-id",
+          "in" : "path",
+          "description" : "ID of the professional identity to add the web address to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/WebAddress"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Web address has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WebAddress"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or professional identity not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/professional-identities/{professional-identity-id}/web-addresses/{web-address-id}" : {
+      "get" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Load a web address by parent contact, professional identity and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the professional identity owning the address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "professional-identity-id",
+          "in" : "path",
+          "description" : "ID of the professional identity the address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "web-address-id",
+          "in" : "path",
+          "description" : "ID of the address to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Web address is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WebAddress"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact, professional identity or web address not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "individual_contacts_professional_identities" ],
+        "summary" : "Full update of a web address",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the professional identity owning the web address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "professional-identity-id",
+          "in" : "path",
+          "description" : "ID of the professional identity the web address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "web-address-id",
+          "in" : "path",
+          "description" : "ID of the web address to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/WebAddress"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Address was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WebAddress"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact, professional identity or web address not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/personal-relationships" : {
+      "get" : {
+        "tags" : [ "individual_contacts_personal_relationships" ],
+        "summary" : "Get all personal relationships of an IndividualContact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the IndividualContact whose PRs to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Personal relationship information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/PersonalRelationship"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "IndividualContact not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "individual_contacts_personal_relationships" ],
+        "summary" : "Add a new personal relationship to an IndividualContact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the IndividualContact to add the PR to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PersonalRelationship"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "PersonalRelationship has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PersonalRelationship"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "IndividualContact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/personal-relationships/{personal-relationship-id}" : {
+      "get" : {
+        "tags" : [ "individual_contacts_personal_relationships" ],
+        "summary" : "Load a PersonalRelationship by parent contact and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the IndividualContact the PR belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "personal-relationship-id",
+          "in" : "path",
+          "description" : "ID of the PersonalRelationship to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "PersonalRelationship is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PersonalRelationship"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "IndividualContact or PersonalRelationship not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "individual_contacts_personal_relationships" ],
+        "summary" : "Full update of a PersonalRelationship",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the IndividualContact the PI belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "personal-relationship-id",
+          "in" : "path",
+          "description" : "ID of the PersonalRelationship to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/PersonalRelationship"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "PersonalRelationship was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PersonalRelationship"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "IndividualContact or PersonalRelationship not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/roles/customer" : {
+      "get" : {
+        "tags" : [ "individual_contacts_roles" ],
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Customer info is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerRole"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "IndividualContact or CustomerRole not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "individual_contacts_roles" ],
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CustomerRole"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Customer info is successfully created or updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerRole"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "IndividualContact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/roles/supplier" : {
+      "get" : {
+        "tags" : [ "individual_contacts_roles" ],
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Supplier info is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SupplierRole"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "IndividualContact or SupplierRole not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "individual_contacts_roles" ],
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SupplierRole"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Supplier info is successfully created or updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SupplierRole"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "IndividualContact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/individual/{contact-id}/roles/staff" : {
+      "get" : {
+        "tags" : [ "individual_contacts_roles" ],
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Staff info is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffRole"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "IndividualContact or StaffRole not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "individual_contacts_roles" ],
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/StaffRole"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Staff info is successfully created or updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/StaffRole"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "IndividualContact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization" : {
+      "post" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Add a new OrganizationContact to the organization",
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OrganizationContact"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Contact has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OrganizationContact"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "409" : {
+            "description" : "When payload contains an external ID and an OrganizationContact with the same external ID already exists"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}" : {
+      "get" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Load an OrganizationContact by its identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Contact is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OrganizationContact"
+                }
+              },
+              "application/vnd.enfore.contacts.full+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OrganizationContactWithSubresources"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Full update of an OrganizationContact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OrganizationContact"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Contact was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OrganizationContact"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/addresses" : {
+      "get" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Get all addresses of a contact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose addresses to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Address information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Address"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Add a new address to a contact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the address is to be added to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Address"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Address has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/addresses/{address-id}" : {
+      "get" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Load an address by parent contact and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "address-id",
+          "in" : "path",
+          "description" : "ID of the address to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Address is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or address not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Full update of an address",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "address-id",
+          "in" : "path",
+          "description" : "ID of the address to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Address"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Address was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or address not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/emails" : {
+      "get" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Get all emails of a contact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose emails to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Email information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Email"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Add a new email to a contact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the email is to be added to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Email"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Email has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Email"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/emails/{email-id}" : {
+      "get" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Load an email by parent contact and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the email belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "email-id",
+          "in" : "path",
+          "description" : "ID of the email to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Email is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Email"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or email not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Full update of an email",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the email belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "email-id",
+          "in" : "path",
+          "description" : "ID of the email to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Email"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Email was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Email"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or email not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/phones" : {
+      "get" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Get all phones of a contact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose phones to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Phone information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Phone"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Add a new phone to a contact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the phone is to be added to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Phone"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Phone has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Phone"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/phones/{phone-id}" : {
+      "get" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Load an phone by parent contact and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the phone belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "phone-id",
+          "in" : "path",
+          "description" : "ID of the phone to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Phone is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Phone"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or phone not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Full update of an phone",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the phone belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "phone-id",
+          "in" : "path",
+          "description" : "ID of the phone to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Phone"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Phone was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Phone"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or phone not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/web-addresses" : {
+      "get" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Get all web addresses of a contact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose web addresses to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Web address information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/WebAddress"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Add a new web address to a contact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the web address is to be added to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/WebAddress"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Web address has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WebAddress"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/web-addresses/{web-address-id}" : {
+      "get" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Load a web address by parent contact and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "web-address-id",
+          "in" : "path",
+          "description" : "ID of the address to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Web address is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WebAddress"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or web address not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "organization_contacts" ],
+        "summary" : "Full update of a web address",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the web address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "web-address-id",
+          "in" : "path",
+          "description" : "ID of the web address to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/WebAddress"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Address was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WebAddress"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or web address not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/departments" : {
+      "get" : {
+        "tags" : [ "organization_contacts_departments" ],
+        "summary" : "Get all departments of an OrganizationContact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the OrganizationContact whose departments to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Department information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Department"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "OrganizationContact not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "organization_contacts_departments" ],
+        "summary" : "Add a new department to an OrganizationContact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the OrganizationContact to add the department to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Department"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Department has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Department"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "OrganizationContact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/departments/{department-id}" : {
+      "get" : {
+        "tags" : [ "organization_contacts_departments" ],
+        "summary" : "Load a department by parent contact and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the OrganizationContact the department belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "department-id",
+          "in" : "path",
+          "description" : "ID of the department to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Department is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Department"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "OrganizationContact or department not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "organization_contacts_departments" ],
+        "summary" : "Full update of a department",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the OrganizationContact the department belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "department-id",
+          "in" : "path",
+          "description" : "ID of the department to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Department"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Department was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Department"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "OrganizationContact or department not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/locations" : {
+      "get" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Get all locations of an OrganizationContact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the OrganizationContact whose locations to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Location information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Location"
+                  }
+                }
+              },
+              "application/vnd.enfore.contacts.full+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LocationWithSubresources"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "OrganizationContact not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Add a new location to an OrganizationContact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the OrganizationContact to add the location to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Location"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Location has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Location"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "OrganizationContact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/locations/{location-id}" : {
+      "get" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Load a location by parent contact and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the OrganizationContact the location belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "location-id",
+          "in" : "path",
+          "description" : "ID of the location to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Location is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Location"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "OrganizationContact or location not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Full update of a location",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the OrganizationContact the location belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "location-id",
+          "in" : "path",
+          "description" : "ID of the location to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Location"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Location was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Location"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "OrganizationContact or location not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/locations/{location-id}/addresses" : {
+      "get" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Get all addresses of a location of a contact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose location's addresses to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "location-id",
+          "in" : "path",
+          "description" : "ID of the location whose addresses to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Address information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Address"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or location not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Add a new address to a location of a contact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose location the address is to be added to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "location-id",
+          "in" : "path",
+          "description" : "ID of the location to add the address to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Address"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Address has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or location not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/locations/{location-id}/addresses/{address-id}" : {
+      "get" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Load an address by parent contact, location and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the location owning the address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "location-id",
+          "in" : "path",
+          "description" : "ID of the location the address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "address-id",
+          "in" : "path",
+          "description" : "ID of the address to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Address is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact, location or address not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Full update of an address",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the location owning the address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "location-id",
+          "in" : "path",
+          "description" : "ID of the location the address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "address-id",
+          "in" : "path",
+          "description" : "ID of the address to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Address"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Address was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Address"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact, location or address not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/locations/{location-id}/emails" : {
+      "get" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Get all emails of a location of a contact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose location's emails to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "location-id",
+          "in" : "path",
+          "description" : "ID of the location whose emails to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Email information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Email"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or location not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Add a new email to a location of a contact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose location the email is to be added to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "location-id",
+          "in" : "path",
+          "description" : "ID of the location to add the email to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Email"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Email has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Email"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or location not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/locations/{location-id}/emails/{email-id}" : {
+      "get" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Load an email by parent contact, location and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the location owning the email belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "location-id",
+          "in" : "path",
+          "description" : "ID of the location the email belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "email-id",
+          "in" : "path",
+          "description" : "ID of the email to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Email is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Email"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact, location or email not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Full update of an email",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the location owning the email belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "location-id",
+          "in" : "path",
+          "description" : "ID of the location the email belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "email-id",
+          "in" : "path",
+          "description" : "ID of the email to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Email"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Email was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Email"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact, location or email not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/locations/{location-id}/phones" : {
+      "get" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Get all phones of a location of a contact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose location's phones to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "location-id",
+          "in" : "path",
+          "description" : "ID of the location whose phones to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Phone information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Phone"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or location not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Add a new phone to a location of a contact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose location the phone is to be added to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "location-id",
+          "in" : "path",
+          "description" : "ID of the location to add the phone to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Phone"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Phone has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Phone"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or location not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/locations/{location-id}/phones/{phone-id}" : {
+      "get" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Load an phone by parent contact, location and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the location owning the phone belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "location-id",
+          "in" : "path",
+          "description" : "ID of the location the phone belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "phone-id",
+          "in" : "path",
+          "description" : "ID of the phone to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Phone is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Phone"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact, location or phone not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Full update of an phone",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the location owning the phone belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "location-id",
+          "in" : "path",
+          "description" : "ID of the location the phone belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "phone-id",
+          "in" : "path",
+          "description" : "ID of the phone to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Phone"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Phone was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Phone"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact, location or phone not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/locations/{location-id}/web-addresses" : {
+      "get" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Get all web addresses of a location of a contact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose location's web addresses to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "location-id",
+          "in" : "path",
+          "description" : "ID of the location whose web addresses to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Web address information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/WebAddress"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or location not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Add a new web address to a location of a contact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact whose location the web address is to be added to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "location-id",
+          "in" : "path",
+          "description" : "ID of the location to add the web address to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/WebAddress"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Web address has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WebAddress"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact or location not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/locations/{location-id}/web-addresses/{web-address-id}" : {
+      "get" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Load a web address by parent contact, location and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the location owning the address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "location-id",
+          "in" : "path",
+          "description" : "ID of the location the address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "web-address-id",
+          "in" : "path",
+          "description" : "ID of the address to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Web address is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WebAddress"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact, location or web address not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "organization_contacts_locations" ],
+        "summary" : "Full update of a web address",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact the location owning the web address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "location-id",
+          "in" : "path",
+          "description" : "ID of the location the web address belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "web-address-id",
+          "in" : "path",
+          "description" : "ID of the web address to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/WebAddress"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Address was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/WebAddress"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact, location or web address not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/memberships" : {
+      "get" : {
+        "tags" : [ "organization_contacts_memberships" ],
+        "summary" : "Get all memberships of an OrganizationContact.",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the OrganizationContact whose memberships to get",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Membership information is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/Membership"
+                  }
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid parameters were sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "OrganizationContact not found or invalid identifier"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "organization_contacts_memberships" ],
+        "summary" : "Add a new membership to an OrganizationContact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the OrganizationContact to add the membership to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Membership"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Membership has successfully been added",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Membership"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "OrganizationContact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/memberships/{membership-id}" : {
+      "get" : {
+        "tags" : [ "organization_contacts_memberships" ],
+        "summary" : "Load a membership by parent contact and identifier",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the OrganizationContact the membership belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "membership-id",
+          "in" : "path",
+          "description" : "ID of the membership to load",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Membership is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Membership"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "OrganizationContact or membership not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "organization_contacts_memberships" ],
+        "summary" : "Full update of a membership",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the OrganizationContact the membership belongs to",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "membership-id",
+          "in" : "path",
+          "description" : "ID of the membership to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Membership"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Membership was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Membership"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "OrganizationContact or membership not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/roles/customer" : {
+      "get" : {
+        "tags" : [ "organization_contacts_roles" ],
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Customer info is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerRole"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "OrganizationContact or CustomerRole not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "organization_contacts_roles" ],
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CustomerRole"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Customer info is successfully created or updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CustomerRole"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "OrganizationContact not found or invalid identifier"
+          }
+        }
+      }
+    },
+    "/contacts/organization/{contact-id}/roles/supplier" : {
+      "get" : {
+        "tags" : [ "organization_contacts_roles" ],
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Supplier info is successfully returned",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SupplierRole"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "OrganizationContact or SupplierRole not found or invalid identifier"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "organization_contacts_roles" ],
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/SupplierRole"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Supplier info is successfully created or updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/SupplierRole"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "OrganizationContact not found or invalid identifier"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Contact" : {
+        "required" : [ "id", "name", "type" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The technical identifier of the contact. Assigned by the enfore platform on creation of the\ncontact and not changeable afterwards.\n",
+            "readOnly" : true
+          },
+          "type" : {
+            "type" : "string",
+            "enum" : [ "individual", "organization" ]
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "The name of the contact.\nFor individual contacts, this is the full name of the person, e.g., \"Barnabas Ludwig Johnson II Sr.\".\nFor organization contacts, this is the \"common name\" of the organization. This may not necessarily be the registered business name, as that may either not exist or be too cumbersome to use.\n"
+          }
+        },
+        "description" : "Base type for all contacts.\n"
+      },
+      "IndividualContact" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "gender" : {
+            "$ref" : "#/components/schemas/Gender"
+          },
+          "dateOfBirth" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "anniversary" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        },
+        "description" : "Represents a human person.\n"
+      },
+      "IndividualContactWithSubresources" : {
+        "type" : "object",
+        "properties" : {
+          "individual_contact" : {
+            "$ref" : "#/components/schemas/IndividualContact"
+          },
+          "addresses" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Address"
+            }
+          },
+          "emails" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Email"
+            }
+          },
+          "phones" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Phone"
+            }
+          },
+          "web_addresses" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/WebAddress"
+            }
+          },
+          "professional_identities" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/ProfessionalIdentity"
+            }
+          },
+          "personal_relationships" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PersonalRelationship"
+            }
+          },
+          "customer_role" : {
+            "$ref" : "#/components/schemas/CustomerRole"
+          },
+          "supplier_role" : {
+            "$ref" : "#/components/schemas/SupplierRole"
+          },
+          "staff_role" : {
+            "$ref" : "#/components/schemas/StaffRole"
+          }
+        },
+        "description" : "An IndividualContact including all subresources such addresses, emails and phones.\n"
+      },
+      "OrganizationContact" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "founded" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "representatives" : {
+            "type" : "array",
+            "readOnly" : true,
+            "items" : {
+              "$ref" : "#/components/schemas/Representative"
+            }
+          },
+          "founders" : {
+            "type" : "array",
+            "description" : "The founders of the organization.\nThe array contains the URIs for accessing the professional identities of the founders of the organization.\n",
+            "items" : {
+              "type" : "string",
+              "format" : "uri"
+            }
+          },
+          "leaders" : {
+            "type" : "array",
+            "description" : "The leaders of the organization.\nThe array contains the URIs for accessing the professional identities of the leaders of the organization.\n",
+            "items" : {
+              "type" : "string",
+              "format" : "uri"
+            }
+          }
+        },
+        "description" : "Represents an organization or business.\n"
+      },
+      "OrganizationContactWithSubresources" : {
+        "type" : "object",
+        "properties" : {
+          "organization_contact" : {
+            "$ref" : "#/components/schemas/OrganizationContact"
+          },
+          "addresses" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Address"
+            }
+          },
+          "emails" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Email"
+            }
+          },
+          "phones" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Phone"
+            }
+          },
+          "web_addresses" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/WebAddress"
+            }
+          },
+          "departments" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Department"
+            }
+          },
+          "locations" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Location"
+            }
+          },
+          "memberships" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Membership"
+            }
+          },
+          "customer_role" : {
+            "$ref" : "#/components/schemas/CustomerRole"
+          },
+          "supplier_role" : {
+            "$ref" : "#/components/schemas/SupplierRole"
+          }
+        },
+        "description" : "An OrganizationContact including all subresources such addresses, emails and phones.\n"
+      },
+      "ProfessionalIdentity" : {
+        "required" : [ "id", "is_active", "organization_contact" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "readOnly" : true
+          },
+          "organization_contact" : {
+            "type" : "string",
+            "description" : "The URI of the OrganizationContact that the IndividualContact owning the ProfessionalIdentity represents.\n",
+            "format" : "uri"
+          },
+          "is_active" : {
+            "type" : "boolean"
+          },
+          "job_title" : {
+            "type" : "string"
+          },
+          "departments" : {
+            "type" : "array",
+            "description" : "The departments of the represented organization that the person works at.\nThe items of the array are references to Department items that belong to the OrganizationContact referenced by the PIs \"organization_contact\" field.\n",
+            "items" : {
+              "type" : "string",
+              "format" : "uri"
+            }
+          },
+          "locations" : {
+            "type" : "array",
+            "description" : "The locations of the represented organization that the person works at.\nThe items of the array are references to Location items that belong to the OrganizationContact referenced by the PIs \"organization_contact\" field.\n",
+            "items" : {
+              "type" : "string",
+              "format" : "uri"
+            }
+          }
+        },
+        "description" : "A professional identity represents that an individual contact represents (e.g., works for) an organization.\n"
+      },
+      "ProfessionalIdentityWithSubresources" : {
+        "type" : "object",
+        "properties" : {
+          "professional_identity" : {
+            "$ref" : "#/components/schemas/ProfessionalIdentity"
+          },
+          "addresses" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Address"
+            }
+          },
+          "emails" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Email"
+            }
+          },
+          "phones" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Phone"
+            }
+          },
+          "web_addresses" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/WebAddress"
+            }
+          }
+        },
+        "description" : "A ProfessionalIdentity including all subresources such addresses, emails and phones.\n"
+      },
+      "PersonalRelationship" : {
+        "required" : [ "id", "individual_contact", "type" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "readOnly" : true
+          },
+          "type" : {
+            "$ref" : "#/components/schemas/PersonalRelationshipType"
+          },
+          "individual_contact" : {
+            "type" : "string",
+            "description" : "The URI of the IndividualContact that the IndividualContact owning the PersonalRelationship has a relationship with.\n",
+            "format" : "uri"
+          }
+        },
+        "description" : "A personal relationship represents a relationship that an individual contact has with another individual.\n"
+      },
+      "PersonalRelationshipType" : {
+        "type" : "string",
+        "description" : "The type of a personal relationship",
+        "enum" : [ "SPOUSE", "FATHER", "MOTHER", "SON", "DAUGHTER", "BROTHER", "SISTER", "RELATIVE", "FRIEND", "BUSINESS_CONNECTION", "CRAZY_EX_GIRLFRIEND" ]
+      },
+      "Representative" : {
+        "required" : [ "is_active", "professional_identity" ],
+        "type" : "object",
+        "properties" : {
+          "professional_identity" : {
+            "type" : "string",
+            "format" : "uri"
+          },
+          "is_active" : {
+            "type" : "boolean"
+          },
+          "activation_date" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "deactivation_date" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }
+      },
+      "Department" : {
+        "required" : [ "id", "name" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "readOnly" : true
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "area" : {
+            "$ref" : "#/components/schemas/DepartmentArea"
+          },
+          "code" : {
+            "type" : "string"
+          }
+        }
+      },
+      "DepartmentArea" : {
+        "type" : "string",
+        "description" : "The area of activity of a department",
+        "enum" : [ "ADMINISTRATION", "OPERATIONS", "MARKETING", "SALES", "OTHER" ]
+      },
+      "Location" : {
+        "required" : [ "id", "name", "organization_contact", "type" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "readOnly" : true
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "leaders" : {
+            "type" : "array",
+            "description" : "The leaders of the location.\nThe array contains the URIs for accessing the professional identities of the leaders of the location.\n",
+            "items" : {
+              "type" : "string",
+              "format" : "uri"
+            }
+          },
+          "member_count" : {
+            "multipleOf" : 1,
+            "type" : "number"
+          }
+        }
+      },
+      "LocationWithSubresources" : {
+        "type" : "object",
+        "properties" : {
+          "location" : {
+            "$ref" : "#/components/schemas/Location"
+          },
+          "addresses" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Address"
+            }
+          },
+          "emails" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Email"
+            }
+          },
+          "phones" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Phone"
+            }
+          },
+          "web_addresses" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/WebAddress"
+            }
+          }
+        },
+        "description" : "A Location including all subresources such addresses, emails and phones.\n"
+      },
+      "Membership" : {
+        "required" : [ "id", "name", "organization_contact", "type" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "readOnly" : true
+          },
+          "type" : {
+            "$ref" : "#/components/schemas/MembershipType"
+          },
+          "organization_contact" : {
+            "type" : "string",
+            "description" : "The URI of the OrganizationContact that the contact owning the Membership is a member of.\n",
+            "format" : "uri"
+          },
+          "name" : {
+            "type" : "string"
+          },
+          "reference" : {
+            "type" : "string"
+          }
+        }
+      },
+      "MembershipType" : {
+        "type" : "string",
+        "description" : "The type of an Membership",
+        "enum" : [ "CLUB", "COOP", "FILIALE", "FRANCHISE", "GROUP_BUYING", "SUBSIDIARY", "WHOLLY_OWNED_SUBSIDIARY" ]
+      },
+      "CustomerRole" : {
+        "required" : [ "customer_id", "customer_since", "is_active" ],
+        "type" : "object",
+        "properties" : {
+          "customer_id" : {
+            "type" : "string"
+          },
+          "is_active" : {
+            "type" : "boolean"
+          },
+          "customer_since" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "managed_by" : {
+            "type" : "string",
+            "format" : "uri"
+          },
+          "enfore_card" : {
+            "$ref" : "#/components/schemas/CustomerCard"
+          },
+          "external_card" : {
+            "$ref" : "#/components/schemas/CustomerCard"
+          }
+        }
+      },
+      "CustomerCard" : {
+        "required" : [ "added", "number" ],
+        "type" : "object",
+        "properties" : {
+          "number" : {
+            "type" : "string"
+          },
+          "added" : {
+            "type" : "string",
+            "format" : "date"
+          }
+        }
+      },
+      "SupplierRole" : {
+        "required" : [ "is_active", "supplier_id", "supplier_since" ],
+        "type" : "object",
+        "properties" : {
+          "supplier_id" : {
+            "type" : "string"
+          },
+          "is_active" : {
+            "type" : "boolean"
+          },
+          "supplier_since" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "managed_by" : {
+            "type" : "string",
+            "format" : "uri"
+          },
+          "my_customer_id" : {
+            "type" : "string"
+          }
+        }
+      },
+      "StaffRole" : {
+        "required" : [ "is_active", "staff_id" ],
+        "type" : "object",
+        "properties" : {
+          "staff_id" : {
+            "type" : "string"
+          },
+          "is_active" : {
+            "type" : "boolean"
+          },
+          "date_hired" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "date_released" : {
+            "type" : "string",
+            "format" : "date"
+          },
+          "managed_by" : {
+            "type" : "string",
+            "format" : "uri"
+          },
+          "substitute" : {
+            "type" : "string",
+            "format" : "uri"
+          },
+          "national_id" : {
+            "type" : "string"
+          }
+        }
+      },
+      "Address" : {
+        "required" : [ "full_address", "id", "type", "usage_context" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "readOnly" : true
+          },
+          "type" : {
+            "$ref" : "#/components/schemas/AddressType"
+          },
+          "full_address" : {
+            "type" : "string",
+            "description" : "The full address as a string suitable for display to an end user.\n"
+          },
+          "recipient_name" : {
+            "type" : "string"
+          },
+          "care_of" : {
+            "type" : "string"
+          },
+          "street_name" : {
+            "type" : "string"
+          },
+          "street_number" : {
+            "type" : "string"
+          },
+          "additional" : {
+            "type" : "string"
+          },
+          "city" : {
+            "type" : "string"
+          },
+          "zip" : {
+            "type" : "string"
+          },
+          "country_code" : {
+            "type" : "string",
+            "description" : "The country code according to [iso-3166-1-alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)\n"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "usages" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/AddressUsage"
+            }
+          },
+          "usage_context" : {
+            "$ref" : "#/components/schemas/UsageContext"
+          }
+        },
+        "description" : "An address of a location/destination"
+      },
+      "AddressType" : {
+        "type" : "string",
+        "enum" : [ "NOT_QUALIFIED", "FACTORY", "HEADQUARTERS", "HOME_OFFICE", "OFFICE", "OFFICE_CENTER", "PACKSTATION", "PO_BOX", "POST_OFFICE", "RESIDENTIAL_HOME", "SECOND_HOME", "SERVICE_POINT", "STORE", "SUBSIDIARY", "VACATION_HOME", "WAREHOUSE" ]
+      },
+      "AddressUsage" : {
+        "type" : "string",
+        "enum" : [ "EVERYTHING", "CORRESPONDENCE", "INVOICES", "SHIPPING" ]
+      },
+      "Email" : {
+        "required" : [ "address", "id", "type", "usage_context" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "readOnly" : true
+          },
+          "type" : {
+            "$ref" : "#/components/schemas/EmailType"
+          },
+          "address" : {
+            "type" : "string",
+            "format" : "email"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "usage_context" : {
+            "$ref" : "#/components/schemas/UsageContext"
+          }
+        }
+      },
+      "EmailType" : {
+        "type" : "string",
+        "enum" : [ "NOT_QUALIFIED", "EMAIL_ALIAS", "MAILING_LIST", "PERSONAL_EMAIL", "WORK_EMAIL" ]
+      },
+      "Phone" : {
+        "required" : [ "id", "number", "type", "usage_context" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "readOnly" : true
+          },
+          "type" : {
+            "$ref" : "#/components/schemas/PhoneType"
+          },
+          "number" : {
+            "type" : "string"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "usages" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/PhoneUsage"
+            }
+          },
+          "usage_context" : {
+            "$ref" : "#/components/schemas/UsageContext"
+          }
+        }
+      },
+      "PhoneType" : {
+        "type" : "string",
+        "enum" : [ "NOT_QUALIFIED", "DIRECT_EXTENSION", "DIRECT_FAX", "DIRECT_LINE", "FAX_LINE", "FIXED_LINE", "HOME_FAX", "HOME_PHONE", "HOTLINE", "MAIN", "MAIN_FAX", "MOBILE", "PERSONAL_MOBILE", "SAT", "VIRTUAL_LINE", "VOIP_LINE", "WORK_MOBILE" ]
+      },
+      "PhoneUsage" : {
+        "type" : "string",
+        "enum" : [ "EVERYTHING", "CALL", "SMS", "WHATSAPP" ]
+      },
+      "WebAddress" : {
+        "required" : [ "id", "type", "url", "usage_context" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "readOnly" : true
+          },
+          "type" : {
+            "$ref" : "#/components/schemas/WebAddressType"
+          },
+          "url" : {
+            "type" : "string",
+            "format" : "uri"
+          },
+          "description" : {
+            "type" : "string"
+          },
+          "usage_context" : {
+            "$ref" : "#/components/schemas/UsageContext"
+          }
+        }
+      },
+      "WebAddressType" : {
+        "type" : "string",
+        "enum" : [ "NOT_QUALIFIED", "BLOG", "FACEBOOK_PAGE_OR_PROFILE", "GOOGLE_PLUS_PROFILE", "HOMEPAGE_OR_WEBSITE", "LINKEDIN_PROFILE", "ONLINE_STORE", "ORGANIZATION_BLOG", "ORGANIZATION_PROFILE", "ORGANIZATION_WEBSITE", "OTHER", "PERSONAL_BLOG", "PERSONAL_PROFILE", "PERSONAL_WEBSITE", "PROFESSIONAL_BLOG", "PROFESSIONAL_PROFILE", "PROFESSIONAL_WEBSITE", "TWITTER_PROFILE", "TWITTER_STREAM", "XING_PROFILE", "YELP_IMAGE" ]
+      },
+      "UsageContext" : {
+        "type" : "string",
+        "enum" : [ "ORGANIZATION", "PERSONAL", "PROFESSIONAL" ]
+      },
+      "Gender" : {
+        "type" : "string",
+        "description" : "The gender of a human person",
+        "enum" : [ "FEMALE", "MALE" ]
+      }
+    }
+  }
+}

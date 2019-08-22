@@ -18,7 +18,6 @@ import io.circe
 import io.circe._
 import cats.syntax.functor._
 import io.circe.generic.auto._
-import io.circe.yaml.parser
 
 import scala.io.Source
 
@@ -81,7 +80,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
       |        - unit
     """.stripMargin
 
-    val ast = parser.parse(yamlCode).flatMap(_.as[CoreASTRepr])
+    val ast = circe.yaml.parser.parse(yamlCode).flatMap(_.as[CoreASTRepr])
     ast.left.map(println) // For debugging the failing tests
     ast.map { representation =>
       implicit val packageName = PackageName("foo")
@@ -171,7 +170,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
       |        - unit
     """.stripMargin
 
-    val ast = parser.parse(yamlCode).flatMap(_.as[CoreASTRepr])
+    val ast = circe.yaml.parser.parse(yamlCode).flatMap(_.as[CoreASTRepr])
     ast.left.map(println) // For debugging the failing tests
     ast.map { representation =>
       implicit val packageName = PackageName("foo")
@@ -218,7 +217,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
   }
 
   it should "be able to read all yamls" in {
-    val sources = List("catalog", "Contacts-API", "ERP-API", "problem", "purchasing", "registry").map(_ + ".yaml")
+    val sources = List("catalog", "Contacts-API", "ERP-API", "problem", "purchasing", "registry").map(_ + ".json")
     sources.foreach { source =>
       info { source }
       val yaml: String                          = Source.fromResource(source).mkString

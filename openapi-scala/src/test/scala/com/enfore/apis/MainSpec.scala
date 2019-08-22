@@ -6,8 +6,8 @@ import org.scalatest._
 class MainSpec extends FlatSpec with Matchers {
 
   it should "be able to generate scala for all yamls" in {
-    val sources = List("catalog", "Contacts-API", "ERP-API", "problem", "purchasing", "registry").map(_ + ".yaml")
-    sources.foreach { source =>
+    val sources = List("catalog", "Contacts-API", "ERP-API", "problem", "purchasing", "registry").map(_ + ".json")
+    sources.foreach { source: String =>
       info { source }
       val result = Main.generateScala(
         ClassLoader.getSystemResource(source).getPath,

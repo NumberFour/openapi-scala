@@ -4,6 +4,7 @@ import sbt.{Def, _}
 import Keys._
 import com.enfore.apis.generator.RouteImplementation
 import java.io.{File, FileWriter}
+import java.nio.file.Files
 
 object OpenAPIPlugin extends AutoPlugin {
 
@@ -14,6 +15,8 @@ object OpenAPIPlugin extends AutoPlugin {
       routesImplementations: List[RouteImplementation]
   ): Seq[File] = {
     println(s"[info] Creating OpenAPI from $sourceDir and writing to target $outputDir")
+    Files.createDirectories(sourceDir.toPath)
+    println("Total number of files are: " + sourceDir.listFiles.length)
     sourceDir.listFiles.flatMap { sourceFile =>
       Main
         .generateScala(sourceFile.getAbsolutePath, packageName, routesImplementations)
@@ -54,7 +57,7 @@ object OpenAPIPlugin extends AutoPlugin {
       openAPISource := { sourceDirectory.value / "openapi" },
       openAPIOutput := sourceManaged.value / "main",
       openAPIOutputPackage := "com.enfore.openapi",
-      openAPIGenerate := Def.taskDyn {
+      openAPIGenerate :=
         Def.task {
           compileOpenAPI(
             openAPISource.value,
@@ -62,8 +65,7 @@ object OpenAPIPlugin extends AutoPlugin {
             openAPIOutputPackage.value,
             routeImplementations.value
           )
-        }
-      }.value,
+        }.value,
       watchSources ++= { (openAPISource.value ** "*").get },
       sourceGenerators in Compile += openAPIGenerate
     )

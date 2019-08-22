@@ -28,9 +28,10 @@ lazy val `openapi-scala` = (project in file("openapi-scala"))
     libraryDependencies ++= Seq(
       "com.github.mpilquist" %% "simulacrum"       % "0.15.0",
       "com.beachape"         %% "enumeratum"       % "1.5.13",
-      "io.circe"             %% "circe-yaml"       % "0.9.0",
       "io.circe"             %% "circe-generic"    % "0.10.0",
+      "io.circe"             %% "circe-parser"    % "0.10.0",
       "com.beachape"         %% "enumeratum-circe" % "1.5.20",
+      "io.circe"             %% "circe-yaml"       % "0.9.0" % "test",
       "org.scalatest"        %% "scalatest"        % "3.0.5" % "test",
       "org.scalameta"        %% "scalameta"        % "4.1.0" % "test"
     )
