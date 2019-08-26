@@ -3,7 +3,7 @@ package com.enfore.apis
 import com.enfore.apis.ast.ASTTranslationFunctions
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
 import com.enfore.apis.ast.SwaggerAST._
-import com.enfore.apis.generator.RouteImplementation
+import com.enfore.apis.generator.{Http4sImplementation, RouteImplementation}
 import com.enfore.apis.generator.ScalaGenerator.ops._
 import io.circe
 import io.circe._
@@ -23,8 +23,6 @@ object Main {
   def loadRepresentationFromFile(filename: String): Either[circe.Error, CoreASTRepr] = {
     val file = Source.fromFile(filename)
     val content = file.getLines
-    // God bless you. i.e., if you believe in God. If not, well...
-      .map(line => if (line == "      - NO") "      - \"NO\"" else line)
       .mkString("\n")
     file.close()
     parser
@@ -45,6 +43,17 @@ object Main {
     } yield {
       componentsMap.mapValues(_.generateScala) ++
         routeImplementations.flatMap(_.generateScala(routesMap, pn))
+    }
+  }
+
+  def genHttp4sFromJson(in: String, packageName: String): Either[circe.Error, Map[String, String]] = {
+    val pn = PackageName(packageName)
+    for {
+      repr <- parser.parse(in).flatMap(_.as[CoreASTRepr])
+      componentsMap = ASTTranslationFunctions.readComponentsToInterop(repr)(pn)
+      routesMap     = ASTTranslationFunctions.readRoutesToInterop(repr)(pn)
+    } yield {
+      componentsMap.mapValues(_.generateScala) ++ Http4sImplementation.generateScala(routesMap, pn)
     }
   }
 }

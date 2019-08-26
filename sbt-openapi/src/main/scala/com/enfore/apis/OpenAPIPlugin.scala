@@ -1,51 +1,50 @@
 package com.enfore.apis
 
-import sbt.{Def, _}
+import sbt.{Compile, Def, _}
 import Keys._
-import com.enfore.apis.generator.RouteImplementation
-import java.io.{File, FileWriter}
+import java.io.File
 import java.nio.file.Files
 
 object OpenAPIPlugin extends AutoPlugin {
 
-  def compileOpenAPI(
-      sourceDir: File,
+  def compileCombined(
+      sourceFile: File,
       outputDir: File,
-      packageName: String,
-      routesImplementations: List[RouteImplementation]
-  ): Seq[File] = {
-    println(s"[info] Creating OpenAPI from $sourceDir and writing to target $outputDir")
-    Files.createDirectories(sourceDir.toPath)
-    println("Total number of files are: " + sourceDir.listFiles.length)
-    sourceDir.listFiles.flatMap { sourceFile =>
-      Main
-        .generateScala(sourceFile.getAbsolutePath, packageName, routesImplementations)
-        .left
-        .map(err => println(s"Error while converting: $err"))
-        .right
-        .get
-        .map {
-          case (name: String, content: String) =>
-            val file = outputDir / s"$name.scala"
-            file.getParentFile.mkdirs()
-            val writer = new FileWriter(file)
-            writer.write(content.replaceAll("\t", "  "))
-            writer.close()
-            file
-        }
-        .toList
-    }
+      targetSvcUrl: String,
+      apiDefTarget: File,
+      packageName: String): Seq[File] = {
+    println(s"[info] Creating OpenAPI from $sourceFile and writing to target $outputDir")
+    Files.createDirectories(sourceFile.getParentFile.toPath)
+    Files.createDirectories(apiDefTarget.getParentFile.toPath)
+    val apiCombined = CombineUtils.resolvedApi(sourceFile, targetSvcUrl)
+    val jsonRepr    = CombineUtils.jsonRepr(apiCombined)
+    CombineUtils.writeFile(apiDefTarget, jsonRepr)
+    Main
+      .genHttp4sFromJson(jsonRepr, packageName)
+      .left
+      .map(err => println(s"[error] Errors while converting: $err"))
+      .right
+      .get
+      .map {
+        case (name: String, content: String) =>
+          val file = outputDir / s"$name.scala"
+          Files.createDirectories(file.getParentFile.toPath)
+          CombineUtils.writeFile(file, content.replaceAll("\t", "  "))
+          file
+      }
+      .toSeq
   }
 
   object autoImport {
+    val svcUrl = settingKey[String]("Stage variable OpenAPI Service endpoint. Probably should not be updated.")
+    val apiDefTarget =
+      settingKey[File]("Name of the base file to use for dumping OpenAPI definition in YAML and JSON.")
     val openAPISource =
-      settingKey[File]("Source directory for OpenAPI. Defaults to src/main/openapi")
+      settingKey[File]("Source entry file for OpenAPI. Defaults to src/main/openapi/main.yaml")
     val openAPIOutput =
       settingKey[File]("Output directory for OpenAPI. Defaults to managed sources - openapi.")
     val openAPIOutputPackage =
       settingKey[String]("Name of the package to be used for OpenAPI generated objects.")
-    val routeImplementations =
-      settingKey[List[RouteImplementation]]("List of implementations for routes that should be generated")
     val openAPIGenerate =
       taskKey[Seq[File]]("Generate Scala sources from OpenAPI definition in YAML.")
   }
@@ -54,18 +53,23 @@ object OpenAPIPlugin extends AutoPlugin {
 
   val openAPISettings: Seq[Def.Setting[_]] =
     Seq(
-      openAPISource := { sourceDirectory.value / "openapi" },
+      svcUrl := s"$${stageVariables.serviceUri}",
+      apiDefTarget := (Compile / classDirectory).value / "openapi" / (name.value + ".json"),
+      //openAPISource := { sourceDirectory.value / "openapi" / "main.yaml" },
+      openAPISource := { sourceDirectory.value / ".." / "main.yaml" },
       openAPIOutput := sourceManaged.value / "main",
       openAPIOutputPackage := "com.enfore.openapi",
-      openAPIGenerate :=
-        Def.task {
-          compileOpenAPI(
+      openAPIGenerate := Def
+        .taskDyn(Def.task {
+          compileCombined(
             openAPISource.value,
             openAPIOutput.value,
-            openAPIOutputPackage.value,
-            routeImplementations.value
+            svcUrl.value,
+            apiDefTarget.value,
+            openAPIOutputPackage.value
           )
-        }.value,
+        })
+        .value,
       watchSources ++= { (openAPISource.value ** "*").get },
       sourceGenerators in Compile += openAPIGenerate
     )

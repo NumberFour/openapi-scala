@@ -28,8 +28,9 @@ lazy val `openapi-scala` = (project in file("openapi-scala"))
     libraryDependencies ++= Seq(
       "com.github.mpilquist" %% "simulacrum"       % "0.15.0",
       "com.beachape"         %% "enumeratum"       % "1.5.13",
-      "io.circe"             %% "circe-generic"    % "0.10.0",
-      "io.circe"             %% "circe-parser"    % "0.10.0",
+      "io.circe"             %% "circe-core"       % "0.11.1",
+      "io.circe"             %% "circe-generic"    % "0.11.1",
+      "io.circe"             %% "circe-parser"     % "0.11.1",
       "com.beachape"         %% "enumeratum-circe" % "1.5.20",
       "io.circe"             %% "circe-yaml"       % "0.9.0" % "test",
       "org.scalatest"        %% "scalatest"        % "3.0.5" % "test",
@@ -71,6 +72,10 @@ lazy val `sbt-openapi` = (project in file("sbt-openapi"))
     name := "sbt-openapi",
     sbtPlugin := true,
     organization := "com.enfore",
+    libraryDependencies ++= Seq(
+      "io.swagger.core.v3"   % "swagger-core"   % "2.0.8",
+      "io.swagger.parser.v3" % "swagger-parser" % "2.0.12"
+    ),
     addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.7.0"),
     buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion, organization),
     buildInfoPackage := organization.value + ".openapi.plugin"
