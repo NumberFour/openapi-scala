@@ -30,19 +30,19 @@ class ErrorHandlerImplementation(convertThrowableToServiceExceptionFn: Throwable
       .map(_.left.map(convertThrowableToServiceExceptionFn))
 
   implicit val encoderServiceError: Encoder[ServiceError] =
-    deriveEncoder[ServiceError](renaming.snakeCase)
+    deriveEncoder[ServiceError](renaming.snakeCase, None)
   implicit val encoderItemAlreadyExists: Encoder[ItemAlreadyExists] =
-    deriveEncoder[ItemAlreadyExists](renaming.snakeCase)
+    deriveEncoder[ItemAlreadyExists](renaming.snakeCase, None)
   implicit val encoderItemDoesNotExist: Encoder[ItemDoesNotExist] =
-    deriveEncoder[ItemDoesNotExist](renaming.snakeCase)
+    deriveEncoder[ItemDoesNotExist](renaming.snakeCase, None)
   implicit val encoderRequestConflict: Encoder[RequestConflict] =
-    deriveEncoder[RequestConflict](renaming.snakeCase)
+    deriveEncoder[RequestConflict](renaming.snakeCase, None)
   implicit val encoderPermissionRequired: Encoder[PermissionRequired] =
-    deriveEncoder[PermissionRequired](renaming.snakeCase)
+    deriveEncoder[PermissionRequired](renaming.snakeCase, None)
   implicit val encoderWrongRequestContent: Encoder[WrongRequestContent] =
-    deriveEncoder[WrongRequestContent](renaming.snakeCase)
+    deriveEncoder[WrongRequestContent](renaming.snakeCase, None)
   implicit val encoderUnprocessableContent: Encoder[UnprocessableContent] =
-    deriveEncoder[UnprocessableContent](renaming.snakeCase)
+    deriveEncoder[UnprocessableContent](renaming.snakeCase, None)
 
   private def mapServiceErrorsFn(err: ServiceException): IO[Response[IO]] =
     err match {

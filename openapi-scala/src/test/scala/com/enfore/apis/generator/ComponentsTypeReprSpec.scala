@@ -31,8 +31,8 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         |final case class Person(name: String, age: Int)
         |
         |object Person {
-        | implicit val circeDecoder: Decoder[Person] = deriveDecoder[Person](renaming.snakeCase)
-        | implicit val circeEncoder: Encoder[Person] = deriveEncoder[Person](renaming.snakeCase)
+        | implicit val circeDecoder: Decoder[Person] = deriveDecoder[Person](renaming.snakeCase, true, None)
+        | implicit val circeEncoder: Encoder[Person] = deriveEncoder[Person](renaming.snakeCase, None)
         |}
       """.stripMargin.trim.parse[Source]
     val tree: Parsed[Source] = person.generateScala.parse[Source]
@@ -61,8 +61,8 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         |final case class Person(name: com.enfore.apis.Name, age: Int)
         |
         |object Person {
-        | implicit val circeDecoder: Decoder[Person] = deriveDecoder[Person](renaming.snakeCase)
-        | implicit val circeEncoder: Encoder[Person] = deriveEncoder[Person](renaming.snakeCase)
+        | implicit val circeDecoder: Decoder[Person] = deriveDecoder[Person](renaming.snakeCase, true, None)
+        | implicit val circeEncoder: Encoder[Person] = deriveEncoder[Person](renaming.snakeCase, None)
         |}
       """.stripMargin.trim.parse[Source]
     val tree: Parsed[Source] = person.generateScala.parse[Source]
@@ -122,8 +122,8 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         | listOpVal: List[Option[Double]])
         |
         | object ParamedType {
-        |   implicit val circeDecoder: Decoder[ParamedType] = deriveDecoder[ParamedType](renaming.snakeCase)
-        |   implicit val circeEncoder: Encoder[ParamedType] = deriveEncoder[ParamedType](renaming.snakeCase)
+        |   implicit val circeDecoder: Decoder[ParamedType] = deriveDecoder[ParamedType](renaming.snakeCase, true, None)
+        |   implicit val circeEncoder: Encoder[ParamedType] = deriveEncoder[ParamedType](renaming.snakeCase, None)
         | }
       """.stripMargin.trim.parse[Source]
     val tree: Parsed[Source] = paramedType.generateScala.parse[Source]
@@ -159,8 +159,8 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         |final case class RefinedType(stringVal : String Refined AllOf[MinSize[W.`3`.T] :: MaxSize[W.`3`.T] :: HNil])
         |
         |object RefinedType {
-        | implicit val circeDecoder: Decoder[RefinedType] = deriveDecoder[RefinedType](renaming.snakeCase)
-        | implicit val circeEncoder: Encoder[RefinedType] = deriveEncoder[RefinedType](renaming.snakeCase)
+        | implicit val circeDecoder: Decoder[RefinedType] = deriveDecoder[RefinedType](renaming.snakeCase, true, None)
+        | implicit val circeEncoder: Encoder[RefinedType] = deriveEncoder[RefinedType](renaming.snakeCase, None)
         | object RefinementConstructors {
         |   val stringVal = new RefinedTypeOps[String Refined AllOf[MinSize[W.`3`.T] :: MaxSize[W.`3`.T] :: HNil], String]
         | }
@@ -198,8 +198,8 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         |final case class RefinedType(listString : List[String] Refined AllOf[MinSize[W.`3`.T] :: MaxSize[W.`3`.T] :: HNil])
         |
         |object RefinedType {
-        | implicit val circeDecoder: Decoder[RefinedType] = deriveDecoder[RefinedType](renaming.snakeCase)
-        | implicit val circeEncoder: Encoder[RefinedType] = deriveEncoder[RefinedType](renaming.snakeCase)
+        | implicit val circeDecoder: Decoder[RefinedType] = deriveDecoder[RefinedType](renaming.snakeCase, true, None)
+        | implicit val circeEncoder: Encoder[RefinedType] = deriveEncoder[RefinedType](renaming.snakeCase, None)
         | object RefinementConstructors {
         |   val listString = new RefinedTypeOps[List[String] Refined AllOf[MinSize[W.`3`.T] :: MaxSize[W.`3`.T] :: HNil], List[String]]
         | }
@@ -239,8 +239,8 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         |final case class RefinedType(nested : Option[String Refined AllOf[MinSize[W.`2`.T] :: MaxSize[W.`2`.T] :: HNil]])
         |
         | object RefinedType {
-        |  implicit val circeDecoder: Decoder[RefinedType] = deriveDecoder[RefinedType](renaming.snakeCase)
-        |  implicit val circeEncoder: Encoder[RefinedType] = deriveEncoder[RefinedType](renaming.snakeCase)
+        |  implicit val circeDecoder: Decoder[RefinedType] = deriveDecoder[RefinedType](renaming.snakeCase, true, None)
+        |  implicit val circeEncoder: Encoder[RefinedType] = deriveEncoder[RefinedType](renaming.snakeCase, None)
         |
         |  object RefinementConstructors {
         |        val nested = new RefinedTypeOps[String Refined AllOf[MinSize[W.`2`.T] :: MaxSize[W.`2`.T] :: HNil], String]
