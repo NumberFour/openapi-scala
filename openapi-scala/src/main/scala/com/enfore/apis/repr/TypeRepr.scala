@@ -60,6 +60,8 @@ object TypeRepr {
 
   final case class PrimitiveEnum(packageName: String, typeName: String, values: Set[String])     extends NewType
   final case class PrimitiveProduct(packageName: String, typeName: String, values: List[Symbol]) extends NewType
+  final case class PrimitiveUnion(packageName: String, typeName: String, values: Set[Ref], discriminator: String)
+      extends NewType
 
   final case class PrimitiveSymbol(valName: String, dataType: Primitive) extends Symbol {
     val typeName: String = ShowTypeTag.typeReprShowType.showType(dataType)

@@ -112,46 +112,106 @@ object ScalaGenerator {
     NonEmptyList.fromList(helpers)
   }
 
+  private def generateForPrimitiveEnum(packageName: String, typeName: String, content: Set[String]): String =
+    s"""
+       |package $packageName\n
+       |import enumeratum._\n
+       |sealed trait $typeName extends EnumEntry
+       |object $typeName extends Enum[$typeName] with CirceEnum[$typeName] {
+       |  val values = findValues
+       |  ${content
+         .map(item => s"""case object ${cleanScalaSymbol(item)} extends $typeName""")
+         .mkString("", "\n\t", "")}
+       | }
+       """.stripMargin.trim
+
+  private def genetateForPrimitiveProduct(packageName: String, typeName: String, values: List[Symbol]): String = {
+    val refinements: Option[String] = refinementSymbolMaker(values)
+      .map(_.toList.mkString("\n\nobject RefinementConstructors {\n\t", "\n\t\t", "\n\t}"))
+    val refinementImports = refinements.map(_ => """
+      |
+      |import eu.timepit.refined._
+      |import eu.timepit.refined.api._
+      |import eu.timepit.refined.collection._
+      |import shapeless._
+      |import eu.timepit.refined.boolean._
+      |import io.circe.refined._
+      |
+      """.stripMargin)
+    s"""
+       |package $packageName\n
+       |import io.circe._
+       |import io.circe.derivation._\n${refinementImports.getOrElse("")}
+       |final case class $typeName${values
+         .map(sym => s"${cleanScalaSymbol(sym.valName)} : ${SymbolAnnotationMaker.refinedAnnotation(sym)}")
+         .mkString("(\n\t", ",\n\t", "\n)")} \n
+       |object $typeName {
+       |\timplicit val circeDecoder: Decoder[$typeName] = deriveDecoder[$typeName](renaming.snakeCase, true, None)
+       |\timplicit val circeEncoder: Encoder[$typeName] = deriveEncoder[$typeName](renaming.snakeCase, None)${refinements
+         .getOrElse("")}
+       |}
+       """.stripMargin.trim
+  }
+
+  private def generateUnionJsonConversions(members: Set[Ref], margin: String = "\t\t"): String =
+    members
+      .map(_.typeName)
+      .map(member => s"""implicit def case${member} = at[$member](_.asJson)""")
+      .mkString(s"\n$margin")
+
+  private def generateUnionJsonMatch(members: Set[Ref], parentType: String, margin: String = "\t\t"): String =
+    members
+      .map(_.typeName)
+      .map(member => s"""case Some("$member") => c.value.as[$member].map(Coproduct[$parentType](_))""")
+      .mkString(s"\n$margin")
+
+  private def generateForPrimitiveUnion(
+      packageName: String,
+      typeName: String,
+      unionMembers: Set[Ref],
+      discriminator: String
+  ): String = {
+    val unionName: String = s"${typeName}Union"
+    s"""
+       |package $packageName\n
+       |import shapeless._
+       |import io.circe._
+       |import syntax._
+       |
+       |object $unionName {
+       |
+       |  type $typeName = ${unionMembers.map(_.typeName).mkString("", " :+: ", " :+: CNil")}
+       |
+       |  object jsonConversions extends Poly1 {
+       |    ${generateUnionJsonConversions(unionMembers)}
+       |  }
+       |
+       |  implicit val customEncoders = new Encoder[$typeName] {
+       |    def apply(a: $typeName): Json = {
+       |      (a map jsonConversions).unify
+       |    }
+       |  }
+       |
+       |  implicit val customDecoder = new Decoder[$typeName] {
+       |    def apply(c: HCursor): Decoder.Result[$typeName] = {
+       |      c.downField("$discriminator").as[String] match {
+       |        ${generateUnionJsonMatch(unionMembers, typeName)}
+       |        case _ => c.fail(CursorOp.DownField("$discriminator"))
+       |      }
+       |    }
+       |  }
+       |}
+       |""".stripMargin
+  }
+
   private def newTypeSymbolGenerator(symbol: NewTypeSymbol): String = symbol match {
     case NewTypeSymbol(_, PrimitiveEnum(packageName, typeName, content)) =>
-      s"""
-         |package $packageName\n
-         |import enumeratum._\n
-         |sealed trait $typeName extends EnumEntry
-         |object $typeName extends Enum[$typeName] with CirceEnum[$typeName] {
-         |  val values = findValues
-         |  ${content
-           .map(item => s"""case object ${cleanScalaSymbol(item)} extends $typeName""")
-           .mkString("", "\n\t", "")}
-         | }
-       """.stripMargin.trim
+      generateForPrimitiveEnum(packageName, typeName, content)
     case NewTypeSymbol(_, PrimitiveProduct(packageName, typeName, values)) =>
       assert(values.nonEmpty, s"$packageName.$typeName contains 0 values. This is not allowed.")
-      val refinements: Option[String] = refinementSymbolMaker(values)
-        .map(_.toList.mkString("\n\nobject RefinementConstructors {\n\t", "\n\t\t", "\n\t}"))
-      val refinementImports = refinements.map(_ => """
-          |
-          |import eu.timepit.refined._
-          |import eu.timepit.refined.api._
-          |import eu.timepit.refined.collection._
-          |import shapeless._
-          |import eu.timepit.refined.boolean._
-          |import io.circe.refined._
-          |
-          """.stripMargin)
-      s"""
-         |package $packageName\n
-         |import io.circe._
-         |import io.circe.derivation._\n${refinementImports.getOrElse("")}
-         |final case class $typeName${values
-           .map(sym => s"${cleanScalaSymbol(sym.valName)} : ${SymbolAnnotationMaker.refinedAnnotation(sym)}")
-           .mkString("(\n\t", ",\n\t", "\n)")} \n
-         |object $typeName {
-         |\timplicit val circeDecoder: Decoder[$typeName] = deriveDecoder[$typeName](renaming.snakeCase, true, None)
-         |\timplicit val circeEncoder: Encoder[$typeName] = deriveEncoder[$typeName](renaming.snakeCase, None)${refinements
-           .getOrElse("")}
-         |}
-       """.stripMargin.trim
+      genetateForPrimitiveProduct(packageName, typeName, values)
+    case NewTypeSymbol(_, PrimitiveUnion(packageName, typeName, unionMembers, discriminator)) =>
+      generateForPrimitiveUnion(packageName, typeName, unionMembers, discriminator)
   }
 
   implicit val codeGenerator: ScalaGenerator[Symbol] = {

@@ -4,7 +4,8 @@ import enumeratum._
 
 import scala.collection.immutable
 
-// This is a 1 to 1 representation of https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md
+// This attempts to be a representation of https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md
+// as close as possible.
 
 object SwaggerAST {
 
@@ -31,7 +32,18 @@ object SwaggerAST {
     case object `dict`    extends SchemaObjectType
   }
 
+  /*
+   * This is a marker trait for all type definitions that are possible in Swagger. Since OpenAPI YAML
+   * definition relies on optional value to represent the nature of type (i.e., sum, product, primitive, etc.),
+   * we clean them up at load time.
+   */
   sealed trait SchemaOrReferenceObject
+
+  /*
+   * Marker trait for pointing to a type definition. This is to identify between different types of type definitions
+   *   (such as unions and products)
+   */
+  sealed trait TypeDef
 
   final case class SchemaObject(
       description: Option[String] = None,      // Optional field (docstring)
@@ -41,20 +53,21 @@ object SwaggerAST {
       additionalProperties: Option[SchemaOrReferenceObject] = None,
       // CAVEAT: We allow a reference here, which according to the spec is not allowed but the way all OpenAPI tools work
       items: Option[SchemaOrReferenceObject] = None, // Only present when schema object is an array
+      oneOf: Option[List[ReferenceObject]] = None,   // Used for sum types and nothing else
+      discriminator: Option[String] = None,          // Used for sum types and nothing else
       enum: Option[List[String]] = None,
       required: Option[List[String]] = None,
-      readOnly: Option[Boolean] = None, // Points out whether a property is readOnly (defaults to false)
-      minLength: Option[Int] = None, // Optional refinement
-      maxLength: Option[Int] = None, // Optional refinement
-      maxItems: Option[Int] = None, // Optional refinement
-      minItems: Option[Int] = None, // Optional refinement
+      readOnly: Option[Boolean] = None,  // Points out whether a property is readOnly (defaults to false)
+      minLength: Option[Int] = None,     // Optional refinement
+      maxLength: Option[Int] = None,     // Optional refinement
+      maxItems: Option[Int] = None,      // Optional refinement
+      minItems: Option[Int] = None,      // Optional refinement
       maxProperties: Option[Int] = None, // Optional refinement
       minProperties: Option[Int] = None, // Optional refinement
-      maximum: Option[Int] = None, // Optional refinement
-      minimum: Option[Int] = None // Optional refinement
+      maximum: Option[Int] = None,       // Optional refinement
+      minimum: Option[Int] = None        // Optional refinement
   ) extends SchemaOrReferenceObject
-
-  // --- Types for Routes ---
+      with TypeDef
 
   /*
    *  Example : {{{
@@ -63,6 +76,8 @@ object SwaggerAST {
    *  }}}
    */
   final case class ReferenceObject($ref: String) extends SchemaOrReferenceObject
+
+  // --- Types for Routes ---
 
   /*
    * Example : {{{

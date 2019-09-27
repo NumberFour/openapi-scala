@@ -252,4 +252,53 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
     tree.get.structure shouldBe expected.get.structure
   }
 
+  it should "be able to work with union types" in {
+    val unionTypeSymbol: Symbol = NewTypeSymbol(
+      "Customer",
+      PrimitiveUnion(
+        "com.enfore.test",
+        "Customer",
+        Set(Ref("#.components.schemas", "IndividualCustomer"), Ref("#.components.schemas", "OrganizationCustomer")),
+        "@type")
+    )
+
+    val expected =
+      """
+        |package com.enfore.test
+        |
+        |import shapeless._
+        |import io.circe._
+        |import syntax._
+        |
+        |object CustomerUnion {
+        |
+        | type Customer = IndividualCustomer :+: OrganizationCustomer :+: CNil
+        |
+        | object jsonConversions extends Poly1 {
+        |   implicit def caseIndividualCustomer = at[IndividualCustomer](_.asJson)
+        |   implicit def caseOrganizationCustomer = at[OrganizationCustomer](_.asJson)
+        | }
+        |
+        | implicit val customEncoders = new Encoder[Customer] {
+        |   def apply(a: Customer): Json = {
+        |     (a map jsonConversions).unify
+        |   }
+        | }
+        |
+        | implicit val customDecoder = new Decoder[Customer] {
+        |   def apply(c: HCursor): Decoder.Result[Customer] = {
+        |     c.downField("@type").as[String] match {
+        |       case Some("IndividualCustomer") => c.value.as[IndividualCustomer].map(Coproduct[Customer](_))
+        |       case Some("OrganizationCustomer") => c.value.as[OrganizationCustomer].map(Coproduct[Customer](_))
+        |       case _ => c.fail(CursorOp.DownField("@type"))
+        |     }
+        |   }
+        | }
+        |}
+        |""".stripMargin.trim.parse[Source]
+
+    val tree = unionTypeSymbol.generateScala.parse[Source]
+    tree.get.structure shouldBe expected.get.structure
+  }
+
 }

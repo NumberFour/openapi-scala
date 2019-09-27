@@ -12,7 +12,8 @@ object OpenAPIPlugin extends AutoPlugin {
       outputDir: File,
       targetSvcUrl: String,
       apiDefTarget: File,
-      packageName: String): Seq[File] = {
+      packageName: String
+  ): Seq[File] = {
     println(s"[info] Creating OpenAPI from $sourceFile and writing to target $outputDir")
     Files.createDirectories(sourceFile.getParentFile.toPath)
     Files.createDirectories(apiDefTarget.getParentFile.toPath)

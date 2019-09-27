@@ -5,12 +5,14 @@ import com.enfore.apis.ast.SwaggerAST._
 import com.enfore.apis.repr.ReqWithContentType.POST
 import com.enfore.apis.repr.{PathItemAggregation, PutOrPostRequest, TypeRepr}
 import com.enfore.apis.repr.TypeRepr.{
+  NewTypeSymbol,
   PrimitiveInt,
   PrimitiveNumber,
   PrimitiveOption,
   PrimitiveProduct,
   PrimitiveString,
   PrimitiveSymbol,
+  PrimitiveUnion,
   Ref
 }
 import org.scalatest._
@@ -128,7 +130,54 @@ class AstTranslationSpec extends FlatSpec with Matchers {
     ast.isRight shouldBe true
   }
 
-  "SwaggerAST" should "be translated properly for POST requests with simple string body" in {
+  it should "be able to read the sum types properly" in {
+    val yamlCode: String =
+      """
+        |components:
+        | schemas:
+        |   IndividualCustomer:
+        |     type: object
+        |     properties:
+        |       name:
+        |         description: Name of the person
+        |         type: string
+        |       age:
+        |         description: Age of the person
+        |         type: number
+        |     required:
+        |       - name
+        |       - age
+        |   OrganizationCustomer:
+        |     type: object
+        |     properties:
+        |       name:
+        |         description: Name of the person
+        |         type: string
+        |       orgName:
+        |         description: Name of the org
+        |         type: string
+        |     required:
+        |       - name
+        |       - orgName
+        |   Customer:
+        |     discriminator: '@type'
+        |     oneOf:
+        |       - $ref: '#/components/schemas/IndividualCustomer'
+        |       - $ref: '#/components/schemas/OrganizationCustomer'
+        |""".stripMargin
+
+    val ast: Either[Error, CoreASTRepr] = circe.yaml.parser.parse(yamlCode).flatMap(_.as[CoreASTRepr])
+    ast.left.map(println)
+    ast.isRight shouldBe true
+    val components: Map[String, SchemaObject] = ast.right.get.components.schemas
+    components("Customer").oneOf.isDefined shouldBe true
+    val interop: Map[String, TypeRepr.Symbol] =
+      ASTTranslationFunctions.readComponentsToInterop(ast.right.get)(PackageName("com.enfore.test"))
+    interop("Customer").isInstanceOf[NewTypeSymbol] shouldBe true
+    interop("Customer").asInstanceOf[NewTypeSymbol].data.isInstanceOf[PrimitiveUnion] shouldBe true
+  }
+
+  it should "be translated properly for POST requests with simple string body" in {
     val yamlCode: String =
       """
       |paths:

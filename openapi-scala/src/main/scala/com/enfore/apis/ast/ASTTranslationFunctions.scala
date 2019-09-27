@@ -77,7 +77,7 @@ object ASTTranslationFunctions {
                   value
                 }
               case ReferenceObject(_) =>
-                throw new NotImplementedError("ReferenceObjects in query parameters are not supported.")
+                throw new AssertionError("ReferenceObjects in query parameters are not supported.")
             }
         }
       )
@@ -86,7 +86,8 @@ object ASTTranslationFunctions {
   private def findRefInComponents(
       components: Map[String, SchemaObject],
       typeName: String,
-      context: String = ""): SchemaObject =
+      context: String = ""
+  ): SchemaObject =
     components
       .collectFirst { case (key: String, schemaObject: SchemaObject) if key == typeName => schemaObject }
       .getOrElse(
@@ -179,8 +180,7 @@ object ASTTranslationFunctions {
       implicit packageName: PackageName
   ): SchemaObjectType => Option[TypeRepr] = {
     case schemaObject @ SchemaObjectType.`object` =>
-      println(s"Ignoring inline object: $schemaObject")
-      None
+      throw new AssertionError(s"Inline object definition for $schemaObject is not possible")
     case SchemaObjectType.array =>
       assert(items.isDefined, "A parameter type for an array is not defined")
       loadSingleProperty(items.get).map(PrimitiveArray(_, refinements))
@@ -206,10 +206,10 @@ object ASTTranslationFunctions {
           loadSingleProperty(ro)
       }
       Some(PrimitiveArray(someType.get, None))
-    case x => {
-      println(s"Ignoring '$x' which is not supported in buildPrimitiveFromSchemaObjectType")
-      None
-    }
+    case x =>
+      throw new AssertionError(
+        s"The case $x does not seem to be supported by the generator: buildPrimitiveFromSchemaObjectType"
+      )
   }
 
   private def loadSingleProperty(
@@ -225,11 +225,10 @@ object ASTTranslationFunctions {
           so.`type`
             .flatMap(buildPrimitiveFromSchemaObjectTypeForComponents(so.items, refinements))
         }(loadSingleProperty(_).map(PrimitiveDict(_, None)))
-      case ReferenceObject(ref) => {
+      case ReferenceObject(ref) =>
         val name: String = ref.split("/").last
         val path: String = ref.split("/").dropRight(1).mkString(".")
         (Ref(path.replace("#.components.schemas", packageName.name), name): TypeRepr).some
-      }
     }
 
   private def makeSymbolFromTypeRepr(name: String, repr: TypeRepr): Symbol = repr match {
@@ -257,7 +256,7 @@ object ASTTranslationFunctions {
   private def loadEnum(typeName: String, values: List[String])(implicit packageName: PackageName): NewType =
     PrimitiveEnum(packageName.name, typeName, values.toSet)
 
-  private def evalSchema(name: String, schemaObject: SchemaObject)(
+  private def handleSchemaObjectProductType(name: String, schemaObject: SchemaObject)(
       implicit packageName: PackageName
   ): Option[Symbol] = {
     val required = schemaObject.required.getOrElse(List.empty[String])
@@ -271,13 +270,42 @@ object ASTTranslationFunctions {
         throw new AssertionError(s"Top-level (components/schemas) schemas should not be dicts ($name : $schemaObject)")
       case SchemaObjectType.`boolean` =>
         throw new AssertionError(
-          s"Top-level (components/schemas) schemas should not be booleans ($name : $schemaObject)")
+          s"Top-level (components/schemas) schemas should not be booleans ($name : $schemaObject)"
+        )
       case SchemaObjectType.`number` =>
         throw new AssertionError(
-          s"Top-level (components/schemas) schemas should not be numbers ($name : $schemaObject)")
+          s"Top-level (components/schemas) schemas should not be numbers ($name : $schemaObject)"
+        )
     }
     newType.map(NewTypeSymbol(name, _))
   }
+
+  private def handleSchemaObjectUnionType(
+      name: String,
+      discriminator: Option[String],
+      unionMembers: List[ReferenceObject])(
+      implicit packageName: PackageName
+  ): Option[Symbol] = {
+    assert(
+      discriminator.isDefined,
+      "We require that a discriminator be defined to use oneOf in OpenAPI. Checkout oneOf in OpenAPI 3.0 spec for more information."
+    )
+    val references: Set[Ref] = unionMembers.map {
+      case ReferenceObject(ref) =>
+        val name: String = ref.split("/").last
+        val path: String = ref.split("/").dropRight(1).mkString(".")
+        Ref(path, name)
+    }.toSet
+    val newType: NewType = PrimitiveUnion(packageName.name, name, values = references, discriminator.get)
+    NewTypeSymbol(name, newType).some
+  }
+
+  private def evalSchema(name: String, schemaObject: SchemaObject)(
+      implicit packageName: PackageName
+  ): Option[Symbol] =
+    schemaObject.oneOf.fold(handleSchemaObjectProductType(name, schemaObject))(
+      handleSchemaObjectUnionType(name, schemaObject.discriminator, _)
+    )
 
   private def schemaObjectHasReadOnlyComponent(components: Map[String, SchemaObject])(
       schemaOrReferenceObject: SchemaOrReferenceObject
