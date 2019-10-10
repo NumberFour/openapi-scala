@@ -160,7 +160,8 @@ class AstTranslationSpec extends FlatSpec with Matchers {
         |       - name
         |       - orgName
         |   Customer:
-        |     discriminator: '@type'
+        |     discriminator:
+        |       propertyName: '@type'
         |     oneOf:
         |       - $ref: '#/components/schemas/IndividualCustomer'
         |       - $ref: '#/components/schemas/OrganizationCustomer'

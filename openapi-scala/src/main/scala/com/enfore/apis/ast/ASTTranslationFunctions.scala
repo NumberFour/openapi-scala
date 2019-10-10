@@ -282,7 +282,7 @@ object ASTTranslationFunctions {
 
   private def handleSchemaObjectUnionType(
       name: String,
-      discriminator: Option[String],
+      discriminator: Option[Discriminator],
       unionMembers: List[ReferenceObject])(
       implicit packageName: PackageName
   ): Option[Symbol] = {
@@ -296,7 +296,8 @@ object ASTTranslationFunctions {
         val path: String = ref.split("/").dropRight(1).mkString(".")
         Ref(path, name)
     }.toSet
-    val newType: NewType = PrimitiveUnion(packageName.name, name, values = references, discriminator.get)
+    val newType: NewType =
+      PrimitiveUnion(packageName.name, name, values = references, discriminator.map(_.propertyName).get)
     NewTypeSymbol(name, newType).some
   }
 
