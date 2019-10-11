@@ -244,7 +244,12 @@ object ASTTranslationFunctions {
   )(
       implicit packageName: PackageName
   ): Option[NewType] = {
-    val mapped: immutable.Iterable[Option[Symbol]] = properties.mapValues(loadSingleProperty) map {
+    val mapped: immutable.Iterable[Option[Symbol]] = properties.mapValues {
+      case r: ReferenceObject                 => loadSingleProperty(r)
+      case o: SchemaObject if o.oneOf.isEmpty => loadSingleProperty(o)
+      case _ =>
+        throw new AssertionError("Discriminated Unions (OpenAPI: oneOf) are only supported as top-level types for now.")
+    } map {
       case (name: String, repr: Option[TypeRepr]) =>
         val mapOp: Option[TypeRepr] = if (required.contains(name)) repr else repr.map(PrimitiveOption(_, None))
         assert(mapOp.isDefined, s"$name in $typeName could not be parsed.")

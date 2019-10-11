@@ -159,10 +159,10 @@ object ScalaGenerator {
       .map(member => s"""implicit def case${member} = at[$member](_.asJson)""")
       .mkString(s"\n$margin")
 
-  private def generateUnionJsonMatch(members: Set[Ref], parentType: String, margin: String = "\t\t"): String =
+  private def generateUnionJsonMatch(members: Set[Ref], parentType: String, margin: String = "\t\t\t\t"): String =
     members
       .map(_.typeName)
-      .map(member => s"""case Some("$member") => c.value.as[$member].map(Coproduct[$parentType](_))""")
+      .map(member => s"""case Right("$member") => c.value.as[$member].map(Coproduct[$parentType](_))""")
       .mkString(s"\n$margin")
 
   private def generateForPrimitiveUnion(
@@ -170,39 +170,40 @@ object ScalaGenerator {
       typeName: String,
       unionMembers: Set[Ref],
       discriminator: String
-  ): String = {
-    val unionName: String = s"${typeName}Union"
+  ): String =
     s"""
        |package $packageName\n
        |import shapeless._
        |import io.circe._
-       |import syntax._
+       |import io.circe.syntax._
        |
-       |object $unionName {
+       |sealed trait $typeName {
+       |  type Union = ${unionMembers.map(_.typeName).mkString("", ":+:", " :+: CNil")}
+       |  val value: Union
+       |}
        |
-       |  type $typeName = ${unionMembers.map(_.typeName).mkString("", " :+: ", " :+: CNil")}
-       |
+       |object $typeName {
        |  object jsonConversions extends Poly1 {
        |    ${generateUnionJsonConversions(unionMembers)}
        |  }
        |
-       |  implicit val customEncoders = new Encoder[$typeName] {
+       |  implicit val customEncoders: Encoder[$typeName] = new Encoder[$typeName] {
        |    def apply(a: $typeName): Json = {
-       |      (a map jsonConversions).unify
+       |      (a.value map jsonConversions).unify
        |    }
        |  }
        |
-       |  implicit val customDecoder = new Decoder[$typeName] {
+       |  implicit val customDecoder: Decoder[$typeName] = new Decoder[$typeName] {
        |    def apply(c: HCursor): Decoder.Result[$typeName] = {
-       |      c.downField("$discriminator").as[String] match {
-       |        ${generateUnionJsonMatch(unionMembers, typeName)}
-       |        case _ => c.fail(CursorOp.DownField("$discriminator"))
+       |      val output = c.downField("$discriminator").as[String] match {
+       |        ${generateUnionJsonMatch(unionMembers, s"${typeName}#Union")}
+       |        case _ => Left(DecodingFailure.apply("Type information not available", List(CursorOp.DownField("$discriminator"))))
        |      }
+       |      output.map { objValue => new $typeName { val value = objValue } }
        |    }
        |  }
        |}
        |""".stripMargin
-  }
 
   private def newTypeSymbolGenerator(symbol: NewTypeSymbol): String = symbol match {
     case NewTypeSymbol(_, PrimitiveEnum(packageName, typeName, content)) =>

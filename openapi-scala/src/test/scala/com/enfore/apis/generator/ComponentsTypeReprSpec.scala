@@ -268,30 +268,34 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         |
         |import shapeless._
         |import io.circe._
-        |import syntax._
+        |import io.circe.syntax._
         |
-        |object CustomerUnion {
+        |sealed trait Customer {
+        | type Union = IndividualCustomer :+: OrganizationCustomer :+: CNil
+        | val value: Union
+        |}
         |
-        | type Customer = IndividualCustomer :+: OrganizationCustomer :+: CNil
+        |object Customer {
         |
         | object jsonConversions extends Poly1 {
         |   implicit def caseIndividualCustomer = at[IndividualCustomer](_.asJson)
         |   implicit def caseOrganizationCustomer = at[OrganizationCustomer](_.asJson)
         | }
         |
-        | implicit val customEncoders = new Encoder[Customer] {
+        | implicit val customEncoders: Encoder[Customer] = new Encoder[Customer] {
         |   def apply(a: Customer): Json = {
-        |     (a map jsonConversions).unify
+        |     (a.value map jsonConversions).unify
         |   }
         | }
         |
-        | implicit val customDecoder = new Decoder[Customer] {
+        | implicit val customDecoder: Decoder[Customer] = new Decoder[Customer] {
         |   def apply(c: HCursor): Decoder.Result[Customer] = {
-        |     c.downField("@type").as[String] match {
-        |       case Some("IndividualCustomer") => c.value.as[IndividualCustomer].map(Coproduct[Customer](_))
-        |       case Some("OrganizationCustomer") => c.value.as[OrganizationCustomer].map(Coproduct[Customer](_))
-        |       case _ => c.fail(CursorOp.DownField("@type"))
+        |     val output = c.downField("@type").as[String] match {
+        |       case Right("IndividualCustomer") => c.value.as[IndividualCustomer].map(Coproduct[Customer#Union](_))
+        |       case Right("OrganizationCustomer") => c.value.as[OrganizationCustomer].map(Coproduct[Customer#Union](_))
+        |       case _ => Left(DecodingFailure.apply("Type information not available", List(CursorOp.DownField("@type"))))
         |     }
+        |     output.map { objValue => new Customer { val value = objValue } }
         |   }
         | }
         |}
