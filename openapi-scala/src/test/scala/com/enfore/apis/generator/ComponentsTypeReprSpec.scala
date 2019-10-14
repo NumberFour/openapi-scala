@@ -269,13 +269,12 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         |import shapeless._
         |import io.circe._
         |import io.circe.syntax._
+        |import Customer._
         |
-        |sealed trait Customer {
-        | type Union = IndividualCustomer :+: OrganizationCustomer :+: CNil
-        | val value: Union
-        |}
+        |final case class Customer(value: Union)
         |
         |object Customer {
+        | type Union = IndividualCustomer :+: OrganizationCustomer :+: CNil
         |
         | object jsonConversions extends Poly1 {
         |   implicit def caseIndividualCustomer = at[IndividualCustomer](_.asJson)
@@ -291,11 +290,11 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         | implicit val customDecoder: Decoder[Customer] = new Decoder[Customer] {
         |   def apply(c: HCursor): Decoder.Result[Customer] = {
         |     val output = c.downField("@type").as[String] match {
-        |       case Right("IndividualCustomer") => c.value.as[IndividualCustomer].map(Coproduct[Customer#Union](_))
-        |       case Right("OrganizationCustomer") => c.value.as[OrganizationCustomer].map(Coproduct[Customer#Union](_))
+        |       case Right("IndividualCustomer") => c.value.as[IndividualCustomer].map(Coproduct[Union](_))
+        |       case Right("OrganizationCustomer") => c.value.as[OrganizationCustomer].map(Coproduct[Union](_))
         |       case _ => Left(DecodingFailure.apply("Type information not available", List(CursorOp.DownField("@type"))))
         |     }
-        |     output.map { objValue => new Customer { val value = objValue } }
+        |     output.map(Customer.apply)
         |   }
         | }
         |}

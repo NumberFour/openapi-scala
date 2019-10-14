@@ -176,13 +176,13 @@ object ScalaGenerator {
        |import shapeless._
        |import io.circe._
        |import io.circe.syntax._
+       |import $typeName._
        |
-       |sealed trait $typeName {
-       |  type Union = ${unionMembers.map(_.typeName).mkString("", ":+:", " :+: CNil")}
-       |  val value: Union
-       |}
+       |final case class $typeName(value: Union)
        |
        |object $typeName {
+       |  type Union = ${unionMembers.map(_.typeName).mkString("", " :+: ", " :+: CNil")}
+       |
        |  object jsonConversions extends Poly1 {
        |    ${generateUnionJsonConversions(unionMembers)}
        |  }
@@ -196,10 +196,10 @@ object ScalaGenerator {
        |  implicit val customDecoder: Decoder[$typeName] = new Decoder[$typeName] {
        |    def apply(c: HCursor): Decoder.Result[$typeName] = {
        |      val output = c.downField("$discriminator").as[String] match {
-       |        ${generateUnionJsonMatch(unionMembers, s"${typeName}#Union")}
+       |        ${generateUnionJsonMatch(unionMembers, "Union")}
        |        case _ => Left(DecodingFailure.apply("Type information not available", List(CursorOp.DownField("$discriminator"))))
        |      }
-       |      output.map { objValue => new $typeName { val value = objValue } }
+       |      output.map($typeName.apply)
        |    }
        |  }
        |}
