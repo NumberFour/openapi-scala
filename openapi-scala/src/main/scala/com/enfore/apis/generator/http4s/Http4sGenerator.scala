@@ -115,10 +115,11 @@ object Http4sGenerator {
     val listDecoder = RouteGenerator.listDecoder(routeDefinitions, indentationLevel)
     val matchers    = RouteGenerator.buildMatchers(routeDefinitions, indentationLevel)
 
-    (listDecoder, matchers) match {
+    val output = (listDecoder, matchers) match {
       case (Nil, m) => m
       case (l, m)   => (l :+ "\n") ++ m
     }
+    output.distinct
   }
 
   private def routeDefinitions(routes: Map[FileName, PathItemAggregation], indentationLevel: Int): List[String] =
