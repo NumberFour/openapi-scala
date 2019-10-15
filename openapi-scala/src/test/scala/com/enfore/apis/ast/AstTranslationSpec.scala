@@ -11,6 +11,7 @@ import com.enfore.apis.repr.TypeRepr.{
   PrimitiveOption,
   PrimitiveProduct,
   PrimitiveString,
+  PrimitiveStringValue,
   PrimitiveSymbol,
   PrimitiveUnion,
   Ref
@@ -76,10 +77,10 @@ class AstTranslationSpec extends FlatSpec with Matchers {
       |          type: number
       |          multipleOf: 0.000001
       |        unit:
-                  type: string
+      |          type: string
+      |          default: EUR
       |      required:
       |        - value
-      |        - unit
     """.stripMargin
 
     val ast = circe.yaml.parser.parse(yamlCode).flatMap(_.as[CoreASTRepr])
@@ -98,7 +99,9 @@ class AstTranslationSpec extends FlatSpec with Matchers {
               typeName = "Money",
               values = List(
                 PrimitiveSymbol("value", PrimitiveNumber(Some(List()))),
-                PrimitiveSymbol("unit", PrimitiveString(Some(List())))
+                PrimitiveSymbol(
+                  "unit",
+                  PrimitiveOption(PrimitiveString(Some(List())), Some(PrimitiveStringValue("EUR"))))
               )
             )
           )

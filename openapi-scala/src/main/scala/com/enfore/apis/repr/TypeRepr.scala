@@ -1,6 +1,8 @@
 package com.enfore.apis.repr
 
 import com.enfore.apis.generator.ShowTypeTag
+import io.circe._
+import cats.syntax.functor._
 
 sealed trait TypeRepr {
   val typeName: String
@@ -11,10 +13,33 @@ object TypeRepr {
   final case class Ref(path: String, typeName: String) extends TypeRepr
 
   sealed trait PrimitiveValue
-  final case class PrimitiveStringValue(value: String)   extends PrimitiveValue
-  final case class PrimitiveNumberValue(value: Double)   extends PrimitiveValue
-  final case class PrimitiveIntValue(value: Int)         extends PrimitiveValue
-  final case class PrimitiveBooleanValue(value: Boolean) extends PrimitiveValue
+  final case class PrimitiveStringValue(value: String) extends PrimitiveValue {
+    override def toString: String = s""""$value""""
+  }
+  final case class PrimitiveNumberValue(value: Double) extends PrimitiveValue {
+    override def toString: String = value.toString
+  }
+  final case class PrimitiveIntValue(value: Int) extends PrimitiveValue {
+    override def toString: String = value.toString
+  }
+  final case class PrimitiveBooleanValue(value: Boolean) extends PrimitiveValue {
+    override def toString: String = value.toString
+  }
+
+  implicit val primitiveStringDecoder: Decoder[PrimitiveStringValue] = (c: HCursor) =>
+    c.as[String].map(PrimitiveStringValue)
+  implicit val primitiveNumberDecoder: Decoder[PrimitiveNumberValue] = (c: HCursor) =>
+    c.as[Double].map(PrimitiveNumberValue)
+  implicit val primitiveIntDecoder: Decoder[PrimitiveIntValue] = (c: HCursor) => c.as[Int].map(PrimitiveIntValue)
+  implicit val primitiveBooleanDecoder: Decoder[PrimitiveBooleanValue] = (c: HCursor) =>
+    c.as[Boolean].map(PrimitiveBooleanValue)
+  implicit val PrimitiveDecoder: Decoder[PrimitiveValue] =
+    List[Decoder[PrimitiveValue]](
+      Decoder[PrimitiveStringValue].widen,
+      Decoder[PrimitiveNumberValue].widen,
+      Decoder[PrimitiveIntValue].widen,
+      Decoder[PrimitiveBooleanValue].widen
+    ).reduceLeft(_ or _)
 
   sealed trait Primitive extends TypeRepr
   final case class PrimitiveString(refinements: Option[List[RefinedTags]]) extends Primitive {

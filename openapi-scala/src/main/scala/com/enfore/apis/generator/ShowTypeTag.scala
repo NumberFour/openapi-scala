@@ -11,13 +11,14 @@ import simulacrum._
 object ShowTypeTag {
   import ops._
   implicit val primitiveShowType: ShowTypeTag[Primitive] = {
-    case PrimitiveString(_)                 => "String"
-    case PrimitiveNumber(_)                 => "Double"
-    case PrimitiveInt(_)                    => "Int"
-    case PrimitiveBoolean(_)                => "Boolean"
-    case PrimitiveArray(data: TypeRepr, _)  => s"List[${data.showType}]"
-    case PrimitiveOption(data: TypeRepr, _) => s"Option[${data.showType}]"
-    case PrimitiveDict(data: TypeRepr, _)   => s"Map[String, ${data.showType}]"
+    case PrimitiveString(_)                => "String"
+    case PrimitiveNumber(_)                => "Double"
+    case PrimitiveInt(_)                   => "Int"
+    case PrimitiveBoolean(_)               => "Boolean"
+    case PrimitiveArray(data: TypeRepr, _) => s"List[${data.showType}]"
+    case PrimitiveOption(data: TypeRepr, default) =>
+      default.fold(s"Option[${data.showType}]")(d => s"${data.showType} = ${d.toString}")
+    case PrimitiveDict(data: TypeRepr, _) => s"Map[String, ${data.showType}]"
   }
 
   implicit private val newTypeShowType: ShowTypeTag[NewType] = {

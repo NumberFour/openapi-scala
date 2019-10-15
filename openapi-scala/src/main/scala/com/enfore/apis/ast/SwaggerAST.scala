@@ -1,5 +1,6 @@
 package com.enfore.apis.ast
 
+import com.enfore.apis.repr.TypeRepr.PrimitiveValue
 import enumeratum._
 
 import scala.collection.immutable
@@ -67,7 +68,8 @@ object SwaggerAST {
       maxProperties: Option[Int] = None, // Optional refinement
       minProperties: Option[Int] = None, // Optional refinement
       maximum: Option[Int] = None, // Optional refinement
-      minimum: Option[Int] = None // Optional refinement
+      minimum: Option[Int] = None, // Optional refinement
+      default: Option[PrimitiveValue] = None
   ) extends SchemaOrReferenceObject
       with TypeDef
 

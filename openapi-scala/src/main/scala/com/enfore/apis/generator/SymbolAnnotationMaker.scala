@@ -37,9 +37,11 @@ object SymbolAnnotationMaker {
   }
 
   def refinedAnnotation(symbol: Symbol): String = symbol match {
-    case PrimitiveSymbol(_, PrimitiveOption(data: Primitive, _)) => s"Option[${dataRefinementMatcher(data)}]"
-    case PrimitiveSymbol(_, data: Primitive)                     => dataRefinementMatcher(data)
-    case x @ _                                                   => makeAnnotation(x)
+    case PrimitiveSymbol(_, PrimitiveOption(data: Primitive, Some(defaultValue))) =>
+      s"${dataRefinementMatcher(data)} = ${defaultValue}"
+    case PrimitiveSymbol(_, PrimitiveOption(data: Primitive, None)) => s"Option[${dataRefinementMatcher(data)}]"
+    case PrimitiveSymbol(_, data: Primitive)                        => dataRefinementMatcher(data)
+    case x @ _                                                      => makeAnnotation(x)
   }
 
   def refinementOnType(symbol: Symbol): String = symbol match {

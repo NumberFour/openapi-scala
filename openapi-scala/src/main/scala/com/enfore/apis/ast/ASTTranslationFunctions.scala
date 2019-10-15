@@ -72,7 +72,7 @@ object ASTTranslationFunctions {
                 val value: Primitive =
                   buildPrimitiveFromSchemaObjectType(refinements = None, a.items)(packageName)(a.`type`.get).get
                 if (!isRequired) {
-                  PrimitiveOption(value, None)
+                  PrimitiveOption(value, a.default)
                 } else {
                   value
                 }
@@ -244,19 +244,26 @@ object ASTTranslationFunctions {
   )(
       implicit packageName: PackageName
   ): Option[NewType] = {
-    val mapped: immutable.Iterable[Option[Symbol]] = properties.mapValues {
-      case r: ReferenceObject                 => loadSingleProperty(r)
-      case o: SchemaObject if o.oneOf.isEmpty => loadSingleProperty(o)
-      case _ =>
-        throw new AssertionError("Discriminated Unions (OpenAPI: oneOf) are only supported as top-level types for now.")
-    } map {
-      case (name: String, repr: Option[TypeRepr]) =>
-        val mapOp: Option[TypeRepr] = if (required.contains(name)) repr else repr.map(PrimitiveOption(_, None))
-        assert(mapOp.isDefined, s"$name in $typeName could not be parsed.")
-        mapOp map (makeSymbolFromTypeRepr(name, _))
+    val mapped: immutable.Iterable[Option[Symbol]] = properties map {
+      case (name: String, repr: SchemaOrReferenceObject) =>
+        val loaded = getTypeRepr(required, name, repr)
+        assert(loaded.isDefined, s"$name in $typeName could not be parsed.")
+        loaded map (makeSymbolFromTypeRepr(name, _))
     }
     mapped.toList.sequence.map(PrimitiveProduct(packageName.name, typeName, _))
   }
+
+  private def getTypeRepr(required: List[String], name: String, repr: SchemaOrReferenceObject)(
+      implicit packageName: PackageName
+  ): Option[TypeRepr] =
+    repr match {
+      case r: ReferenceObject => loadSingleProperty(r)
+      case o: SchemaObject if o.oneOf.isEmpty =>
+        val loadedTypeRepr = loadSingleProperty(o)
+        if (required.contains(name)) loadedTypeRepr else loadedTypeRepr.map(PrimitiveOption(_, o.default))
+      case _ =>
+        throw new AssertionError("Discriminated Unions (OpenAPI: oneOf) are only supported as top-level types for now.")
+    }
 
   private def loadEnum(typeName: String, values: List[String])(implicit packageName: PackageName): NewType =
     PrimitiveEnum(packageName.name, typeName, values.toSet)
