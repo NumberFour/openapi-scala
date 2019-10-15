@@ -257,7 +257,9 @@ object ASTTranslationFunctions {
       implicit packageName: PackageName
   ): Option[TypeRepr] =
     repr match {
-      case r: ReferenceObject => loadSingleProperty(r)
+      case r: ReferenceObject =>
+        val loadedTypeRepr = loadSingleProperty(r)
+        if (required.contains(name)) loadedTypeRepr else loadedTypeRepr.map(PrimitiveOption(_, None))
       case o: SchemaObject if o.oneOf.isEmpty =>
         val loadedTypeRepr = loadSingleProperty(o)
         if (required.contains(name)) loadedTypeRepr else loadedTypeRepr.map(PrimitiveOption(_, o.default))
