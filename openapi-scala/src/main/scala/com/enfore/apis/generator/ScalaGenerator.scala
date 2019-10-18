@@ -153,10 +153,11 @@ object ScalaGenerator {
        """.stripMargin.trim
   }
 
-  private def generateUnionJsonConversions(members: Set[Ref], margin: String = "\t\t"): String =
+  private def generateUnionJsonConversions(discriminator: String)(members: Set[Ref], margin: String = "\t\t"): String =
     members
       .map(_.typeName)
-      .map(member => s"""implicit def case${member} = at[$member](_.asJson)""")
+      .map(member =>
+        s"""implicit def case${member} = at[$member](_.asJson.deepMerge(Json.obj("$discriminator" -> Json.fromString("$member"))))""")
       .mkString(s"\n$margin")
 
   private def generateUnionJsonMatch(members: Set[Ref], parentType: String, margin: String = "\t\t\t\t"): String =
@@ -184,7 +185,7 @@ object ScalaGenerator {
        |  type Union = ${unionMembers.map(_.typeName).mkString("", " :+: ", " :+: CNil")}
        |
        |  object jsonConversions extends Poly1 {
-       |    ${generateUnionJsonConversions(unionMembers)}
+       |    ${generateUnionJsonConversions(discriminator)(unionMembers)}
        |  }
        |
        |  implicit val customEncoders: Encoder[$typeName] = new Encoder[$typeName] {

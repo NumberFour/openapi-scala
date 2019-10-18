@@ -277,8 +277,8 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         | type Union = IndividualCustomer :+: OrganizationCustomer :+: CNil
         |
         | object jsonConversions extends Poly1 {
-        |   implicit def caseIndividualCustomer = at[IndividualCustomer](_.asJson)
-        |   implicit def caseOrganizationCustomer = at[OrganizationCustomer](_.asJson)
+        |   implicit def caseIndividualCustomer = at[IndividualCustomer](_.asJson.deepMerge(Json.obj("@type" -> Json.fromString("IndividualCustomer"))))
+        |   implicit def caseOrganizationCustomer = at[OrganizationCustomer](_.asJson.deepMerge(Json.obj("@type" -> Json.fromString("OrganizationCustomer"))))
         | }
         |
         | implicit val customEncoders: Encoder[Customer] = new Encoder[Customer] {
