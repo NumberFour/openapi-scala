@@ -23,6 +23,7 @@ object MiniTypeHelpers {
 }
 
 object Utilities {
+
   def hyphenAndUnderscoreToCamel(name: String): String =
     "[-_]([a-z\\d])".r.replaceAllIn(name, { m =>
       m.group(1).toUpperCase()
@@ -55,20 +56,19 @@ object Utilities {
     "Refined"
   )
 
-  def underscoreToCamel(name: String): String =
-    // Yes, this was copied from StackOverflow
-    "_([a-z\\d])".r.replaceAllIn(name, { m =>
-      m.group(1).toUpperCase()
-    })
-
   def containsIllegal(in: String): Boolean =
     illegalScalaSymbols.foldLeft(false)((buf, value) => buf || in.contains(value))
 
+  def illegalOrForbidden(str: String): Boolean = forbiddenSymbols.contains(str) || containsIllegal(str)
+
+  def sanitize(str: String): String =
+    if (illegalOrForbidden(str)) s"`$str`" else str
+
   def cleanScalaSymbol(in: String): String =
-    if (forbiddenSymbols.contains(in) || containsIllegal(in)) {
-      val newVal = hyphenAndUnderscoreToCamel(s"$in")
-      if (forbiddenSymbols.contains(newVal) || containsIllegal(newVal)) s"`$newVal`" else newVal
-    } else hyphenAndUnderscoreToCamel(in)
+    sanitize(hyphenAndUnderscoreToCamel(in))
+
+  def cleanScalaSymbolEnum(in: String): String =
+    sanitize(in)
 
 }
 
@@ -120,7 +120,7 @@ object ScalaGenerator {
        |object $typeName extends Enum[$typeName] with CirceEnum[$typeName] {
        |  val values = findValues
        |  ${content
-         .map(item => s"""case object ${cleanScalaSymbol(item)} extends $typeName""")
+         .map(item => s"""case object ${cleanScalaSymbolEnum(item)} extends $typeName""")
          .mkString("", "\n\t", "")}
        | }
        """.stripMargin.trim

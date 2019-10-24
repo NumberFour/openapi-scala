@@ -8,3 +8,4 @@ mongo-to-kafka/biggest.json
 *.log
 data
 cache
+.java-version
