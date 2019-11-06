@@ -24,6 +24,13 @@ final case class ItemAlreadyExists(
     onResource: Option[String]
 ) extends ServiceException
 
+final case class ServiceObjectLocked(
+    `type`: String,
+    title: String = "Item locked. Please try again in a bit.",
+    detail: String,
+    onResource: Option[String]
+) extends ServiceException
+
 final case class ItemDoesNotExist(
     `type`: String,
     title: String = "Item does not exist",

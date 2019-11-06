@@ -33,6 +33,8 @@ class ErrorHandlerImplementation(convertThrowableToServiceExceptionFn: Throwable
     deriveEncoder[ServiceError](renaming.snakeCase, None)
   implicit val encoderItemAlreadyExists: Encoder[ItemAlreadyExists] =
     deriveEncoder[ItemAlreadyExists](renaming.snakeCase, None)
+  implicit val encoderObjectLocked: Encoder[ServiceObjectLocked] =
+    deriveEncoder[ServiceObjectLocked](renaming.snakeCase, None)
   implicit val encoderItemDoesNotExist: Encoder[ItemDoesNotExist] =
     deriveEncoder[ItemDoesNotExist](renaming.snakeCase, None)
   implicit val encoderRequestConflict: Encoder[RequestConflict] =
@@ -52,6 +54,9 @@ class ErrorHandlerImplementation(convertThrowableToServiceExceptionFn: Throwable
       case e: ItemAlreadyExists =>
         logger.info("ItemAlreadyExists", err)
         Conflict(e.asJson)
+      case e: ServiceObjectLocked =>
+        logger.info("ObjectLocked", err)
+        Locked(e.asJson)
       case e: ItemDoesNotExist =>
         logger.info("ItemDoesNotExist", err)
         NotFound(e.asJson)
