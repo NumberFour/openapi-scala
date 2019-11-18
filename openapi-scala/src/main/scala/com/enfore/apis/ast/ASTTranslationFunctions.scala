@@ -79,7 +79,7 @@ object ASTTranslationFunctions {
               case ReferenceObject(_) =>
                 throw new AssertionError("ReferenceObjects in query parameters are not supported.")
             }
-        }
+          }
       )
       .toMap
 
@@ -111,8 +111,8 @@ object ASTTranslationFunctions {
       getNameContentEncoding(route.responses, httpStatus => httpStatus >= 200 && httpStatus < 300)
     assert(possibleResponse.nonEmpty, "There has to be one successful (>=200 and <300) return code")
     requestType match {
-      case RequestType.POST | RequestType.PUT =>
-        PutOrPostRequest(
+      case RequestType.POST | RequestType.PUT | RequestType.PATCH =>
+        RequestWithPayload(
           path = path,
           summary = route.summary,
           operationId = route.operationId,
@@ -297,7 +297,8 @@ object ASTTranslationFunctions {
   private def handleSchemaObjectUnionType(
       name: String,
       discriminator: Option[Discriminator],
-      unionMembers: List[ReferenceObject])(
+      unionMembers: List[ReferenceObject]
+  )(
       implicit packageName: PackageName
   ): Option[Symbol] = {
     assert(

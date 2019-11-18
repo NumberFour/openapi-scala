@@ -118,8 +118,9 @@ object PathInterfaceGenerator {
     val params: String                      = paramsMaker(queries, pathVars, request)(p)
     val typelessParams: String              = typelessParamsMaker(queries, pathVars, true)
     val reqName: String = reqType match {
-      case ReqWithContentType.POST => "Post"
-      case ReqWithContentType.PUT  => "Put"
+      case ReqWithContentType.POST  => "Post"
+      case ReqWithContentType.PUT   => "Put"
+      case ReqWithContentType.PATCH => "Patch"
     }
     val responseType: String =
       response.map(r => MiniTypeHelpers.referenceCoproduct(r.values.toList)(p)).getOrElse("Unit")
@@ -203,7 +204,7 @@ object PathInterfaceGenerator {
   private[generator] def routeDefGen(implicit p: PackageName): ScalaGenerator[RouteDefinition] = {
     case GetRequest(path, _, _, pathParams, queries, response, _) =>
       getRequestGenerator(path, pathParams, queries, response)
-    case PutOrPostRequest(path, _, _, reqType, pathParams, queries, request, response, _, _) =>
+    case RequestWithPayload(path, _, _, reqType, pathParams, queries, request, response, _, _) =>
       postRequestGenerator(path, reqType, pathParams, queries, request, response)
     case DeleteRequest(path, _, _, pathParams, response, _) =>
       deleteRequestGenerator(path, pathParams, response)

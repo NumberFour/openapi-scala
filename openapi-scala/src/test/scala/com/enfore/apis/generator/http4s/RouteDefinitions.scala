@@ -2,7 +2,7 @@ package com.enfore.apis.generator.http4s
 
 import com.enfore.apis.repr.TypeRepr
 import com.enfore.apis.repr.TypeRepr._
-import com.enfore.apis.repr.ReqWithContentType.{POST, PUT}
+import com.enfore.apis.repr.ReqWithContentType.{PATCH, POST, PUT}
 import com.enfore.apis.repr._
 import scala.collection.immutable.ListMap
 
@@ -35,7 +35,7 @@ object RouteDefinitions {
     200
   )
 
-  lazy val `POST /contacts/individual` = PutOrPostRequest(
+  lazy val `POST /contacts/individual` = RequestWithPayload(
     "/contacts/individual",
     None,
     None,
@@ -48,7 +48,7 @@ object RouteDefinitions {
     200
   )
 
-  lazy val `POST /contacts/single` = PutOrPostRequest(
+  lazy val `POST /contacts/single` = RequestWithPayload(
     "/contacts/single",
     None,
     None,
@@ -61,7 +61,7 @@ object RouteDefinitions {
     200
   )
 
-  lazy val `POST /contacts/individual/empty` = PutOrPostRequest(
+  lazy val `POST /contacts/individual/empty` = RequestWithPayload(
     "/contacts/individual/empty",
     None,
     None,
@@ -102,7 +102,7 @@ object RouteDefinitions {
     200
   )
 
-  lazy val `PUT /contacts/individual/{contacts-id}` = PutOrPostRequest(
+  lazy val `PUT /contacts/individual/{contacts-id}` = RequestWithPayload(
     "/contacts/individual/{contacts-id}",
     None,
     None,
@@ -115,7 +115,7 @@ object RouteDefinitions {
     200
   )
 
-  lazy val `PUT /contacts/individual/empty/{contacts-id}` = PutOrPostRequest(
+  lazy val `PUT /contacts/individual/empty/{contacts-id}` = RequestWithPayload(
     "/contacts/individual/empty/{contacts-id}",
     None,
     None,
@@ -125,6 +125,19 @@ object RouteDefinitions {
     None,
     Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
     None,
+    200
+  )
+
+  lazy val `PATCH /contacts/individual/{contacts-id}` = RequestWithPayload(
+    "/contacts/individual/{contacts-id}",
+    None,
+    None,
+    PATCH,
+    List(PathParameter("contacts-id")),
+    Map.empty,
+    Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")),
+    Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    Some(false),
     200
   )
 
@@ -151,7 +164,7 @@ object RouteDefinitions {
     200
   )
 
-  lazy val `POST /contacts/organization/{contacts-id}/addresses` = PutOrPostRequest(
+  lazy val `POST /contacts/organization/{contacts-id}/addresses` = RequestWithPayload(
     "/contacts/organization/{contacts-id}/addresses",
     None,
     None,
@@ -181,7 +194,7 @@ object RouteDefinitions {
     200
   )
 
-  lazy val `PUT /contacts/organization/{contacts-id}/addresses/{address-id}` = PutOrPostRequest(
+  lazy val `PUT /contacts/organization/{contacts-id}/addresses/{address-id}` = RequestWithPayload(
     "/contacts/organization/{contacts-id}/addresses/{address-id}",
     None,
     None,
@@ -238,7 +251,7 @@ object RouteDefinitions {
     200
   )
 
-  lazy val `POST /contacts/individual?query1&query2&optional1&optional2&list1&optional-list1` = PutOrPostRequest(
+  lazy val `POST /contacts/individual?query1&query2&optional1&optional2&list1&optional-list1` = RequestWithPayload(
     "/contacts/individual",
     None,
     None,
@@ -275,7 +288,7 @@ object RouteDefinitions {
     200
   )
 
-  lazy val `PUT /contacts/individual/{contacts-id}?optional1&optional2` = PutOrPostRequest(
+  lazy val `PUT /contacts/individual/{contacts-id}?optional1&optional2` = RequestWithPayload(
     "/contacts/individual/{contacts-id}",
     None,
     None,
@@ -317,7 +330,7 @@ object RouteDefinitions {
     200
   )
 
-  lazy val `POST /contacts/organization/{contacts-id}/addresses?query1&query2` = PutOrPostRequest(
+  lazy val `POST /contacts/organization/{contacts-id}/addresses?query1&query2` = RequestWithPayload(
     "/contacts/organization/{contacts-id}/addresses",
     None,
     None,
@@ -353,7 +366,7 @@ object RouteDefinitions {
     200
   )
 
-  lazy val `PUT /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2` = PutOrPostRequest(
+  lazy val `PUT /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2` = RequestWithPayload(
     "/contacts/organization/{contacts-id}/addresses/{address-id}",
     None,
     None,
@@ -409,7 +422,7 @@ object RouteDefinitions {
     200
   )
 
-  lazy val `POST /contacts/individual?optionaoListl1&optional-list2` = PutOrPostRequest(
+  lazy val `POST /contacts/individual?optionaoListl1&optional-list2` = RequestWithPayload(
     "/contacts/individual",
     None,
     None,

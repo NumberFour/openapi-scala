@@ -3,7 +3,7 @@ package com.enfore.apis.ast
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
 import com.enfore.apis.ast.SwaggerAST._
 import com.enfore.apis.repr.ReqWithContentType.POST
-import com.enfore.apis.repr.{PathItemAggregation, PutOrPostRequest, TypeRepr}
+import com.enfore.apis.repr.{PathItemAggregation, RequestWithPayload, TypeRepr}
 import com.enfore.apis.repr.TypeRepr.{
   NewTypeSymbol,
   PrimitiveInt,
@@ -112,7 +112,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
           PathItemAggregation(
             path = "/products",
             items = List(
-              PutOrPostRequest(
+              RequestWithPayload(
                 path = "/products",
                 summary = Some("Add a new product to the organisation"),
                 operationId = Some("dummyFunction"),
@@ -249,7 +249,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
           PathItemAggregation(
             path = "/products",
             items = List(
-              PutOrPostRequest(
+              RequestWithPayload(
                 path = "/products",
                 summary = Some("Add a existing product to something"),
                 operationId = Some("dummyFunction"),

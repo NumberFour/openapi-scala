@@ -4,7 +4,7 @@ variables:
   SBT_OPTS: '-Dsbt.color=always -Dsbt.supershell=false -Xms200m -Xmx500m -Xss2M -XX:MaxMetaspaceSize=500m -XX:MetaspaceSize=200m -XX:+CMSClassUnloadingEnabled'
   COURSIER_CACHE: cache
 
-image: ${ECR}/scala-build-images:openjdk11-scala2.13-sbt1.3
+image: ${ECR}/scala-build-images:openjdk11-scala2.13.1-sbt1.3.3
 
 cache:
   key: one-cache-per-project

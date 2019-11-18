@@ -96,7 +96,7 @@ object Http4sGenerator {
          |import org.http4s.Request
          |
          |trait Http4sRoutesApi[F[_]] {
-         |${implementationTrait(routes).map("  " + _).mkString("\n")}
+         |${implementationTrait(routes, indentationLevel = 1).map("  " + _).mkString("\n")}
          |}
       """.stripMargin
   }
@@ -127,6 +127,8 @@ object Http4sGenerator {
       .flatMap(_.items)
       .map(RouteGenerator.generate(_, indentationLevel).mkString("\n"))
 
-  private def implementationTrait(routes: Map[FileName, PathItemAggregation]): List[String] =
-    routes.values.toList.flatMap(_.items).map(ImplementationGenerator.generate)
+  private def implementationTrait(routes: Map[FileName, PathItemAggregation], indentationLevel: Int): List[String] =
+    routes.values.toList
+      .flatMap(_.items)
+      .map(ImplementationGenerator.generate(_, indentationLevel).mkString("\n"))
 }

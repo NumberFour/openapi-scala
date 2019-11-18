@@ -13,6 +13,7 @@ object SwaggerAST {
   // --- Helper Types ---
   sealed trait RequestType
   object RequestType {
+    case object PATCH  extends RequestType
     case object POST   extends RequestType
     case object PUT    extends RequestType
     case object GET    extends RequestType
@@ -56,19 +57,19 @@ object SwaggerAST {
       additionalProperties: Option[SchemaOrReferenceObject] = None,
       // CAVEAT: We allow a reference here, which according to the spec is not allowed but the way all OpenAPI tools work
       items: Option[SchemaOrReferenceObject] = None, // Only present when schema object is an array
-      oneOf: Option[List[ReferenceObject]] = None, // Used for sum types and nothing else
-      discriminator: Option[Discriminator] = None, // Used for sum types and nothing else
+      oneOf: Option[List[ReferenceObject]] = None,   // Used for sum types and nothing else
+      discriminator: Option[Discriminator] = None,   // Used for sum types and nothing else
       enum: Option[List[String]] = None,
       required: Option[List[String]] = None,
-      readOnly: Option[Boolean] = None, // Points out whether a property is readOnly (defaults to false)
-      minLength: Option[Int] = None, // Optional refinement
-      maxLength: Option[Int] = None, // Optional refinement
-      maxItems: Option[Int] = None, // Optional refinement
-      minItems: Option[Int] = None, // Optional refinement
+      readOnly: Option[Boolean] = None,  // Points out whether a property is readOnly (defaults to false)
+      minLength: Option[Int] = None,     // Optional refinement
+      maxLength: Option[Int] = None,     // Optional refinement
+      maxItems: Option[Int] = None,      // Optional refinement
+      minItems: Option[Int] = None,      // Optional refinement
       maxProperties: Option[Int] = None, // Optional refinement
       minProperties: Option[Int] = None, // Optional refinement
-      maximum: Option[Int] = None, // Optional refinement
-      minimum: Option[Int] = None, // Optional refinement
+      maximum: Option[Int] = None,       // Optional refinement
+      minimum: Option[Int] = None,       // Optional refinement
       default: Option[PrimitiveValue] = None
   ) extends SchemaOrReferenceObject
       with TypeDef

@@ -2,7 +2,7 @@ package com.enfore.apis.generator
 
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
 import com.enfore.apis.repr.TypeRepr.{Ref => TypeReprRef}
-import com.enfore.apis.repr.{GetRequest, PathParameter, PutOrPostRequest, ReqWithContentType}
+import com.enfore.apis.repr.{GetRequest, PathParameter, RequestWithPayload, ReqWithContentType}
 import org.scalatest._
 
 import scala.meta._
@@ -43,7 +43,7 @@ class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
   }
 
   it should "be able to use the correct input/return type in post request" in {
-    val request = PutOrPostRequest(
+    val request = RequestWithPayload(
       "/products",
       None,
       Some("dummyFunction"),
@@ -77,7 +77,7 @@ class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
   }
 
   it should "be able to deal with no return type for Post requests" in {
-    val request = PutOrPostRequest(
+    val request = RequestWithPayload(
       "/subscriptions",
       None,
       Some("dummyFunction"),
@@ -121,7 +121,7 @@ class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
       | val path = "/subscriptions/{subscription-id}"
       | val queries = Map()
       | val pathVariables = List("subscriptionId")
-      | 
+      |
       | type Response = Unit
       | def impl(subscriptionId: String): F[Response]
       |}

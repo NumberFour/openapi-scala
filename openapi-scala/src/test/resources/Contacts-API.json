@@ -152,6 +152,52 @@
             "description" : "Contact not found or invalid identifier"
           }
         }
+      },
+      "patch" : {
+        "tags" : [ "individual_contacts" ],
+        "summary" : "Partial update of an IndividualContact",
+        "parameters" : [ {
+          "name" : "contact-id",
+          "in" : "path",
+          "description" : "ID of the contact to update",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/vnd.enfore.contacts+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/IndividualContact"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Contact was successfully updated",
+            "content" : {
+              "application/vnd.enfore.contacts+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/IndividualContact"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Invalid payload was sent by the client"
+          },
+          "403" : {
+            "description" : "Credentials missing or not sufficient"
+          },
+          "404" : {
+            "description" : "Contact not found or invalid identifier"
+          }
+        }
       }
     },
     "/contacts/individual/{contact-id}/addresses" : {

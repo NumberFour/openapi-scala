@@ -8,7 +8,7 @@ class ImplementationGeneratorSpec extends FreeSpec with Matchers {
     "based on http4s according to provided route definiton" in tableTest
 
   def tableTest = forAll(table) { (pathItem, sourceString) =>
-    ImplementationGenerator.generate(pathItem) should equal(sourceString)
+    ImplementationGenerator.generate(pathItem, indentationLevel = 0) should equal(sourceString)
   }
 
   lazy val table = Table(
@@ -17,6 +17,7 @@ class ImplementationGeneratorSpec extends FreeSpec with Matchers {
     `POST /contacts/individual`,
     `GET /contacts/individual/{contacts-id}`,
     `PUT /contacts/individual/{contacts-id}`,
+    `PATCH /contacts/individual/{contacts-id}`,
     `DELETE /contacts/individual/{contacts-id}`,
     `GET /contacts/organization/{contacts-id}/addresses`,
     `POST /contacts/organization/{contacts-id}/addresses`,
@@ -41,127 +42,180 @@ class ImplementationGeneratorSpec extends FreeSpec with Matchers {
 
   lazy val `GET /contacts/individual` = (
     RouteDefinitions.`GET /contacts/individual`,
-    """/**
-      | * Dummy documentation
-      | * Dummy documentation next line.
-      |**/
-      |def dummyFunction(implicit request: Request[F]): F[IndividualContact]""".stripMargin
+    List(
+      "/**",
+      " * Dummy documentation",
+      " * Dummy documentation next line.",
+      "**/",
+      "def dummyFunction(implicit request: Request[F]): F[IndividualContact]"
+    )
   )
 
   lazy val `POST /contacts/individual` = (
     RouteDefinitions.`POST /contacts/individual`,
-    """def `POST /contacts/individual`(body: IndividualContact)(implicit request: Request[F]): F[IndividualContact]"""
+    List(
+      """def `POST /contacts/individual`(body: IndividualContact)(implicit request: Request[F]): F[IndividualContact]"""
+    )
   )
 
   lazy val `GET /contacts/individual/{contacts-id}` = (
     RouteDefinitions.`GET /contacts/individual/{contacts-id}`,
-    """def `GET /contacts/individual/{contacts-id}`(contactsId: String)(implicit request: Request[F]): F[IndividualContact]"""
+    List(
+      """def `GET /contacts/individual/{contacts-id}`(contactsId: String)(implicit request: Request[F]): F[IndividualContact]"""
+    )
   )
 
   lazy val `PUT /contacts/individual/{contacts-id}` = (
     RouteDefinitions.`PUT /contacts/individual/{contacts-id}`,
-    """def `PUT /contacts/individual/{contacts-id}`(contactsId: String, body: IndividualContact)(implicit request: Request[F]): F[IndividualContact]"""
+    List(
+      """def `PUT /contacts/individual/{contacts-id}`(contactsId: String, body: IndividualContact)(implicit request: Request[F]): F[IndividualContact]"""
+    )
+  )
+
+  lazy val `PATCH /contacts/individual/{contacts-id}` = (
+    RouteDefinitions.`PATCH /contacts/individual/{contacts-id}`,
+    List(
+      """def `PATCH /contacts/individual/{contacts-id}`(contactsId: String, body: IndividualContact)(implicit request: Request[F]): F[IndividualContact]"""
+    )
   )
 
   lazy val `DELETE /contacts/individual/{contacts-id}` = (
     RouteDefinitions.`DELETE /contacts/individual/{contacts-id}`,
-    """def `DELETE /contacts/individual/{contacts-id}`(contactsId: String)(implicit request: Request[F]): F[Unit]"""
+    List(
+      """def `DELETE /contacts/individual/{contacts-id}`(contactsId: String)(implicit request: Request[F]): F[Unit]"""
+    )
   )
 
   lazy val `GET /contacts/organization/{contacts-id}/addresses` = (
     RouteDefinitions.`GET /contacts/organization/{contacts-id}/addresses`,
-    """def `GET /contacts/organization/{contacts-id}/addresses`(contactsId: String)(implicit request: Request[F]): F[Address]"""
+    List(
+      """def `GET /contacts/organization/{contacts-id}/addresses`(contactsId: String)(implicit request: Request[F]): F[Address]"""
+    )
   )
 
   lazy val `POST /contacts/organization/{contacts-id}/addresses` = (
     RouteDefinitions.`POST /contacts/organization/{contacts-id}/addresses`,
-    """def `POST /contacts/organization/{contacts-id}/addresses`(contactsId: String, body: Address)(implicit request: Request[F]): F[Address]"""
+    List(
+      """def `POST /contacts/organization/{contacts-id}/addresses`(contactsId: String, body: Address)(implicit request: Request[F]): F[Address]"""
+    )
   )
 
   lazy val `GET /contacts/organization/{contacts-id}/addresses/{address-id}` = (
     RouteDefinitions.`GET /contacts/organization/{contacts-id}/addresses/{address-id}`,
-    """def `GET /contacts/organization/{contacts-id}/addresses/{address-id}`(contactsId: String, addressId: String)(implicit request: Request[F]): F[Address]"""
+    List(
+      """def `GET /contacts/organization/{contacts-id}/addresses/{address-id}`(contactsId: String, addressId: String)(implicit request: Request[F]): F[Address]"""
+    )
   )
 
   lazy val `PUT /contacts/organization/{contacts-id}/addresses/{address-id}` = (
     RouteDefinitions.`PUT /contacts/organization/{contacts-id}/addresses/{address-id}`,
-    """def `PUT /contacts/organization/{contacts-id}/addresses/{address-id}`(contactsId: String, addressId: String, body: Address)(implicit request: Request[F]): F[Address]"""
+    List(
+      """def `PUT /contacts/organization/{contacts-id}/addresses/{address-id}`(contactsId: String, addressId: String, body: Address)(implicit request: Request[F]): F[Address]"""
+    )
   )
 
   lazy val `DELETE /contacts/organization/{contacts-id}/addresses/{address-id}` = (
     RouteDefinitions.`DELETE /contacts/organization/{contacts-id}/addresses/{address-id}`,
-    """def `DELETE /contacts/organization/{contacts-id}/addresses/{address-id}`(contactsId: String, addressId: String)(implicit request: Request[F]): F[Unit]"""
+    List(
+      """def `DELETE /contacts/organization/{contacts-id}/addresses/{address-id}`(contactsId: String, addressId: String)(implicit request: Request[F]): F[Unit]"""
+    )
   )
 
   lazy val `GET /contacts/individual?query1&query2&optional1&optional2&list1&optional-list1` = (
     RouteDefinitions.`GET /contacts/individual?query1&query2&optional1&optional2&list1&optional-list1`,
-    """def `GET /contacts/individual`(list1: List[Int], optionalList1: Option[List[String]], optional1: Option[String], optional2: Option[Int], query1: String, query2: Int)(implicit request: Request[F]): F[IndividualContact]"""
+    List(
+      """def `GET /contacts/individual`(list1: List[Int], optionalList1: Option[List[String]], optional1: Option[String], optional2: Option[Int], query1: String, query2: Int)(implicit request: Request[F]): F[IndividualContact]"""
+    )
   )
 
   lazy val `POST /contacts/individual?query1&query2&optional1&optional2&list1&optional-list1` = (
     RouteDefinitions.`POST /contacts/individual?query1&query2&optional1&optional2&list1&optional-list1`,
-    """def `POST /contacts/individual`(list1: List[Int], optionalList1: Option[List[String]], optional1: Option[String], optional2: Option[Int], query1: String, query2: Int, body: IndividualContact)(implicit request: Request[F]): F[IndividualContact]"""
+    List(
+      """def `POST /contacts/individual`(list1: List[Int], optionalList1: Option[List[String]], optional1: Option[String], optional2: Option[Int], query1: String, query2: Int, body: IndividualContact)(implicit request: Request[F]): F[IndividualContact]"""
+    )
   )
 
   lazy val `GET /contacts/individual/{contacts-id}?optional1&optional2` = (
     RouteDefinitions.`GET /contacts/individual/{contacts-id}?optional1&optional2`,
-    """def `GET /contacts/individual/{contacts-id}`(contactsId: String, optional1: Option[String], optional2: Option[Int])(implicit request: Request[F]): F[IndividualContact]"""
+    List(
+      """def `GET /contacts/individual/{contacts-id}`(contactsId: String, optional1: Option[String], optional2: Option[Int])(implicit request: Request[F]): F[IndividualContact]"""
+    )
   )
 
   lazy val `PUT /contacts/individual/{contacts-id}?optional1&optional2` = (
     RouteDefinitions.`PUT /contacts/individual/{contacts-id}?optional1&optional2`,
-    """def `PUT /contacts/individual/{contacts-id}`(contactsId: String, optional1: Option[String], optional2: Option[Int], body: IndividualContact)(implicit request: Request[F]): F[IndividualContact]"""
+    List(
+      """def `PUT /contacts/individual/{contacts-id}`(contactsId: String, optional1: Option[String], optional2: Option[Int], body: IndividualContact)(implicit request: Request[F]): F[IndividualContact]"""
+    )
   )
 
   // DELETE does not support query parameters
   lazy val `DELETE /contacts/individual/{contacts-id}?optional1&optional2` = (
     RouteDefinitions.`DELETE /contacts/individual/{contacts-id}?optional1&optional2`,
-    """def `DELETE /contacts/individual/{contacts-id}`(contactsId: String)(implicit request: Request[F]): F[Unit]"""
+    List(
+      """def `DELETE /contacts/individual/{contacts-id}`(contactsId: String)(implicit request: Request[F]): F[Unit]"""
+    )
   )
 
   lazy val `GET /contacts/organization/{contacts-id}/addresses?query1&query2` = (
     RouteDefinitions.`GET /contacts/organization/{contacts-id}/addresses?query1&query2`,
-    """def `GET /contacts/organization/{contacts-id}/addresses`(contactsId: String, query1: String, query2: Int)(implicit request: Request[F]): F[Address]"""
+    List(
+      """def `GET /contacts/organization/{contacts-id}/addresses`(contactsId: String, query1: String, query2: Int)(implicit request: Request[F]): F[Address]"""
+    )
   )
 
   lazy val `POST /contacts/organization/{contacts-id}/addresses?query1&query2` = (
     RouteDefinitions.`POST /contacts/organization/{contacts-id}/addresses?query1&query2`,
-    """def `POST /contacts/organization/{contacts-id}/addresses`(contactsId: String, query1: String, query2: Int, body: Address)(implicit request: Request[F]): F[Address]"""
+    List(
+      """def `POST /contacts/organization/{contacts-id}/addresses`(contactsId: String, query1: String, query2: Int, body: Address)(implicit request: Request[F]): F[Address]"""
+    )
   )
 
   lazy val `GET /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2` = (
     RouteDefinitions.`GET /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2`,
-    """def `GET /contacts/organization/{contacts-id}/addresses/{address-id}`(contactsId: String, addressId: String, list1: List[String], list2: List[Int])(implicit request: Request[F]): F[Address]"""
+    List(
+      """def `GET /contacts/organization/{contacts-id}/addresses/{address-id}`(contactsId: String, addressId: String, list1: List[String], list2: List[Int])(implicit request: Request[F]): F[Address]"""
+    )
   )
 
   lazy val `PUT /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2` = (
     RouteDefinitions.`PUT /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2`,
-    """def `PUT /contacts/organization/{contacts-id}/addresses/{address-id}`(contactsId: String, addressId: String, list1: List[String], list2: List[Int], body: Address)(implicit request: Request[F]): F[Address]"""
+    List(
+      """def `PUT /contacts/organization/{contacts-id}/addresses/{address-id}`(contactsId: String, addressId: String, list1: List[String], list2: List[Int], body: Address)(implicit request: Request[F]): F[Address]"""
+    )
   )
 
   // DELETE does not support query parameters
   lazy val `DELETE /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2` = (
     RouteDefinitions.`DELETE /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2`,
-    """def `DELETE /contacts/organization/{contacts-id}/addresses/{address-id}`(contactsId: String, addressId: String)(implicit request: Request[F]): F[Unit]"""
+    List(
+      """def `DELETE /contacts/organization/{contacts-id}/addresses/{address-id}`(contactsId: String, addressId: String)(implicit request: Request[F]): F[Unit]"""
+    )
   )
 
   lazy val `GET /contacts/individual?optional-list1&optional-list2` = (
     RouteDefinitions.`GET /contacts/individual?optional-list1&optional-list2`,
-    """def `GET /contacts/individual`(optionalList1: Option[List[String]], optionalList2: Option[List[Int]])(implicit request: Request[F]): F[IndividualContact]"""
+    List(
+      """def `GET /contacts/individual`(optionalList1: Option[List[String]], optionalList2: Option[List[Int]])(implicit request: Request[F]): F[IndividualContact]"""
+    )
   )
 
   lazy val `POST /contacts/individual?optionaoListl1&optional-list2` = (
     RouteDefinitions.`POST /contacts/individual?optionaoListl1&optional-list2`,
-    """def `POST /contacts/individual`(optionalList1: Option[List[String]], optionalList2: Option[List[Int]], body: IndividualContact)(implicit request: Request[F]): F[IndividualContact]"""
+    List(
+      """def `POST /contacts/individual`(optionalList1: Option[List[String]], optionalList2: Option[List[Int]], body: IndividualContact)(implicit request: Request[F]): F[IndividualContact]"""
+    )
   )
 
   lazy val `GET /contacts/individual/funny.,argument/type/?other:@funny&trait` = (
     RouteDefinitions.`GET /contacts/individual/funny.,argument/type/?other:@funny&trait`,
-    """def `GET /contacts/individual/{funny.,argument}/{type}`(`funny.,argument`: String, `type`: String, `other:@funny`: String, `trait`: String)(implicit request: Request[F]): F[IndividualContact]"""
+    List(
+      """def `GET /contacts/individual/{funny.,argument}/{type}`(`funny.,argument`: String, `type`: String, `other:@funny`: String, `trait`: String)(implicit request: Request[F]): F[IndividualContact]"""
+    )
   )
 
   lazy val `POST /contacts/single` = (
     RouteDefinitions.`POST /contacts/single`,
-    """def `POST /contacts/single`(body: String)(implicit request: Request[F]): F[IndividualContact]"""
+    List("""def `POST /contacts/single`(body: String)(implicit request: Request[F]): F[IndividualContact]""")
   )
 }

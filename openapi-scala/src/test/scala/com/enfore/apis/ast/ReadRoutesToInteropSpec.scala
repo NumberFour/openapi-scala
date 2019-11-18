@@ -16,7 +16,7 @@ import com.enfore.apis.ast.SwaggerAST.{
 import com.enfore.apis.ast.SwaggerAST.ParameterLocation.path
 import com.enfore.apis.repr.ReqWithContentType.PUT
 import com.enfore.apis.repr.TypeRepr.Ref
-import com.enfore.apis.repr.{GetRequest, PathItemAggregation, PathParameter, PutOrPostRequest}
+import com.enfore.apis.repr.{GetRequest, PathItemAggregation, PathParameter, RequestWithPayload}
 import org.scalatest.{FlatSpec, Matchers}
 
 class ReadRoutesToInteropSpec extends FlatSpec with Matchers {
@@ -42,7 +42,7 @@ class ReadRoutesToInteropSpec extends FlatSpec with Matchers {
               ),
               200
             ),
-            PutOrPostRequest(
+            RequestWithPayload(
               "/contacts/individual/{contact-id}",
               Some("Full update of an IndividualContact"),
               Some("dummyFunction"),

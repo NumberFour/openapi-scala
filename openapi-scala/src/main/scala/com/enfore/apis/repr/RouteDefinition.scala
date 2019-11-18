@@ -18,8 +18,9 @@ final case class PathItemAggregation(path: String, items: List[RouteDefinition])
   */
 sealed trait ReqWithContentType
 object ReqWithContentType {
-  case object POST extends ReqWithContentType
-  case object PUT  extends ReqWithContentType
+  case object PATCH extends ReqWithContentType
+  case object POST  extends ReqWithContentType
+  case object PUT   extends ReqWithContentType
 }
 
 final case class PathParameter(
@@ -36,7 +37,7 @@ final case class GetRequest(
     successStatusCode: Int
 ) extends RouteDefinition
 
-final case class PutOrPostRequest(
+final case class RequestWithPayload(
     path: String,
     summary: Option[String],
     operationId: Option[String],
