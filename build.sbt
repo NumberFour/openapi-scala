@@ -24,7 +24,7 @@ lazy val scalaMacros: Seq[Def.Setting[_]] = Seq(
   scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, 12)) => Seq()
     case _             => Seq("-Ymacro-annotations")
-  }),
+  })
 )
 
 lazy val scalaCompat = "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.2"

@@ -1,7 +1,7 @@
 package com.enfore.apis.ast
 
 import cats.implicits._
-import com.enfore.apis.ast.SwaggerAST.RequestType.{POST, PUT}
+import com.enfore.apis.ast.SwaggerAST.RequestType.{PATCH, POST, PUT}
 import com.enfore.apis.ast.SwaggerAST._
 import com.enfore.apis.repr.TypeRepr
 import com.enfore.apis.repr.TypeRepr._
@@ -49,9 +49,10 @@ object ASTTranslationFunctions {
   ): Option[(Int, Map[String, Ref])] = mediaMap.find(x => acceptMedia(x._1)).map(x => (x._1, getEncodedMap(x._2)))
 
   private def translateReqContentType(in: RequestType): ReqWithContentType = in match {
-    case POST => ReqWithContentType.POST
-    case PUT  => ReqWithContentType.PUT
-    case _    => ReqWithContentType.POST
+    case POST  => ReqWithContentType.POST
+    case PUT   => ReqWithContentType.PUT
+    case PATCH => ReqWithContentType.PATCH
+    case other => throw new RuntimeException(s"Invalid RequestType $other for Request with Content")
   }
 
   private def extractPathParameters(parameters: List[SwaggerAST.ParameterObject]): List[PathParameter] =
@@ -153,6 +154,8 @@ object ASTTranslationFunctions {
   )(implicit packageName: PackageName): List[RouteDefinition] =
     paths.flatMap {
       case (path: String, routes: Map[String, OperationObject]) =>
+        val patch: Option[RouteDefinition] =
+          routes.get("patch").map(routeDefFromSwaggerAST(path)(_, RequestType.PATCH)(components))
         val put: Option[RouteDefinition] =
           routes.get("put").map(routeDefFromSwaggerAST(path)(_, RequestType.PUT)(components))
         val post: Option[RouteDefinition] =
@@ -161,7 +164,7 @@ object ASTTranslationFunctions {
           routes.get("get").map(routeDefFromSwaggerAST(path)(_, RequestType.GET)(components))
         val delete: Option[RouteDefinition] =
           routes.get("delete").map(routeDefFromSwaggerAST(path)(_, RequestType.DELETE)(components))
-        List(put, post, get, delete).flatten
+        List(patch, put, post, get, delete).flatten
     }.toList
 
   //  Functions for translating components

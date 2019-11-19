@@ -96,7 +96,7 @@ object Http4sGenerator {
          |import org.http4s.Request
          |
          |trait Http4sRoutesApi[F[_]] {
-         |${implementationTrait(routes, indentationLevel = 1).map("  " + _).mkString("\n")}
+         |${implementationTrait(routes, indentationLevel = 1).mkString("\n")}
          |}
       """.stripMargin
   }
