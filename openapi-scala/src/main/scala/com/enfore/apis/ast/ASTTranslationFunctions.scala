@@ -80,7 +80,7 @@ object ASTTranslationFunctions {
               case ReferenceObject(_) =>
                 throw new AssertionError("ReferenceObjects in query parameters are not supported.")
             }
-          }
+        }
       )
       .toMap
 
@@ -332,7 +332,7 @@ object ASTTranslationFunctions {
     case so: SchemaObject =>
       so.readOnly.getOrElse(
         so.properties.exists { _.values.exists { schemaObjectHasReadOnlyComponent(components) } }
-      )
+      ) || so.oneOf.fold(false)(_.map(schemaObjectHasReadOnlyComponent(components)(_)).reduce(_ || _))
     case ReferenceObject(ref) =>
       schemaObjectHasReadOnlyComponent(components)(findRefInComponents(components, ref.split("/").last))
   }
@@ -368,7 +368,9 @@ object ASTTranslationFunctions {
                 case (_, v) =>
                   hasReadOnlyBase(v)
               })(components)
-          )
+          ),
+          oneOf = sor.oneOf.map(_.map(ref =>
+            if (schemaObjectHasReadOnlyComponent(components)(ref)) ref.copy($ref = ref.$ref + "Request") else ref))
         )
     }
     hasNoReadOnlyProps ++ hasReadOnlyProps ++ withRequestPostfix
