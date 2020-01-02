@@ -45,7 +45,6 @@ object Main {
         routeImplementations.flatMap(_.generateScala(routesMap, pn))
     }
   }
-
   def genHttp4sFromJson(in: String, packageName: String): Either[circe.Error, Map[String, String]] = {
     val pn = PackageName(packageName)
     for {

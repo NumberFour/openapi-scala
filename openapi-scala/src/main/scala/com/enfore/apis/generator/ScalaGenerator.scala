@@ -210,7 +210,6 @@ object ScalaGenerator {
     case NewTypeSymbol(_, PrimitiveEnum(packageName, typeName, content)) =>
       generateForPrimitiveEnum(packageName, typeName, content)
     case NewTypeSymbol(_, PrimitiveProduct(packageName, typeName, values)) =>
-      assert(values.nonEmpty, s"$packageName.$typeName contains 0 values. This is not allowed.")
       genetateForPrimitiveProduct(packageName, typeName, values)
     case NewTypeSymbol(_, PrimitiveUnion(packageName, typeName, unionMembers, discriminator)) =>
       generateForPrimitiveUnion(packageName, typeName, unionMembers, discriminator)

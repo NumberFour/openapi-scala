@@ -39,6 +39,33 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
     tree.get.structure shouldBe expected.get.structure
   }
 
+  it should "be able to generate a basic case class with no members" in {
+    val person: Symbol = NewTypeSymbol(
+      "none",
+      PrimitiveProduct(
+        "com.enfore.apis",
+        "Person",
+        List.empty
+      )
+    )
+    val expected =
+      """
+        |package com.enfore.apis
+        |
+        |import io.circe._
+        |import io.circe.derivation._
+        |
+        |final case class Person()
+        |
+        |object Person {
+        | implicit val circeDecoder: Decoder[Person] = deriveDecoder[Person](renaming.snakeCase, true, None)
+        | implicit val circeEncoder: Encoder[Person] = deriveEncoder[Person](renaming.snakeCase, None)
+        |}
+      """.stripMargin.trim.parse[Source]
+    val tree: Parsed[Source] = person.generateScala.parse[Source]
+    tree.get.structure shouldBe expected.get.structure
+  }
+
   it should "be able to resolve references" in {
     val person: Symbol = NewTypeSymbol(
       "none",

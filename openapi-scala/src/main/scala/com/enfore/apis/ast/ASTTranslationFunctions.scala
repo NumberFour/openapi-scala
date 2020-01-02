@@ -278,7 +278,8 @@ object ASTTranslationFunctions {
   ): Option[Symbol] = {
     val required = schemaObject.required.getOrElse(List.empty[String])
     val newType: Option[NewType] = schemaObject.`type`.get match {
-      case SchemaObjectType.`object`  => schemaObject.properties.flatMap(loadObjectProperties(name, _, required))
+      case SchemaObjectType.`object` =>
+        loadObjectProperties(name, schemaObject.properties.getOrElse(Map.empty), required)
       case SchemaObjectType.`string`  => schemaObject.enum.map(loadEnum(name, _))
       case SchemaObjectType.`integer` => schemaObject.enum.map(loadEnum(name, _))
       case SchemaObjectType.`array` =>
