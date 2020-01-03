@@ -256,6 +256,28 @@ object ASTTranslationFunctions {
     mapped.toList.sequence.map(PrimitiveProduct(packageName.name, typeName, _))
   }
 
+  private def typedDefaultMapping(value: TypeRepr, default: Option[PrimitiveValue]): PrimitiveOption = {
+    val mismatchErr = s"${value.typeName} has wrong default value type"
+    val mappedDefault = default map {
+      case PrimitiveNumberValue(n) =>
+        value match {
+          case _: PrimitiveNumber => PrimitiveNumberValue(n)
+          case _: PrimitiveInt =>
+            assert(n.isValidInt, "Implicit double to integer type coercion")
+            PrimitiveIntValue(n.toInt)
+          case _ => throw new AssertionError(mismatchErr)
+        }
+      case i: PrimitiveIntValue =>
+        assert(value.isInstanceOf[PrimitiveInt], mismatchErr)
+        i
+      case s: PrimitiveStringValue =>
+        assert(value.isInstanceOf[PrimitiveString], mismatchErr)
+        s
+      case self => self
+    }
+    PrimitiveOption(value, mappedDefault)
+  }
+
   private def getTypeRepr(required: List[String], name: String, repr: SchemaOrReferenceObject)(
       implicit packageName: PackageName
   ): Option[TypeRepr] =
@@ -264,8 +286,8 @@ object ASTTranslationFunctions {
         val loadedTypeRepr = loadSingleProperty(r)
         if (required.contains(name)) loadedTypeRepr else loadedTypeRepr.map(PrimitiveOption(_, None))
       case o: SchemaObject if o.oneOf.isEmpty =>
-        val loadedTypeRepr = loadSingleProperty(o)
-        if (required.contains(name)) loadedTypeRepr else loadedTypeRepr.map(PrimitiveOption(_, o.default))
+        val loadedTypeRepr: Option[TypeRepr] = loadSingleProperty(o)
+        if (required.contains(name)) loadedTypeRepr else loadedTypeRepr.map(typedDefaultMapping(_, o.default))
       case _ =>
         throw new AssertionError("Discriminated Unions (OpenAPI: oneOf) are only supported as top-level types for now.")
     }

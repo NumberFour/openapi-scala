@@ -7,7 +7,9 @@ import com.enfore.apis.repr.{PathItemAggregation, RequestWithPayload, TypeRepr}
 import com.enfore.apis.repr.TypeRepr.{
   NewTypeSymbol,
   PrimitiveInt,
+  PrimitiveIntValue,
   PrimitiveNumber,
+  PrimitiveNumberValue,
   PrimitiveOption,
   PrimitiveProduct,
   PrimitiveString,
@@ -132,6 +134,99 @@ class AstTranslationSpec extends FlatSpec with Matchers {
     }
 
     ast.isRight shouldBe true
+  }
+
+  it should "be able to translate the default values properly" in {
+    val yamlCode1: String =
+      """
+        |components:
+        | schemas:
+        |   ContainsDefault:
+        |     type: object
+        |     properties:
+        |       something:
+        |         type: integer
+        |         default: 10
+        |""".stripMargin
+    val expectedComp1 = Map(
+      "ContainsDefault" -> NewTypeSymbol(
+        valName = "ContainsDefault",
+        data = PrimitiveProduct(
+          packageName = "foo",
+          typeName = "ContainsDefault",
+          values = List(
+            PrimitiveSymbol(
+              "something",
+              PrimitiveOption(PrimitiveInt(Some(List())), Some(PrimitiveIntValue(10)))
+            )
+          )
+        )
+      )
+    )
+    val yamlCode2: String =
+      """
+        |components:
+        | schemas:
+        |   ContainsDefault:
+        |     type: object
+        |     properties:
+        |       something:
+        |         type: number
+        |         default: 10.2
+        |""".stripMargin
+    val expectedComp2 = Map(
+      "ContainsDefault" -> NewTypeSymbol(
+        valName = "ContainsDefault",
+        data = PrimitiveProduct(
+          packageName = "foo",
+          typeName = "ContainsDefault",
+          values = List(
+            PrimitiveSymbol(
+              "something",
+              PrimitiveOption(PrimitiveNumber(Some(List())), Some(PrimitiveNumberValue(10.2)))
+            )
+          )
+        )
+      )
+    )
+
+    val yamlCode3: String =
+      """
+        |components:
+        | schemas:
+        |   ContainsDefault:
+        |     type: object
+        |     properties:
+        |       something:
+        |         type: integer
+        |         default: 10.2
+        |""".stripMargin
+
+    val ast1 = circe.yaml.parser.parse(yamlCode1).flatMap(_.as[CoreASTRepr])
+    ast1.left.map(println) // For debugging the failing tests
+    ast1.map { representation =>
+      implicit val packageName: PackageName = PackageName("foo")
+      val componentsMap =
+        ASTTranslationFunctions.readComponentsToInterop(representation)(packageName)
+      componentsMap shouldBe expectedComp1
+    }
+
+    val ast2 = circe.yaml.parser.parse(yamlCode2).flatMap(_.as[CoreASTRepr])
+    ast2.left.map(println) // For debugging the failing tests
+    ast2.map { representation =>
+      implicit val packageName: PackageName = PackageName("foo")
+      val componentsMap =
+        ASTTranslationFunctions.readComponentsToInterop(representation)(packageName)
+      componentsMap shouldBe expectedComp2
+    }
+
+    val ast3 = circe.yaml.parser.parse(yamlCode3).flatMap(_.as[CoreASTRepr])
+    ast3.left.map(println) // For debugging the failing tests
+    ast3.map { representation =>
+      implicit val packageName: PackageName = PackageName("foo")
+      an[AssertionError] shouldBe thrownBy(ASTTranslationFunctions.readComponentsToInterop(representation)(packageName))
+    }
+
   }
 
   it should "be able to read the sum types properly" in {
