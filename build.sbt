@@ -47,7 +47,7 @@ lazy val `openapi-scala` = (project in file("openapi-scala"))
     scalaMacros,
     libraryDependencies ++= Seq(
       "io.circe"      %% "circe-yaml" % "0.11.0-M1" % "test",
-      "org.scalameta" %% "scalameta"  % "4.2.3"     % "test"
+      "org.scalameta" %% "scalameta"  % "4.3.0"     % "test"
     ) ++ sharedDependencies
   )
   .settings(commonScalaSettings)

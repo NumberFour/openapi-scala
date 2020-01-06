@@ -12,6 +12,8 @@ object SymbolAnnotationMaker {
     def refinementMatcher(in: T) = in match {
       case MinLength(length) => s"MinSize[W.`$length`.T]"
       case MaxLength(length) => s"MaxSize[W.`$length`.T]"
+      case Minimum(size)     => s"GreaterEqual[$size]"
+      case Maximum(size)     => s"LessEqual[$size]"
     }
     s"Refined AllOf[${refinements.map(refinementMatcher).toList.mkString("", " :: ", " :: HNil")}]"
   }
@@ -30,6 +32,16 @@ object SymbolAnnotationMaker {
         .fold(base)(r => s"$base ${refinementTagGenerator(r)}")
     case PrimitiveArray(data: TypeRepr, refinements) =>
       val base = s"List[${ShowTypeTag.typeReprShowType.showType(data)}]"
+      refinements
+        .flatMap(NonEmptyList.fromList)
+        .fold(base)(r => s"$base ${refinementTagGenerator(r)}")
+    case PrimitiveInt(refinements) =>
+      val base = "Int"
+      refinements
+        .flatMap(NonEmptyList.fromList)
+        .fold(base)(r => s"$base ${refinementTagGenerator(r)}")
+    case PrimitiveNumber(refinements) =>
+      val base = "Double"
       refinements
         .flatMap(NonEmptyList.fromList)
         .fold(base)(r => s"$base ${refinementTagGenerator(r)}")

@@ -157,7 +157,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
     tree.get.structure shouldBe expected.get.structure
   }
 
-  it should "deal with type refinements properly" in {
+  it should "deal with type refinements properly in strings" in {
     val refinedType: Symbol = NewTypeSymbol(
       "null",
       PrimitiveProduct(
@@ -179,6 +179,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         |import eu.timepit.refined._
         |import eu.timepit.refined.api._
         |import eu.timepit.refined.collection._
+        |import eu.timepit.refined.numeric._
         |import shapeless._
         |import eu.timepit.refined.boolean._
         |import io.circe.refined._
@@ -195,6 +196,50 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
       """.stripMargin.trim.parse[Source]
     val tree = refinedType.generateScala.parse[Source]
     tree.get.structure shouldBe expected.get.structure
+  }
+
+  it should "deal with type refinements in numbers properly" in {
+    val refinedType: Symbol = NewTypeSymbol(
+      "null",
+      PrimitiveProduct(
+        "com.enfore.apis",
+        "RefinedType",
+        List(
+          PrimitiveSymbol("intVal", PrimitiveInt(Some(List(Minimum(10), Maximum(15)))))
+        )
+      )
+    )
+    val expected =
+      """package com.enfore.apis
+        |
+        |import io.circe._
+        |import io.circe.derivation._
+        |
+        |
+        |import eu.timepit.refined._
+        |import eu.timepit.refined.api._
+        |import eu.timepit.refined.collection._
+        |import eu.timepit.refined.numeric._
+        |import shapeless._
+        |import eu.timepit.refined.boolean._
+        |import io.circe.refined._
+        |
+        |      
+        |final case class RefinedType(
+        |	intVal : Int Refined AllOf[GreaterEqual[10] :: LessEqual[15] :: HNil]
+        |) 
+        |
+        |object RefinedType {
+        |	implicit val circeDecoder: Decoder[RefinedType] = deriveDecoder[RefinedType](renaming.snakeCase, true, None)
+        |	implicit val circeEncoder: Encoder[RefinedType] = deriveEncoder[RefinedType](renaming.snakeCase, None)
+        |
+        |object RefinementConstructors {
+        |	val intVal = new RefinedTypeOps[Int Refined AllOf[GreaterEqual[10] :: LessEqual[15] :: HNil], Int]
+        |	}
+        |}""".stripMargin
+
+    val tree = refinedType.generateScala
+    tree shouldBe expected
   }
 
   it should "deal with type refinements with type parameters" in {
@@ -218,6 +263,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         |import eu.timepit.refined._
         |import eu.timepit.refined.api._
         |import eu.timepit.refined.collection._
+        |import eu.timepit.refined.numeric._
         |import shapeless._
         |import eu.timepit.refined.boolean._
         |import io.circe.refined._
@@ -259,6 +305,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         |import eu.timepit.refined._
         |import eu.timepit.refined.api._
         |import eu.timepit.refined.collection._
+        |import eu.timepit.refined.numeric._
         |import shapeless._
         |import eu.timepit.refined.boolean._
         |import io.circe.refined._

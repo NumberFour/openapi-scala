@@ -89,9 +89,13 @@ object ScalaGenerator {
           if (refinements.flatMap(_.headOption).isDefined) Some(s) else None
         case a @ PrimitiveArray(_, refinements: Option[List[RefinedTags]]) =>
           if (refinements.flatMap(_.headOption).isDefined) Some(a) else None
+        case i @ PrimitiveInt(refinements: Option[List[RefinedTags]]) =>
+          if (refinements.flatMap(_.headOption).isDefined) Some(i) else None
+        case n @ PrimitiveNumber(refinements: Option[List[RefinedTags]]) =>
+          if (refinements.flatMap(_.headOption).isDefined) Some(n) else None
         case PrimitiveOption(data: Primitive, _) =>
           refinementExtractor(PrimitiveSymbol(in.valName, data))
-        case _ => None // TODO: META-6086 Enable more refinements here
+        case _ => None
       }
     case _ => None
   }
@@ -133,6 +137,7 @@ object ScalaGenerator {
       |import eu.timepit.refined._
       |import eu.timepit.refined.api._
       |import eu.timepit.refined.collection._
+      |import eu.timepit.refined.numeric._
       |import shapeless._
       |import eu.timepit.refined.boolean._
       |import io.circe.refined._
