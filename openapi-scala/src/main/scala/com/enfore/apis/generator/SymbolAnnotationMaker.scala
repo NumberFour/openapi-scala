@@ -48,12 +48,23 @@ object SymbolAnnotationMaker {
     case x @ _ => ShowTypeTag.typeReprShowType.showType(x)
   }
 
-  def refinedAnnotation(symbol: Symbol): String = symbol match {
+  /**
+    * Generate the type after applying the refinements to the type derived from the symbol
+    * provided as input.
+    *
+    * @param symbol           Symbol to derive the type to be refined
+    * @param generateForAlias Flag that tells weather the code is being generated for type annotation
+    *                         or type alias definition
+    */
+  def refinedAnnotation(symbol: Symbol)(generateForAlias: Boolean = true): String = symbol match {
     case PrimitiveSymbol(_, PrimitiveOption(data: Primitive, Some(defaultValue))) =>
-      s"${dataRefinementMatcher(data)} = ${defaultValue}"
-    case PrimitiveSymbol(_, PrimitiveOption(data: Primitive, None)) => s"Option[${dataRefinementMatcher(data)}]"
-    case PrimitiveSymbol(_, data: Primitive)                        => dataRefinementMatcher(data)
-    case x @ _                                                      => makeAnnotation(x)
+      val possibleDefault = if (generateForAlias) s" = $defaultValue" else ""
+      s"${dataRefinementMatcher(data)}$possibleDefault"
+    case PrimitiveSymbol(_, PrimitiveOption(data: Primitive, None)) =>
+      val content = dataRefinementMatcher(data)
+      if (generateForAlias) s"Option[$content]" else content
+    case PrimitiveSymbol(_, data: Primitive) => dataRefinementMatcher(data)
+    case x @ _                               => makeAnnotation(x)
   }
 
   def refinementOnType(symbol: Symbol): String = symbol match {

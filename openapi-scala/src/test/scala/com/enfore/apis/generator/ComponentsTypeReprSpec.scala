@@ -192,6 +192,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         | object RefinementConstructors {
         |   val stringVal = new RefinedTypeOps[String Refined AllOf[MinSize[W.`3`.T] :: MaxSize[W.`3`.T] :: HNil], String]
         | }
+        | type `stringValRefined` = String Refined AllOf[MinSize[W.`3`.T] :: MaxSize[W.`3`.T] :: HNil]
         |}
       """.stripMargin.trim.parse[Source]
     val tree = refinedType.generateScala.parse[Source]
@@ -211,32 +212,34 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
     )
     val expected =
       """package com.enfore.apis
-        |
-        |import io.circe._
-        |import io.circe.derivation._
-        |
-        |
-        |import eu.timepit.refined._
-        |import eu.timepit.refined.api._
-        |import eu.timepit.refined.collection._
-        |import eu.timepit.refined.numeric._
-        |import shapeless._
-        |import eu.timepit.refined.boolean._
-        |import io.circe.refined._
-        |
-        |      
-        |final case class RefinedType(
-        |	intVal : Int Refined AllOf[GreaterEqual[10] :: LessEqual[15] :: HNil]
-        |) 
-        |
-        |object RefinedType {
-        |	implicit val circeDecoder: Decoder[RefinedType] = deriveDecoder[RefinedType](renaming.snakeCase, true, None)
-        |	implicit val circeEncoder: Encoder[RefinedType] = deriveEncoder[RefinedType](renaming.snakeCase, None)
-        |
-        |object RefinementConstructors {
-        |	val intVal = new RefinedTypeOps[Int Refined AllOf[GreaterEqual[10] :: LessEqual[15] :: HNil], Int]
-        |	}
-        |}""".stripMargin
+                     |
+                     |import io.circe._
+                     |import io.circe.derivation._
+                     |
+                     |
+                     |import eu.timepit.refined._
+                     |import eu.timepit.refined.api._
+                     |import eu.timepit.refined.collection._
+                     |import eu.timepit.refined.numeric._
+                     |import shapeless._
+                     |import eu.timepit.refined.boolean._
+                     |import io.circe.refined._
+                     |
+                     |      
+                     |final case class RefinedType(
+                     |	intVal : Int Refined AllOf[GreaterEqual[10] :: LessEqual[15] :: HNil]
+                     |) 
+                     |
+                     |object RefinedType {
+                     |	implicit val circeDecoder: Decoder[RefinedType] = deriveDecoder[RefinedType](renaming.snakeCase, true, None)
+                     |	implicit val circeEncoder: Encoder[RefinedType] = deriveEncoder[RefinedType](renaming.snakeCase, None)
+                     |
+                     |object RefinementConstructors {
+                     |	val intVal = new RefinedTypeOps[Int Refined AllOf[GreaterEqual[10] :: LessEqual[15] :: HNil], Int]
+                     |	}
+                     |type `intValRefined` = Int Refined AllOf[GreaterEqual[10] :: LessEqual[15] :: HNil]
+                     |
+                     |}""".stripMargin
 
     val tree = refinedType.generateScala
     tree shouldBe expected
@@ -276,6 +279,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         | object RefinementConstructors {
         |   val listString = new RefinedTypeOps[List[String] Refined AllOf[MinSize[W.`3`.T] :: MaxSize[W.`3`.T] :: HNil], List[String]]
         | }
+        | type `listStringRefined` = List[String] Refined AllOf[MinSize[W.`3`.T] :: MaxSize[W.`3`.T] :: HNil]
         |}
       """.stripMargin.trim.parse[Source]
     val tree = refinedType.generateScala.parse[Source]
@@ -316,9 +320,13 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         |  implicit val circeDecoder: Decoder[RefinedType] = deriveDecoder[RefinedType](renaming.snakeCase, true, None)
         |  implicit val circeEncoder: Encoder[RefinedType] = deriveEncoder[RefinedType](renaming.snakeCase, None)
         |
+        |
         |  object RefinementConstructors {
         |        val nested = new RefinedTypeOps[String Refined AllOf[MinSize[W.`2`.T] :: MaxSize[W.`2`.T] :: HNil], String]
         |        }
+        |
+        |  type `nestedRefined` = String Refined AllOf[MinSize[W.`2`.T] :: MaxSize[W.`2`.T] :: HNil]
+        |
         | }
         |
       """.stripMargin.trim.parse[Source]

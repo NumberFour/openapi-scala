@@ -4,6 +4,7 @@ import cats.data.NonEmptyList
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
 import com.enfore.apis.repr.TypeRepr._
 import simulacrum._
+import cats.implicits._
 
 import scala.annotation.tailrec
 
@@ -100,6 +101,12 @@ object ScalaGenerator {
     case _ => None
   }
 
+  private def refinementTypeDef(in: List[Symbol]): Option[NonEmptyList[String]] = {
+    val generateAnnotationType: Symbol => String =
+      SymbolAnnotationMaker.refinedAnnotation(_)(generateForAlias = false)
+    NonEmptyList.fromList(in.map(sym => s"type `${sym.valName}Refined` = ${generateAnnotationType(sym)}"))
+  }
+
   private def refinementSymbolMaker(in: List[Symbol]): Option[NonEmptyList[String]] = {
     val helpers = in
       .flatMap(sym => refinementExtractor(sym).map(_ => sym))
@@ -111,7 +118,7 @@ object ScalaGenerator {
       .map(
         sym =>
           s"val ${cleanScalaSymbol(sym.valName)} = new RefinedTypeOps[${SymbolAnnotationMaker
-            .refinedAnnotation(sym)}, ${SymbolAnnotationMaker.refinementOnType(sym)}]"
+            .refinedAnnotation(sym)(generateForAlias = true)}, ${SymbolAnnotationMaker.refinementOnType(sym)}]"
       )
     NonEmptyList.fromList(helpers)
   }
@@ -132,6 +139,9 @@ object ScalaGenerator {
   private def genetateForPrimitiveProduct(packageName: String, typeName: String, values: List[Symbol]): String = {
     val refinements: Option[String] = refinementSymbolMaker(values)
       .map(_.toList.mkString("\n\nobject RefinementConstructors {\n\t", "\n\t\t", "\n\t}"))
+    val refinementTypeDefs: Option[String] = refinementTypeDef(values).map(_.toList.mkString("\n", "\n\t", "\n"))
+    val refinedCode                        = (refinements, refinementTypeDefs).mapN(_ + _)
+
     val refinementImports = refinements.map(_ => """
       |
       |import eu.timepit.refined._
@@ -148,11 +158,12 @@ object ScalaGenerator {
        |import io.circe._
        |import io.circe.derivation._\n${refinementImports.getOrElse("")}
        |final case class $typeName${values
-         .map(sym => s"${cleanScalaSymbol(sym.valName)} : ${SymbolAnnotationMaker.refinedAnnotation(sym)}")
+         .map(sym =>
+           s"${cleanScalaSymbol(sym.valName)} : ${SymbolAnnotationMaker.refinedAnnotation(sym)(generateForAlias = true)}")
          .mkString("(\n\t", ",\n\t", "\n)")} \n
        |object $typeName {
        |\timplicit val circeDecoder: Decoder[$typeName] = deriveDecoder[$typeName](renaming.snakeCase, true, None)
-       |\timplicit val circeEncoder: Encoder[$typeName] = deriveEncoder[$typeName](renaming.snakeCase, None)${refinements
+       |\timplicit val circeEncoder: Encoder[$typeName] = deriveEncoder[$typeName](renaming.snakeCase, None)${refinedCode
          .getOrElse("")}
        |}
        """.stripMargin.trim
