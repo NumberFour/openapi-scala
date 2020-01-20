@@ -3,37 +3,46 @@ package com.enfore.apis
 import sbt.{Compile, Def, _}
 import Keys._
 import java.io.File
-import java.nio.file.Files
+import java.nio.file._
 
 object OpenAPIPlugin extends AutoPlugin {
 
-  def compileCombined(
-      sourceFile: File,
-      outputDir: File,
+  def compileAll(
+      extraSourcesJarName: File,
+      hostProjectOpenAPISourceDir: File,
+      openAPIEntrypointFile: File,
+      generatedCodeOutputDir: File,
       targetSvcUrl: String,
       apiDefTarget: File,
-      packageName: String
-  ): Seq[File] = {
-    println(s"[info] Creating OpenAPI from $sourceFile and writing to target $outputDir")
-    Files.createDirectories(sourceFile.getParentFile.toPath)
-    Files.createDirectories(apiDefTarget.getParentFile.toPath)
-    val apiCombined = CombineUtils.resolvedApi(sourceFile, targetSvcUrl)
-    val jsonRepr    = CombineUtils.jsonRepr(apiCombined)
-    CombineUtils.writeFile(apiDefTarget, jsonRepr)
-    Main
-      .genHttp4sFromJson(jsonRepr, packageName)
-      .left
-      .map(err => println(s"[error] Errors while converting: $err"))
-      .right
-      .get
-      .map {
-        case (name: String, content: String) =>
-          val file = outputDir / s"$name.scala"
-          Files.createDirectories(file.getParentFile.toPath)
-          CombineUtils.writeFile(file, content.replaceAll("\t", "  "))
-          file
+      packageName: String): Seq[File] = {
+    println(
+      s"[info] Creating OpenAPI from $hostProjectOpenAPISourceDir/$openAPIEntrypointFile and writing to target $generatedCodeOutputDir")
+    if (hostProjectOpenAPISourceDir.exists() && hostProjectOpenAPISourceDir.isDirectory) {
+      IO.withTemporaryDirectory { tmpDir =>
+        IO.unzip(extraSourcesJarName, tmpDir)
+        IO.copyDirectory(hostProjectOpenAPISourceDir, tmpDir)
+        println("[info] Available OpenAPI Files:")
+        println(tmpDir.list.mkString("[info] ", "\n[info] ", ""))
+        Files.createDirectories(apiDefTarget.getParentFile.toPath)
+        val apiCombined = CombineUtils.resolvedApi(new File(tmpDir, openAPIEntrypointFile.name), targetSvcUrl)
+        val jsonRepr    = CombineUtils.jsonRepr(apiCombined)
+        CombineUtils.writeFile(apiDefTarget, jsonRepr)
+        Main
+          .genHttp4sFromJson(jsonRepr, packageName)
+          .left
+          .map(err => println(s"[error] Errors while convertiong: $err"))
+          .right
+          .get
+          .map {
+            case (name: String, content: String) =>
+              val file = generatedCodeOutputDir / s"$name.scala"
+              Files.createDirectories(file.getParentFile.toPath)
+              CombineUtils.writeFile(file, content.replaceAll("\t", "  "))
+              file
+          }
+          .toSeq
       }
-      .toSeq
+    } else Seq.empty
   }
 
   object autoImport {
@@ -41,13 +50,17 @@ object OpenAPIPlugin extends AutoPlugin {
     val apiDefTarget =
       settingKey[File]("Name of the base file to use for dumping OpenAPI definition in YAML and JSON.")
     val openAPISource =
-      settingKey[File]("Source entry file for OpenAPI. Defaults to src/main/openapi/main.yaml")
+      settingKey[File](
+        "Source entry directory for OpenAPI (expects to contain main.yaml file). Defaults to src/main/openapi")
+    val openAPISourceFile =
+      settingKey[File]("Source entry file that is inside the source entry directory. Defaults to main.yaml.")
+    val extraSourcesJar =
+      settingKey[String]("Name of the Jar/Zip file that contains extra YAML definitions for shared objects")
     val openAPIOutput =
       settingKey[File]("Output directory for OpenAPI. Defaults to managed sources - openapi.")
     val openAPIOutputPackage =
       settingKey[String]("Name of the package to be used for OpenAPI generated objects.")
-    val openAPIGenerate =
-      taskKey[Seq[File]]("Generate Scala sources from OpenAPI definition in YAML.")
+    val openAPIBuild = taskKey[Seq[File]]("Generate Scala sources from OpenAPI including shared forigen objects.")
   }
 
   import autoImport._
@@ -56,14 +69,18 @@ object OpenAPIPlugin extends AutoPlugin {
     Seq(
       svcUrl := s"$${stageVariables.serviceUri}",
       apiDefTarget := (Compile / classDirectory).value / "openapi" / (name.value + ".json"),
-      //openAPISource := { sourceDirectory.value / "openapi" / "main.yaml" },
       openAPISource := { sourceDirectory.value / ".." / "main.yaml" },
       openAPIOutput := sourceManaged.value / "main",
       openAPIOutputPackage := "com.enfore.openapi",
-      openAPIGenerate := Def
+      openAPIBuild := Def
         .taskDyn(Def.task {
-          compileCombined(
+          compileAll(
+            Def.settingDyn {
+              (dependencyClasspath in Compile)
+                .map(_.filter((x: Attributed[File]) => x.data.getName.contains(extraSourcesJar.value)).head.data)
+            }.value,
             openAPISource.value,
+            openAPISourceFile.value,
             openAPIOutput.value,
             svcUrl.value,
             apiDefTarget.value,
@@ -71,8 +88,7 @@ object OpenAPIPlugin extends AutoPlugin {
           )
         })
         .value,
-      watchSources ++= { (openAPISource.value ** "*").get },
-      sourceGenerators in Compile += openAPIGenerate
+      watchSources ++= { (openAPISource.value ** "*").get }
     )
 
   override lazy val projectSettings: Seq[Def.Setting[_]] = openAPISettings

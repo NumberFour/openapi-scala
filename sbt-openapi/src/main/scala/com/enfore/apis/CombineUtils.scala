@@ -16,7 +16,7 @@ object CombineUtils {
   def yamlRepr(in: OpenAPI): String = Yaml.pretty(in)
 
   def writeFile(file: File, content: String): Unit = {
-    println("Writing file: " + file.getPath)
+    println("[info] Writing file: " + file.getPath)
     val writer = new FileWriter(file)
     writer.write(content)
     writer.close()
