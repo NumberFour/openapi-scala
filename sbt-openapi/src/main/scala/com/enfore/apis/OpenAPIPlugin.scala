@@ -8,23 +8,23 @@ import java.nio.file._
 object OpenAPIPlugin extends AutoPlugin {
 
   def compileAll(
-      extraSourcesJarName: File,
+      extraSourcesJarName: Option[File],
       hostProjectOpenAPISourceDir: File,
-      openAPIEntrypointFile: File,
+      openAPIEntryPointFile: File,
       generatedCodeOutputDir: File,
       targetSvcUrl: String,
       apiDefTarget: File,
       packageName: String): Seq[File] = {
     println(
-      s"[info] Creating OpenAPI from $hostProjectOpenAPISourceDir/$openAPIEntrypointFile and writing to target $generatedCodeOutputDir")
+      s"[info] Creating OpenAPI from $hostProjectOpenAPISourceDir/$openAPIEntryPointFile and writing to target $generatedCodeOutputDir")
     if (hostProjectOpenAPISourceDir.exists() && hostProjectOpenAPISourceDir.isDirectory) {
       IO.withTemporaryDirectory { tmpDir =>
-        IO.unzip(extraSourcesJarName, tmpDir)
+        extraSourcesJarName.foreach(IO.unzip(_, tmpDir))
         IO.copyDirectory(hostProjectOpenAPISourceDir, tmpDir)
         println("[info] Available OpenAPI Files:")
         println(tmpDir.list.mkString("[info] ", "\n[info] ", ""))
         Files.createDirectories(apiDefTarget.getParentFile.toPath)
-        val apiCombined = CombineUtils.resolvedApi(new File(tmpDir, openAPIEntrypointFile.name), targetSvcUrl)
+        val apiCombined = CombineUtils.resolvedApi(new File(tmpDir, openAPIEntryPointFile.name), targetSvcUrl)
         val jsonRepr    = CombineUtils.jsonRepr(apiCombined)
         CombineUtils.writeFile(apiDefTarget, jsonRepr)
         Main
@@ -77,7 +77,8 @@ object OpenAPIPlugin extends AutoPlugin {
           compileAll(
             Def.settingDyn {
               (dependencyClasspath in Compile)
-                .map(_.filter((x: Attributed[File]) => x.data.getName.contains(extraSourcesJar.value)).head.data)
+                .map(_.find((x: Attributed[File]) => x.data.getName.contains(extraSourcesJar.value))
+                  .map(_.data))
             }.value,
             openAPISource.value,
             openAPISourceFile.value,
