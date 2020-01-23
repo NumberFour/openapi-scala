@@ -136,7 +136,7 @@ object RouteGenerator {
 
     def flatmapPutOrPost(s: String) = route match {
       case p: RequestWithPayload if p.request.nonEmpty => s".flatMap($s)"
-      case _                                         => s
+      case _                                           => s
     }
 
     val arguments = getArgumentList(route) + "(request)"
@@ -155,9 +155,9 @@ object RouteGenerator {
   }
 
   private val getListQueryParams: RouteDefinition =/> Map[String, TypeRepr.Primitive] = {
-    case GetRequest(_, _, _, _, queries, _, _)                => queries
-    case RequestWithPayload(_, _, _, _, _, queries, _, _, _, _) => queries
-    case _: DeleteRequest                                     => Map.empty
+    case GetRequest(_, _, _, _, _, queries, _, _)                  => queries
+    case RequestWithPayload(_, _, _, _, _, _, queries, _, _, _, _) => queries
+    case _: DeleteRequest                                          => Map.empty
   }
 
   private val enumListParameterType: TypeRepr.Primitive =/> Option[String] = {
@@ -207,26 +207,27 @@ object RouteGenerator {
       }
 
     route match {
-      case GetRequest(_, _, _, Nil, queries, _, _) if queries.isEmpty => ""
-      case GetRequest(_, _, _, parameters, queries, _, _) =>
+      case GetRequest(_, _, _, _, Nil, queries, _, _) if queries.isEmpty => ""
+      case GetRequest(_, _, _, _, parameters, queries, _, _) =>
         buildParameters(parameters, queries.keys.toList).mkString("(", ", ", ")")
-      case RequestWithPayload(_, _, _, _, Nil, queries, request, _, _, _) if queries.isEmpty =>
+      case RequestWithPayload(_, _, _, _, _, Nil, queries, request, _, _, _) if queries.isEmpty =>
         applyOrNot(request.nonEmpty)
-      case RequestWithPayload(_, _, _, _, parameters, queries, request, _, _, _) =>
+      case RequestWithPayload(_, _, _, _, _, parameters, queries, request, _, _, _) =>
         (buildParameters(parameters, queries.keys.toList) ++ (if (request.nonEmpty) List("_") else List.empty))
           .mkString("(", ", ", ")")
-      case DeleteRequest(_, _, _, Nil, _, _)        => ""
-      case DeleteRequest(_, _, _, parameters, _, _) => buildParameters(parameters, List.empty).mkString("(", ", ", ")")
+      case DeleteRequest(_, _, _, _, Nil, _, _) => ""
+      case DeleteRequest(_, _, _, _, parameters, _, _) =>
+        buildParameters(parameters, List.empty).mkString("(", ", ", ")")
     }
   }
 
   private def getVariableNameAndMethod(route: RouteDefinition): String =
     route match {
-      case _: GetRequest                                      => "request @ GET"
-      case RequestWithPayload(_, _, _, PUT, _, _, _, _, _, _)   => "request @ PUT"
-      case RequestWithPayload(_, _, _, POST, _, _, _, _, _, _)  => "request @ POST"
-      case RequestWithPayload(_, _, _, PATCH, _, _, _, _, _, _) => "request @ PATCH"
-      case _: DeleteRequest                                   => "request @ DELETE"
+      case _: GetRequest                                           => "request @ GET"
+      case RequestWithPayload(_, _, _, _, PUT, _, _, _, _, _, _)   => "request @ PUT"
+      case RequestWithPayload(_, _, _, _, POST, _, _, _, _, _, _)  => "request @ POST"
+      case RequestWithPayload(_, _, _, _, PATCH, _, _, _, _, _, _) => "request @ PATCH"
+      case _: DeleteRequest                                        => "request @ DELETE"
     }
 
   private def buildPath(route: RouteDefinition): String =
@@ -264,8 +265,8 @@ object RouteGenerator {
 
   private def getResponseStatus(route: RouteDefinition): String =
     route match {
-      case DeleteRequest(_, _, _, _, response, status)                => buildString(response, status)
-      case RequestWithPayload(_, _, _, _, _, _, _, response, _, status) => buildString(response, status)
-      case GetRequest(_, _, _, _, _, response, status)                => buildString(response, status)
+      case DeleteRequest(_, _, _, _, _, response, status)                  => buildString(response, status)
+      case RequestWithPayload(_, _, _, _, _, _, _, _, response, _, status) => buildString(response, status)
+      case GetRequest(_, _, _, _, _, _, response, status)                  => buildString(response, status)
     }
 }

@@ -75,6 +75,9 @@ object TypeRepr {
   sealed trait NewType extends TypeRepr {
     val packageName: String
     val typeName: String
+    // User documentation that can either be a short summary or description
+    val summary: Option[String]
+    val description: Option[String]
   }
 
   sealed trait Symbol {
@@ -83,9 +86,27 @@ object TypeRepr {
     val ref: Ref
   }
 
-  final case class PrimitiveEnum(packageName: String, typeName: String, values: Set[String])     extends NewType
-  final case class PrimitiveProduct(packageName: String, typeName: String, values: List[Symbol]) extends NewType
-  final case class PrimitiveUnion(packageName: String, typeName: String, values: Set[Ref], discriminator: String)
+  final case class PrimitiveEnum(
+      packageName: String,
+      typeName: String,
+      values: Set[String],
+      summary: Option[String],
+      description: Option[String])
+      extends NewType
+  final case class PrimitiveProduct(
+      packageName: String,
+      typeName: String,
+      values: List[Symbol],
+      summary: Option[String],
+      description: Option[String])
+      extends NewType
+  final case class PrimitiveUnion(
+      packageName: String,
+      typeName: String,
+      values: Set[Ref],
+      discriminator: String,
+      summary: Option[String],
+      description: Option[String])
       extends NewType
 
   final case class PrimitiveSymbol(valName: String, dataType: Primitive) extends Symbol {

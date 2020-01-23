@@ -136,7 +136,24 @@ object ScalaGenerator {
        | }
        """.stripMargin.trim
 
-  private def genetateForPrimitiveProduct(packageName: String, typeName: String, values: List[Symbol]): String = {
+  private def generateForPrimitive(
+      packageName: String,
+      typeName: String,
+      values: List[Symbol],
+      summary: Option[String],
+      description: Option[String]): String = {
+    val summaryDocs: List[String] = summary
+      .map(_.split("\n").toList.map(l => s" * $l"))
+      .getOrElse(Nil)
+
+    val descriptionDocs = description
+      .map(_.split("\n").toList.map(l => s" * $l"))
+      .getOrElse(Nil)
+
+    val docs =
+      if ((summaryDocs ++ descriptionDocs).isEmpty) ""
+      else ((("/**" +: summaryDocs) ++ descriptionDocs) :+ "**/").mkString("\n\t")
+
     val refinements: Option[String] = refinementSymbolMaker(values)
       .map(_.toList.mkString("\n\nobject RefinementConstructors {\n\t", "\n\t\t", "\n\t}"))
     val refinementTypeDefs: Option[String] = refinementTypeDef(values).map(_.toList.mkString("\n", "\n\t", "\n"))
@@ -157,6 +174,7 @@ object ScalaGenerator {
        |package $packageName\n
        |import io.circe._
        |import io.circe.derivation._\n${refinementImports.getOrElse("")}
+       |$docs
        |final case class $typeName${values
          .map(sym =>
            s"${cleanScalaSymbol(sym.valName)} : ${SymbolAnnotationMaker.refinedAnnotation(sym)(generateForAlias = true)}")
@@ -186,8 +204,22 @@ object ScalaGenerator {
       packageName: String,
       typeName: String,
       unionMembers: Set[Ref],
-      discriminator: String
-  ): String =
+      discriminator: String,
+      summary: Option[String],
+      description: Option[String]
+  ): String = {
+    val summaryDocs: List[String] = summary
+      .map(_.split("\n").toList.map(l => s" * $l"))
+      .getOrElse(Nil)
+
+    val descriptionDocs = description
+      .map(_.split("\n").toList.map(l => s" * $l"))
+      .getOrElse(Nil)
+
+    val docs =
+      if ((summaryDocs ++ descriptionDocs).isEmpty) ""
+      else ((("/**" +: summaryDocs) ++ descriptionDocs) :+ "**/").mkString("\n\t")
+
     s"""
        |package $packageName\n
        |import shapeless._
@@ -197,6 +229,7 @@ object ScalaGenerator {
        |
        |final case class $typeName(value: Union)
        |
+       |$docs
        |object $typeName {
        |  type Union = ${unionMembers.map(_.typeName).mkString("", " :+: ", " :+: CNil")}
        |
@@ -221,14 +254,15 @@ object ScalaGenerator {
        |  }
        |}
        |""".stripMargin
+  }
 
   private def newTypeSymbolGenerator(symbol: NewTypeSymbol): String = symbol match {
-    case NewTypeSymbol(_, PrimitiveEnum(packageName, typeName, content)) =>
+    case NewTypeSymbol(_, PrimitiveEnum(packageName, typeName, content, _, _)) =>
       generateForPrimitiveEnum(packageName, typeName, content)
-    case NewTypeSymbol(_, PrimitiveProduct(packageName, typeName, values)) =>
-      genetateForPrimitiveProduct(packageName, typeName, values)
-    case NewTypeSymbol(_, PrimitiveUnion(packageName, typeName, unionMembers, discriminator)) =>
-      generateForPrimitiveUnion(packageName, typeName, unionMembers, discriminator)
+    case NewTypeSymbol(_, PrimitiveProduct(packageName, typeName, values, summary, description)) =>
+      generateForPrimitive(packageName, typeName, values, summary, description)
+    case NewTypeSymbol(_, PrimitiveUnion(packageName, typeName, unionMembers, discriminator, summary, description)) =>
+      generateForPrimitiveUnion(packageName, typeName, unionMembers, discriminator, summary, description)
   }
 
   implicit val codeGenerator: ScalaGenerator[Symbol] = {

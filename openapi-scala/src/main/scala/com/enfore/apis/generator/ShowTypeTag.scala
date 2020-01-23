@@ -22,9 +22,9 @@ object ShowTypeTag {
   }
 
   implicit private val newTypeShowType: ShowTypeTag[NewType] = {
-    case PrimitiveEnum(packageName: String, name: String, _)     => s"$packageName.$name.Values"
-    case PrimitiveProduct(packageName: String, name: String, _)  => s"$packageName.$name"
-    case PrimitiveUnion(packageName: String, name: String, _, _) => s"$packageName.${name}Union.$name"
+    case PrimitiveEnum(packageName: String, name: String, _, _, _)     => s"$packageName.$name.Values"
+    case PrimitiveProduct(packageName: String, name: String, _, _, _)  => s"$packageName.$name"
+    case PrimitiveUnion(packageName: String, name: String, _, _, _, _) => s"$packageName.${name}Union.$name"
   }
 
   implicit private val refTypeShowType: ShowTypeTag[Ref] = ref => s"${ref.path}.${ref.typeName}"

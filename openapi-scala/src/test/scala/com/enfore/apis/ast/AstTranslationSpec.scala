@@ -105,7 +105,10 @@ class AstTranslationSpec extends FlatSpec with Matchers {
                   "unit",
                   PrimitiveOption(PrimitiveString(Some(List())), Some(PrimitiveStringValue("EUR")))
                 )
-              )
+              ),
+              summary = None,
+              description = Some(
+                """A Money represents a monetary value (i.e., a currency and an amount), for example "120 EUR" or "2,500.75 USD".""")
             )
           )
         )
@@ -118,6 +121,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
               RequestWithPayload(
                 path = "/products",
                 summary = Some("Add a new product to the organisation"),
+                description = None,
                 operationId = Some("dummyFunction"),
                 `type` = POST,
                 pathParams = List(),
@@ -159,7 +163,9 @@ class AstTranslationSpec extends FlatSpec with Matchers {
               "something",
               PrimitiveOption(PrimitiveInt(Some(List())), Some(PrimitiveIntValue(10)))
             )
-          )
+          ),
+          summary = None,
+          description = None
         )
       )
     )
@@ -185,7 +191,9 @@ class AstTranslationSpec extends FlatSpec with Matchers {
               "something",
               PrimitiveOption(PrimitiveNumber(Some(List())), Some(PrimitiveNumberValue(10.2)))
             )
-          )
+          ),
+          summary = None,
+          description = None
         )
       )
     )
@@ -335,7 +343,10 @@ class AstTranslationSpec extends FlatSpec with Matchers {
               values = List(
                 PrimitiveSymbol("value", PrimitiveNumber(Some(List()))),
                 PrimitiveSymbol("unit", PrimitiveString(Some(List())))
-              )
+              ),
+              summary = None,
+              description = Some(
+                """A Money represents a monetary value (i.e., a currency and an amount), for example "120 EUR" or "2,500.75 USD".""")
             )
           )
         )
@@ -348,6 +359,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
               RequestWithPayload(
                 path = "/products",
                 summary = Some("Add a existing product to something"),
+                description = None,
                 operationId = Some("dummyFunction"),
                 `type` = POST,
                 pathParams = List(),
@@ -423,7 +435,10 @@ class AstTranslationSpec extends FlatSpec with Matchers {
               values = List(
                 PrimitiveSymbol("value", PrimitiveNumber(Some(List()))),
                 PrimitiveSymbol("unit", PrimitiveString(Some(List())))
-              )
+              ),
+              summary = None,
+              description = Some(
+                """A Money represents a monetary value (i.e., a currency and an amount), for example "120 EUR" or "2,500.75 USD".""")
             )
           )
         )
@@ -436,6 +451,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
               RequestWithPayload(
                 path = "/products",
                 summary = Some("Partially update an existing product"),
+                description = None,
                 operationId = Some("dummyFunction"),
                 `type` = PATCH,
                 pathParams = List(),

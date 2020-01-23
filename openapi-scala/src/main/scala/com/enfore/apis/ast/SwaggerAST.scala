@@ -50,6 +50,7 @@ object SwaggerAST {
   final case class Discriminator(propertyName: String)
 
   final case class SchemaObject(
+      summary: Option[String] = None, // Optional field (short docstring)
       description: Option[String] = None,      // Optional field (docstring)
       `type`: Option[SchemaObjectType] = None, // Only present when property is not a reference
       // CAVEAT: We allow a reference here, which according to the spec is not allowed but the way all OpenAPI tools work
@@ -57,19 +58,19 @@ object SwaggerAST {
       additionalProperties: Option[SchemaOrReferenceObject] = None,
       // CAVEAT: We allow a reference here, which according to the spec is not allowed but the way all OpenAPI tools work
       items: Option[SchemaOrReferenceObject] = None, // Only present when schema object is an array
-      oneOf: Option[List[ReferenceObject]] = None,   // Used for sum types and nothing else
-      discriminator: Option[Discriminator] = None,   // Used for sum types and nothing else
+      oneOf: Option[List[ReferenceObject]] = None, // Used for sum types and nothing else
+      discriminator: Option[Discriminator] = None, // Used for sum types and nothing else
       enum: Option[List[String]] = None,
       required: Option[List[String]] = None,
-      readOnly: Option[Boolean] = None,  // Points out whether a property is readOnly (defaults to false)
-      minLength: Option[Int] = None,     // Optional refinement
-      maxLength: Option[Int] = None,     // Optional refinement
-      maxItems: Option[Int] = None,      // Optional refinement
-      minItems: Option[Int] = None,      // Optional refinement
+      readOnly: Option[Boolean] = None, // Points out whether a property is readOnly (defaults to false)
+      minLength: Option[Int] = None, // Optional refinement
+      maxLength: Option[Int] = None, // Optional refinement
+      maxItems: Option[Int] = None, // Optional refinement
+      minItems: Option[Int] = None, // Optional refinement
       maxProperties: Option[Int] = None, // Optional refinement
       minProperties: Option[Int] = None, // Optional refinement
-      maximum: Option[Int] = None,       // Optional refinement
-      minimum: Option[Int] = None,       // Optional refinement
+      maximum: Option[Int] = None, // Optional refinement
+      minimum: Option[Int] = None, // Optional refinement
       default: Option[PrimitiveValue] = None
   ) extends SchemaOrReferenceObject
       with TypeDef
@@ -143,6 +144,7 @@ object SwaggerAST {
 
   final case class OperationObject(
       summary: Option[String],
+      description: Option[String],
       operationId: Option[String],
       requestBody: Option[RequestBodyObject],
       responses: ResponsesObject,

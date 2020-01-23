@@ -18,7 +18,9 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         List(
           PrimitiveSymbol("name", PrimitiveString(None)),
           PrimitiveSymbol("age", PrimitiveInt(None))
-        )
+        ),
+        Some("Test Summary"),
+        None
       )
     )
     val expected =
@@ -28,6 +30,9 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         |import io.circe._
         |import io.circe.derivation._
         |
+        |/**
+        |* Test Summary
+        |**/
         |final case class Person(name: String, age: Int)
         |
         |object Person {
@@ -45,7 +50,9 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
       PrimitiveProduct(
         "com.enfore.apis",
         "Person",
-        List.empty
+        List.empty,
+        None,
+        None
       )
     )
     val expected =
@@ -75,7 +82,9 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         List(
           RefSymbol("name", Ref("com.enfore.apis", "Name")),
           PrimitiveSymbol("age", PrimitiveInt(None))
-        )
+        ),
+        None,
+        None
       )
     )
     val expected =
@@ -99,7 +108,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
   it should "be able to generate enums" in {
     val animal: Symbol = NewTypeSymbol(
       "none",
-      PrimitiveEnum("com.enfore.apis", "Animal", Set("Human", "Dolphin", "Dog"))
+      PrimitiveEnum("com.enfore.apis", "Animal", Set("Human", "Dolphin", "Dog"), None, None)
     )
     val expected =
       """
@@ -131,7 +140,9 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
           PrimitiveSymbol("dictVal", PrimitiveDict(PrimitiveInt(None), None)),
           PrimitiveSymbol("opListVal", PrimitiveOption(PrimitiveArray(PrimitiveBoolean(None), None), None)),
           PrimitiveSymbol("listOpVal", PrimitiveArray(PrimitiveOption(PrimitiveNumber(None), None), None))
-        )
+        ),
+        None,
+        None
       )
     )
 
@@ -165,7 +176,9 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         "RefinedType",
         List(
           PrimitiveSymbol("stringVal", PrimitiveString(Some(List(MinLength(3), MaxLength(3)))))
-        )
+        ),
+        None,
+        None
       )
     )
 
@@ -207,7 +220,9 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         "RefinedType",
         List(
           PrimitiveSymbol("intVal", PrimitiveInt(Some(List(Minimum(10), Maximum(15)))))
-        )
+        ),
+        None,
+        None
       )
     )
     val expected =
@@ -225,7 +240,8 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
                      |import eu.timepit.refined.boolean._
                      |import io.circe.refined._
                      |
-                     |      
+                     |
+                     |
                      |final case class RefinedType(
                      |	intVal : Int Refined AllOf[GreaterEqual[10] :: LessEqual[15] :: HNil]
                      |) 
@@ -241,8 +257,8 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
                      |
                      |}""".stripMargin
 
-    val tree = refinedType.generateScala
-    tree shouldBe expected
+    val tree = refinedType.generateScala.split("\n").map(_.trim).filter(_.isEmpty).mkString("\n")
+    tree shouldBe expected.split("\n").map(_.trim).filter(_.isEmpty).mkString("\n")
   }
 
   it should "deal with type refinements with type parameters" in {
@@ -253,7 +269,9 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         "RefinedType",
         List(
           PrimitiveSymbol("listString", PrimitiveArray(PrimitiveString(None), Some(List(MinLength(3), MaxLength(3)))))
-        )
+        ),
+        None,
+        None
       )
     )
     val expected =
@@ -294,7 +312,9 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         "RefinedType",
         List(
           PrimitiveSymbol("nested", PrimitiveOption(PrimitiveString(Some(List(MinLength(2), MaxLength(2)))), None))
-        )
+        ),
+        None,
+        None
       )
     )
 
@@ -341,7 +361,10 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         "com.enfore.test",
         "Customer",
         Set(Ref("#.components.schemas", "IndividualCustomer"), Ref("#.components.schemas", "OrganizationCustomer")),
-        "@type")
+        "@type",
+        None,
+        None
+      )
     )
 
     val expected =

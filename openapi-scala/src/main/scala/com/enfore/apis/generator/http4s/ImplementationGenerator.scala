@@ -21,10 +21,17 @@ object ImplementationGenerator {
     val functionName = route.operationId.getOrElse(s"`${getFunctionName(route)}`")
     val parameters   = getParameters(route)
     val responseType = getResponseType(route)
-    val docs = route.summary
+    val summaryDocs: List[String] = route.summary
       .map(_.split("\n").toList.map(l => s" * $l"))
-      .map(lines => ("/**" +: lines) :+ "**/")
       .getOrElse(Nil)
+
+    val descriptionDocs = route.description
+      .map(_.split("\n").toList.map(l => s" * $l"))
+      .getOrElse(Nil)
+
+    val docs: List[String] =
+      if ((summaryDocs ++ descriptionDocs).isEmpty) Nil
+      else ((("/**" +: summaryDocs) ++ descriptionDocs) :+ "**/")
 
     (docs :+ s"""def $functionName$parameters(implicit request: Request[F]): F[$responseType]""")
       .map(`\t` * indentationLevel + _)
@@ -36,11 +43,11 @@ object ImplementationGenerator {
   def getFunctionName(route: RouteDefinition): String = s"${getMethod(route)} ${route.path}"
 
   private def getMethod(route: RouteDefinition): String = route match {
-    case _: GetRequest                                        => "GET"
-    case RequestWithPayload(_, _, _, PUT, _, _, _, _, _, _)   => "PUT"
-    case RequestWithPayload(_, _, _, POST, _, _, _, _, _, _)  => "POST"
-    case RequestWithPayload(_, _, _, PATCH, _, _, _, _, _, _) => "PATCH"
-    case _: DeleteRequest                                     => "DELETE"
+    case _: GetRequest                                           => "GET"
+    case RequestWithPayload(_, _, _, _, PUT, _, _, _, _, _, _)   => "PUT"
+    case RequestWithPayload(_, _, _, _, POST, _, _, _, _, _, _)  => "POST"
+    case RequestWithPayload(_, _, _, _, PATCH, _, _, _, _, _, _) => "PATCH"
+    case _: DeleteRequest                                        => "DELETE"
   }
 
   private def getParameters(route: RouteDefinition): String = {
@@ -75,9 +82,9 @@ object ImplementationGenerator {
       )
 
     val responseType = route match {
-      case GetRequest(_, _, _, _, _, response, _)                  => getJsonOrFirstType(response)
-      case RequestWithPayload(_, _, _, _, _, _, _, response, _, _) => getJsonOrFirstType(response)
-      case _: DeleteRequest                                        => None
+      case GetRequest(_, _, _, _, _, _, response, _)                  => getJsonOrFirstType(response)
+      case RequestWithPayload(_, _, _, _, _, _, _, _, response, _, _) => getJsonOrFirstType(response)
+      case _: DeleteRequest                                           => None
     }
 
     responseType.fold("Unit")(_.typeName)
@@ -101,9 +108,9 @@ object ImplementationGenerator {
       queries.mapValues(primitiveShowType.showType).toList.sortBy(_._1)
 
     route match {
-      case GetRequest(_, _, _, _, queries, _, _)                  => extractFromQueries(queries)
-      case RequestWithPayload(_, _, _, _, _, queries, _, _, _, _) => extractFromQueries(queries)
-      case DeleteRequest(_, _, _, _, _, _)                        => List.empty
+      case GetRequest(_, _, _, _, _, queries, _, _)                  => extractFromQueries(queries)
+      case RequestWithPayload(_, _, _, _, _, _, queries, _, _, _, _) => extractFromQueries(queries)
+      case DeleteRequest(_, _, _, _, _, _, _)                        => List.empty
     }
   }
 

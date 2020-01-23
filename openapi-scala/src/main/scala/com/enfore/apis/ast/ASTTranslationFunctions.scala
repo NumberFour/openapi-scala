@@ -116,6 +116,7 @@ object ASTTranslationFunctions {
         RequestWithPayload(
           path = path,
           summary = route.summary,
+          description = route.description,
           operationId = route.operationId,
           `type` = translateReqContentType(requestType),
           pathParams = pathParameters,
@@ -131,6 +132,7 @@ object ASTTranslationFunctions {
         GetRequest(
           path = path,
           summary = route.summary,
+          description = route.description,
           operationId = route.operationId,
           pathParams = pathParameters,
           queries = queryParams,
@@ -141,6 +143,7 @@ object ASTTranslationFunctions {
         DeleteRequest(
           path = path,
           summary = route.summary,
+          description = route.description,
           operationId = route.operationId,
           pathParams = pathParameters,
           response = possibleResponse.map(_._2),
@@ -243,7 +246,9 @@ object ASTTranslationFunctions {
   private def loadObjectProperties(
       typeName: String,
       properties: Map[String, SchemaOrReferenceObject],
-      required: List[String]
+      required: List[String],
+      summary: Option[String],
+      description: Option[String]
   )(
       implicit packageName: PackageName
   ): Option[NewType] = {
@@ -253,7 +258,7 @@ object ASTTranslationFunctions {
         assert(loaded.isDefined, s"$name in $typeName could not be parsed.")
         loaded map (makeSymbolFromTypeRepr(name, _))
     }
-    mapped.toList.sequence.map(PrimitiveProduct(packageName.name, typeName, _))
+    mapped.toList.sequence.map(PrimitiveProduct(packageName.name, typeName, _, summary, description))
   }
 
   private def typedDefaultMapping(value: TypeRepr, default: Option[PrimitiveValue]): PrimitiveOption = {
@@ -292,8 +297,9 @@ object ASTTranslationFunctions {
         throw new AssertionError("Discriminated Unions (OpenAPI: oneOf) are only supported as top-level types for now.")
     }
 
-  private def loadEnum(typeName: String, values: List[String])(implicit packageName: PackageName): NewType =
-    PrimitiveEnum(packageName.name, typeName, values.toSet)
+  private def loadEnum(typeName: String, values: List[String], summary: Option[String], description: Option[String])(
+      implicit packageName: PackageName): NewType =
+    PrimitiveEnum(packageName.name, typeName, values.toSet, summary, description)
 
   private def handleSchemaObjectProductType(name: String, schemaObject: SchemaObject)(
       implicit packageName: PackageName
@@ -301,9 +307,16 @@ object ASTTranslationFunctions {
     val required = schemaObject.required.getOrElse(List.empty[String])
     val newType: Option[NewType] = schemaObject.`type`.get match {
       case SchemaObjectType.`object` =>
-        loadObjectProperties(name, schemaObject.properties.getOrElse(Map.empty), required)
-      case SchemaObjectType.`string`  => schemaObject.enum.map(loadEnum(name, _))
-      case SchemaObjectType.`integer` => schemaObject.enum.map(loadEnum(name, _))
+        loadObjectProperties(
+          name,
+          schemaObject.properties.getOrElse(Map.empty),
+          required,
+          schemaObject.summary,
+          schemaObject.description)
+      case SchemaObjectType.`string` =>
+        schemaObject.enum.map(loadEnum(name, _, schemaObject.summary, schemaObject.description))
+      case SchemaObjectType.`integer` =>
+        schemaObject.enum.map(loadEnum(name, _, schemaObject.summary, schemaObject.description))
       case SchemaObjectType.`array` =>
         throw new AssertionError(s"Top-level (components/schemas) schemas should not be arrays ($name : $schemaObject)")
       case SchemaObjectType.`dict` =>
@@ -323,14 +336,12 @@ object ASTTranslationFunctions {
   private def handleSchemaObjectUnionType(
       name: String,
       discriminator: Option[Discriminator],
-      unionMembers: List[ReferenceObject]
+      unionMembers: List[ReferenceObject],
+      summary: Option[String],
+      description: Option[String]
   )(
       implicit packageName: PackageName
   ): Option[Symbol] = {
-    assert(
-      discriminator.isDefined,
-      "We require that a discriminator be defined to use oneOf in OpenAPI. Checkout oneOf in OpenAPI 3.0 spec for more information."
-    )
     val references: Set[Ref] = unionMembers.map {
       case ReferenceObject(ref) =>
         val name: String = ref.split("/").last
@@ -338,7 +349,17 @@ object ASTTranslationFunctions {
         Ref(path, name)
     }.toSet
     val newType: NewType =
-      PrimitiveUnion(packageName.name, name, values = references, discriminator.map(_.propertyName).get)
+      PrimitiveUnion(
+        packageName.name,
+        name,
+        values = references,
+        discriminator
+          .map(_.propertyName)
+          .getOrElse(throw new AssertionError(
+            "We require that a discriminator be defined to use oneOf in OpenAPI. Checkout oneOf in OpenAPI 3.0 spec for more information.")),
+        summary,
+        description
+      )
     NewTypeSymbol(name, newType).some
   }
 
@@ -346,7 +367,7 @@ object ASTTranslationFunctions {
       implicit packageName: PackageName
   ): Option[Symbol] =
     schemaObject.oneOf.fold(handleSchemaObjectProductType(name, schemaObject))(
-      handleSchemaObjectUnionType(name, schemaObject.discriminator, _)
+      handleSchemaObjectUnionType(name, schemaObject.discriminator, _, schemaObject.summary, schemaObject.description)
     )
 
   private def schemaObjectHasReadOnlyComponent(components: Map[String, SchemaObject])(

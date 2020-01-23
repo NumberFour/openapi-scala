@@ -2,7 +2,7 @@ package com.enfore.apis.generator
 
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
 import com.enfore.apis.repr.TypeRepr.{Ref => TypeReprRef}
-import com.enfore.apis.repr.{GetRequest, PathParameter, RequestWithPayload, ReqWithContentType}
+import com.enfore.apis.repr.{GetRequest, PathParameter, ReqWithContentType, RequestWithPayload}
 import org.scalatest._
 
 import scala.meta._
@@ -14,6 +14,7 @@ class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
   "Paths TypeRepr Generator" should "be able to generate basic Get requests" in {
     val request = GetRequest(
       "/products",
+      None,
       None,
       Some("dummyFunction"),
       List(PathParameter("id")),
@@ -45,6 +46,7 @@ class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
   it should "be able to use the correct input/return type in post request" in {
     val request = RequestWithPayload(
       "/products",
+      None,
       None,
       Some("dummyFunction"),
       ReqWithContentType.POST,
@@ -80,6 +82,7 @@ class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
     val request = RequestWithPayload(
       "/subscriptions",
       None,
+      None,
       Some("dummyFunction"),
       ReqWithContentType.POST,
       List.empty,
@@ -108,6 +111,7 @@ class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
   it should "be able to deal with no return type for Get requests" in {
     val request = GetRequest(
       "/subscriptions/{subscription-id}",
+      None,
       None,
       Some("dummyFunction"),
       List(PathParameter("subscriptionId")),

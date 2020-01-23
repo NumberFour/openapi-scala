@@ -10,6 +10,7 @@ object RouteDefinitions {
   lazy val `GET /contacts/individual` = GetRequest(
     "/contacts/individual",
     Some("Dummy documentation\nDummy documentation next line."),
+    None,
     Some("dummyFunction"),
     List.empty,
     Map.empty,
@@ -23,6 +24,7 @@ object RouteDefinitions {
 
   lazy val `GET /org/{org-id}/contacts/individual` = GetRequest(
     "/org/{org-id}/contacts/individual",
+    None,
     None,
     None,
     List(PathParameter("org-id")),
@@ -39,6 +41,7 @@ object RouteDefinitions {
     "/contacts/individual",
     None,
     None,
+    None,
     POST,
     List.empty,
     Map.empty,
@@ -50,6 +53,7 @@ object RouteDefinitions {
 
   lazy val `POST /contacts/single` = RequestWithPayload(
     "/contacts/single",
+    None,
     None,
     None,
     POST,
@@ -65,6 +69,7 @@ object RouteDefinitions {
     "/contacts/individual/empty",
     None,
     None,
+    None,
     POST,
     List.empty,
     Map.empty,
@@ -76,6 +81,7 @@ object RouteDefinitions {
 
   lazy val `GET /contacts/individual/{contacts-id}` = GetRequest(
     "/contacts/individual/{contacts-id}",
+    None,
     None,
     None,
     List(PathParameter("contacts-id")),
@@ -92,6 +98,7 @@ object RouteDefinitions {
     "/org/{org-id}/contacts/individual/{contacts-id}",
     None,
     None,
+    None,
     List(PathParameter("org-id"), PathParameter("contacts-id")),
     Map.empty,
     Some(
@@ -104,6 +111,7 @@ object RouteDefinitions {
 
   lazy val `PUT /contacts/individual/{contacts-id}` = RequestWithPayload(
     "/contacts/individual/{contacts-id}",
+    None,
     None,
     None,
     PUT,
@@ -119,6 +127,7 @@ object RouteDefinitions {
     "/contacts/individual/empty/{contacts-id}",
     None,
     None,
+    None,
     PUT,
     List(PathParameter("contacts-id")),
     Map.empty,
@@ -130,6 +139,7 @@ object RouteDefinitions {
 
   lazy val `PATCH /contacts/individual/{contacts-id}` = RequestWithPayload(
     "/contacts/individual/{contacts-id}",
+    None,
     None,
     None,
     PATCH,
@@ -145,6 +155,7 @@ object RouteDefinitions {
     "/contacts/individual/{contacts-id}",
     None,
     None,
+    None,
     List(PathParameter("contacts-id")),
     Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
     200
@@ -152,6 +163,7 @@ object RouteDefinitions {
 
   lazy val `GET /contacts/organization/{contacts-id}/addresses` = GetRequest(
     "/contacts/organization/{contacts-id}/addresses",
+    None,
     None,
     None,
     List(PathParameter("contacts-id")),
@@ -168,6 +180,7 @@ object RouteDefinitions {
     "/contacts/organization/{contacts-id}/addresses",
     None,
     None,
+    None,
     POST,
     List(PathParameter("contacts-id")),
     Map.empty,
@@ -179,6 +192,7 @@ object RouteDefinitions {
 
   lazy val `GET /contacts/organization/{contacts-id}/addresses/{address-id}` = GetRequest(
     "/contacts/organization/{contacts-id}/addresses/{address-id}",
+    None,
     None,
     None,
     List(
@@ -196,6 +210,7 @@ object RouteDefinitions {
 
   lazy val `PUT /contacts/organization/{contacts-id}/addresses/{address-id}` = RequestWithPayload(
     "/contacts/organization/{contacts-id}/addresses/{address-id}",
+    None,
     None,
     None,
     PUT,
@@ -218,6 +233,7 @@ object RouteDefinitions {
     "/contacts/organization/{contacts-id}/addresses/{address-id}",
     None,
     None,
+    None,
     List(
       PathParameter("contacts-id"),
       PathParameter("address-id")
@@ -232,6 +248,7 @@ object RouteDefinitions {
 
   lazy val `GET /contacts/individual?query1&query2&optional1&optional2&list1&optional-list1` = GetRequest(
     "/contacts/individual",
+    None,
     None,
     None,
     List.empty,
@@ -255,6 +272,7 @@ object RouteDefinitions {
     "/contacts/individual",
     None,
     None,
+    None,
     POST,
     List.empty,
     ListMap(
@@ -275,6 +293,7 @@ object RouteDefinitions {
     "/contacts/individual/{contacts-id}",
     None,
     None,
+    None,
     List(PathParameter("contacts-id")),
     ListMap(
       "optional1" -> PrimitiveOption(PrimitiveString(None), None),
@@ -290,6 +309,7 @@ object RouteDefinitions {
 
   lazy val `PUT /contacts/individual/{contacts-id}?optional1&optional2` = RequestWithPayload(
     "/contacts/individual/{contacts-id}",
+    None,
     None,
     None,
     PUT,
@@ -308,6 +328,7 @@ object RouteDefinitions {
     "/contacts/individual/{contacts-id}",
     None,
     None,
+    None,
     List(PathParameter("contacts-id")),
     Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
     200
@@ -315,6 +336,7 @@ object RouteDefinitions {
 
   lazy val `GET /contacts/organization/{contacts-id}/addresses?query1&query2` = GetRequest(
     "/contacts/organization/{contacts-id}/addresses",
+    None,
     None,
     None,
     List(PathParameter("contacts-id")),
@@ -334,6 +356,7 @@ object RouteDefinitions {
     "/contacts/organization/{contacts-id}/addresses",
     None,
     None,
+    None,
     POST,
     List(PathParameter("contacts-id")),
     ListMap(
@@ -348,6 +371,7 @@ object RouteDefinitions {
 
   lazy val `GET /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2` = GetRequest(
     "/contacts/organization/{contacts-id}/addresses/{address-id}",
+    None,
     None,
     None,
     List(
@@ -368,6 +392,7 @@ object RouteDefinitions {
 
   lazy val `PUT /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2` = RequestWithPayload(
     "/contacts/organization/{contacts-id}/addresses/{address-id}",
+    None,
     None,
     None,
     PUT,
@@ -393,6 +418,7 @@ object RouteDefinitions {
     "/contacts/organization/{contacts-id}/addresses/{address-id}",
     None,
     None,
+    None,
     List(
       PathParameter("contacts-id"),
       PathParameter("address-id")
@@ -407,6 +433,7 @@ object RouteDefinitions {
 
   lazy val `GET /contacts/individual?optional-list1&optional-list2` = GetRequest(
     "/contacts/individual",
+    None,
     None,
     None,
     List.empty,
@@ -426,6 +453,7 @@ object RouteDefinitions {
     "/contacts/individual",
     None,
     None,
+    None,
     POST,
     List.empty,
     ListMap(
@@ -440,6 +468,7 @@ object RouteDefinitions {
 
   lazy val `GET /contacts/individual/funny.,argument/type/?other:@funny&trait` = GetRequest(
     "/contacts/individual/{funny.,argument}/{type}",
+    None,
     None,
     None,
     List(

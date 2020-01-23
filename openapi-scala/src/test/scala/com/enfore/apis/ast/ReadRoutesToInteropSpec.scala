@@ -29,6 +29,7 @@ class ReadRoutesToInteropSpec extends FlatSpec with Matchers {
             GetRequest(
               "/contacts/individual/{contact-id}",
               Some("Load an IndividualContact by its identifier"),
+              None,
               Some("dummyFunction"),
               List(PathParameter("contact-id")),
               Map(),
@@ -45,6 +46,7 @@ class ReadRoutesToInteropSpec extends FlatSpec with Matchers {
             RequestWithPayload(
               "/contacts/individual/{contact-id}",
               Some("Full update of an IndividualContact"),
+              None,
               Some("dummyFunction"),
               PUT,
               List(PathParameter("contact-id")),
@@ -81,7 +83,8 @@ class ReadRoutesToInteropSpec extends FlatSpec with Matchers {
     ComponentsObject(
       Map(
         "Contact" -> SchemaObject(
-          Some("Base type for all contacts.\n"),
+          summary = None,
+          description = Some("Base type for all contacts.\n"),
           Some(SchemaObjectType.`object`),
           Some(
             Map(
@@ -95,8 +98,9 @@ class ReadRoutesToInteropSpec extends FlatSpec with Matchers {
                 readOnly = Some(true),
                 required = None
               ),
-              "type" -> SchemaObject(None, Some(SchemaObjectType.string), None, None, None, None, None),
+              "type" -> SchemaObject(None, None, Some(SchemaObjectType.string), None, None, None, None, None),
               "name" -> SchemaObject(
+                None,
                 Some(
                   "The name of the contact.\nFor individual contacts, this is the full name of the person, e.g., \"Barnabas Ludwig Johnson II Sr.\".\n" +
                     "For organization contacts, this is the \"common name\" of the organization. This may not necessarily be the registered business name, " +
@@ -113,6 +117,7 @@ class ReadRoutesToInteropSpec extends FlatSpec with Matchers {
           Some(List("id", "type", "name"))
         ),
         "IndividualContact" -> SchemaObject(
+          None,
           Some("Represents a human person.\n"),
           Some(SchemaObjectType.`object`),
           Some(
@@ -137,6 +142,7 @@ class ReadRoutesToInteropSpec extends FlatSpec with Matchers {
         "/contacts/individual/{contact-id}" -> Map(
           "get" -> OperationObject(
             Some("Load an IndividualContact by its identifier"),
+            None,
             Some("dummyFunction"),
             None,
             Map(
@@ -162,6 +168,7 @@ class ReadRoutesToInteropSpec extends FlatSpec with Matchers {
           ),
           "put" -> OperationObject(
             summary = Some("Full update of an IndividualContact"),
+            description = None,
             Some("dummyFunction"),
             requestBody = Some(
               RequestBodyObject(
