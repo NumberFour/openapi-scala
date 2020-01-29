@@ -9,3 +9,6 @@ mongo-to-kafka/biggest.json
 data
 cache
 .java-version
+api/target
+example-api/api-example/target
+example-api/target

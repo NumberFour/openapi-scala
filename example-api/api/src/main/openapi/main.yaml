@@ -1,0 +1,69 @@
+openapi: 3.0.0
+
+info:
+  title: 'Example OpenAPI Project'
+  version: "1.0"
+  description: Example project for OpenAPI Generator Demo
+
+paths:
+  '/say-hello/{name}':
+    parameters:
+      - name: name
+        in: path
+        description: Name of the person to say hello to
+        required: true
+        schema:
+          type: string 
+    get:
+      summary: Say hello.
+      operationId: getHello
+      description: Say hello to a given name
+      responses:
+        200:
+          description: Data successfully returned
+          content:
+            application/json:
+              schema:
+                $ref: 'components/schemas/HelloWrapper'
+    post:
+      summary: Register a new hello type for the given name
+      operationId: registerHello
+      description: Lets you update the text of the hello for a given name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: 'components/schemas/HelloRegisterContainer'
+      responses:
+        201:
+          description: Registration of subscription successful (or already subscribed)
+          content:
+            application/json:
+              schema:
+                $ref: 'components/schemas/HelloRegisterContainer'
+
+components:
+  schemas:
+    HelloWrapper:
+      description: Wrapper for a hello
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+      required:
+        - content
+    HelloRegisterContainer:
+      type: object
+      description: Container for a hello-register message
+      properties:
+        request_hash:
+          type: string
+          readOnly: true
+        message:
+          type: string
+          minLength: 1
+      required:
+        - message
+        - request_hash
