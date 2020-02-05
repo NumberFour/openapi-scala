@@ -1,10 +1,13 @@
 package com.enfore.apis.ast
 
+import cats.data.NonEmptyList
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
 import com.enfore.apis.ast.SwaggerAST._
 import com.enfore.apis.repr.ReqWithContentType.{PATCH, POST}
 import com.enfore.apis.repr.{PathItemAggregation, RequestWithPayload, TypeRepr}
 import com.enfore.apis.repr.TypeRepr.{
+  Maximum,
+  Minimum,
   NewTypeSymbol,
   PrimitiveInt,
   PrimitiveIntValue,
@@ -100,15 +103,16 @@ class AstTranslationSpec extends FlatSpec with Matchers {
               packageName = "foo",
               typeName = "Money",
               values = List(
-                PrimitiveSymbol("value", PrimitiveNumber(Some(List()))),
+                PrimitiveSymbol("value", PrimitiveNumber(None)),
                 PrimitiveSymbol(
                   "unit",
-                  PrimitiveOption(PrimitiveString(Some(List())), Some(PrimitiveStringValue("EUR")))
+                  PrimitiveOption(PrimitiveString(None), Some(PrimitiveStringValue("EUR")))
                 )
               ),
               summary = None,
               description = Some(
-                """A Money represents a monetary value (i.e., a currency and an amount), for example "120 EUR" or "2,500.75 USD".""")
+                """A Money represents a monetary value (i.e., a currency and an amount), for example "120 EUR" or "2,500.75 USD"."""
+              )
             )
           )
         )
@@ -125,8 +129,8 @@ class AstTranslationSpec extends FlatSpec with Matchers {
                 operationId = Some("dummyFunction"),
                 `type` = POST,
                 pathParams = List(),
-                queries = Map("limit" -> PrimitiveOption(PrimitiveInt(None), None)),
-//                queries = Map("limit" -> PrimitiveOption(PrimitiveInt(Some(List(Minimum(1), Maximum(5000)))), None)),
+                queries =
+                  Map("limit" -> PrimitiveOption(PrimitiveInt(Some(NonEmptyList.of(Minimum(1), Maximum(5000)))), None)),
                 request = Some(Ref("foo", "Money")),
                 response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money"))),
                 hasReadOnlyType = Some(false),
@@ -161,7 +165,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
           values = List(
             PrimitiveSymbol(
               "something",
-              PrimitiveOption(PrimitiveInt(Some(List())), Some(PrimitiveIntValue(10)))
+              PrimitiveOption(PrimitiveInt(None), Some(PrimitiveIntValue(10)))
             )
           ),
           summary = None,
@@ -189,7 +193,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
           values = List(
             PrimitiveSymbol(
               "something",
-              PrimitiveOption(PrimitiveNumber(Some(List())), Some(PrimitiveNumberValue(10.2)))
+              PrimitiveOption(PrimitiveNumber(None), Some(PrimitiveNumberValue(10.2)))
             )
           ),
           summary = None,
@@ -341,12 +345,13 @@ class AstTranslationSpec extends FlatSpec with Matchers {
               packageName = "foo",
               typeName = "Money",
               values = List(
-                PrimitiveSymbol("value", PrimitiveNumber(Some(List()))),
-                PrimitiveSymbol("unit", PrimitiveString(Some(List())))
+                PrimitiveSymbol("value", PrimitiveNumber(None)),
+                PrimitiveSymbol("unit", PrimitiveString(None))
               ),
               summary = None,
               description = Some(
-                """A Money represents a monetary value (i.e., a currency and an amount), for example "120 EUR" or "2,500.75 USD".""")
+                """A Money represents a monetary value (i.e., a currency and an amount), for example "120 EUR" or "2,500.75 USD"."""
+              )
             )
           )
         )
@@ -364,7 +369,7 @@ class AstTranslationSpec extends FlatSpec with Matchers {
                 `type` = POST,
                 pathParams = List(),
                 queries = Map.empty,
-                request = Some(PrimitiveString(Some(List()))),
+                request = Some(PrimitiveString(None)),
                 response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money"))),
                 hasReadOnlyType = Some(false),
                 successStatusCode = 200
@@ -433,12 +438,13 @@ class AstTranslationSpec extends FlatSpec with Matchers {
               packageName = "foo",
               typeName = "Money",
               values = List(
-                PrimitiveSymbol("value", PrimitiveNumber(Some(List()))),
-                PrimitiveSymbol("unit", PrimitiveString(Some(List())))
+                PrimitiveSymbol("value", PrimitiveNumber(None)),
+                PrimitiveSymbol("unit", PrimitiveString(None))
               ),
               summary = None,
               description = Some(
-                """A Money represents a monetary value (i.e., a currency and an amount), for example "120 EUR" or "2,500.75 USD".""")
+                """A Money represents a monetary value (i.e., a currency and an amount), for example "120 EUR" or "2,500.75 USD"."""
+              )
             )
           )
         )

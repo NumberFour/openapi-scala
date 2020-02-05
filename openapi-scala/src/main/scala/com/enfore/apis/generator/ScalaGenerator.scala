@@ -18,7 +18,7 @@ object MiniTypeHelpers {
   def coproductTypes(in: List[String]): String =
     NonEmptyList.fromList(in).map(_.toList.mkString("", " :+: ", " :+: CNil")).getOrElse("Unit")
 
-  def referenceCoproduct(in: List[Ref])(implicit p: PackageName) =
+  def referenceCoproduct(in: List[Ref])(implicit p: PackageName): String =
     coproductTypes(in.map(resolveRef))
 
 }
@@ -83,22 +83,23 @@ object ScalaGenerator {
   private def refSymbolGenerator(symbol: RefSymbol): String =
     s"${symbol.valName}: ${SymbolAnnotationMaker.makeAnnotation(symbol)}".trim
 
-  @tailrec private def refinementExtractor(in: Symbol): Option[Primitive] = in match {
-    case PrimitiveSymbol(_, data) =>
-      data match {
-        case s @ PrimitiveString(refinements: Option[List[RefinedTags]]) =>
-          if (refinements.flatMap(_.headOption).isDefined) Some(s) else None
-        case a @ PrimitiveArray(_, refinements: Option[List[RefinedTags]]) =>
-          if (refinements.flatMap(_.headOption).isDefined) Some(a) else None
-        case i @ PrimitiveInt(refinements: Option[List[RefinedTags]]) =>
-          if (refinements.flatMap(_.headOption).isDefined) Some(i) else None
-        case n @ PrimitiveNumber(refinements: Option[List[RefinedTags]]) =>
-          if (refinements.flatMap(_.headOption).isDefined) Some(n) else None
-        case PrimitiveOption(data: Primitive, _) =>
-          refinementExtractor(PrimitiveSymbol(in.valName, data))
-        case _ => None
-      }
+  @tailrec def primitiveRefinementExtractor(in: Primitive): Option[Primitive] = in match {
+    case s @ PrimitiveString(refinements: Option[NonEmptyList[RefinedTags]]) =>
+      if (refinements.map(_.head).isDefined) Some(s) else None
+    case a @ PrimitiveArray(_, refinements: Option[NonEmptyList[RefinedTags]]) =>
+      if (refinements.map(_.head).isDefined) Some(a) else None
+    case i @ PrimitiveInt(refinements: Option[NonEmptyList[RefinedTags]]) =>
+      if (refinements.map(_.head).isDefined) Some(i) else None
+    case n @ PrimitiveNumber(refinements: Option[NonEmptyList[RefinedTags]]) =>
+      if (refinements.map(_.head).isDefined) Some(n) else None
+    case PrimitiveOption(data: Primitive, _) =>
+      primitiveRefinementExtractor(data)
     case _ => None
+  }
+
+  private def refinementExtractor(in: Symbol): Option[Primitive] = in match {
+    case PrimitiveSymbol(_, data) => primitiveRefinementExtractor(data)
+    case _                        => None
   }
 
   private def refinementTypeDef(in: List[Symbol]): Option[NonEmptyList[String]] = {
@@ -141,7 +142,8 @@ object ScalaGenerator {
       typeName: String,
       values: List[Symbol],
       summary: Option[String],
-      description: Option[String]): String = {
+      description: Option[String]
+  ): String = {
     val summaryDocs: List[String] = summary
       .map(_.split("\n").toList.map(l => s" * $l"))
       .getOrElse(Nil)
@@ -176,8 +178,10 @@ object ScalaGenerator {
        |import io.circe.derivation._\n${refinementImports.getOrElse("")}
        |$docs
        |final case class $typeName${values
-         .map(sym =>
-           s"${cleanScalaSymbol(sym.valName)} : ${SymbolAnnotationMaker.refinedAnnotation(sym)(generateForAlias = true)}")
+         .map(
+           sym =>
+             s"${cleanScalaSymbol(sym.valName)} : ${SymbolAnnotationMaker.refinedAnnotation(sym)(generateForAlias = true)}"
+         )
          .mkString("(\n\t", ",\n\t", "\n)")} \n
        |object $typeName {
        |\timplicit val circeDecoder: Decoder[$typeName] = deriveDecoder[$typeName](renaming.snakeCase, true, None)
@@ -190,8 +194,10 @@ object ScalaGenerator {
   private def generateUnionJsonConversions(discriminator: String)(members: Set[Ref], margin: String = "\t\t"): String =
     members
       .map(_.typeName)
-      .map(member =>
-        s"""implicit def case${member} = at[$member](_.asJson.deepMerge(Json.obj("$discriminator" -> Json.fromString("$member"))))""")
+      .map(
+        member =>
+          s"""implicit def case${member} = at[$member](_.asJson.deepMerge(Json.obj("$discriminator" -> Json.fromString("$member"))))"""
+      )
       .mkString(s"\n$margin")
 
   private def generateUnionJsonMatch(members: Set[Ref], parentType: String, margin: String = "\t\t\t\t"): String =

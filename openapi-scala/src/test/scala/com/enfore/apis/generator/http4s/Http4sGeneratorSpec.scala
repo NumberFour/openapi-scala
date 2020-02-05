@@ -60,9 +60,9 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
   )
 
   lazy val routesSource =
-    """package com.enfore.contactsapiservice.contacts
+    s"""package com.enfore.contactsapiservice.contacts
       |package http4s
-      |
+
       |import cats.effect.Sync
       |import cats.implicits._
       |import org.http4s._
@@ -71,6 +71,14 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
       |import org.http4s.circe.CirceEntityDecoder._
       |import org.http4s.dsl.Http4sDsl
       |import com.enfore.apis.http4s._
+      |
+      |import eu.timepit.refined._
+      |import eu.timepit.refined.api._
+      |import eu.timepit.refined.collection._
+      |import eu.timepit.refined.numeric._
+      |import shapeless._
+      |import eu.timepit.refined.boolean._
+      |import io.circe.refined._
       |
       |object Routes {
       |  def apply[F[_] : Sync](impl: Http4sRoutesApi[F], errorHandler: ErrorHandler[F]): HttpRoutes[F] = {
@@ -91,6 +99,14 @@ class Http4sGeneratorSpec extends FreeSpec with Matchers {
       |package http4s
       |
       |import org.http4s.Request
+      |
+      |import eu.timepit.refined._
+      |import eu.timepit.refined.api._
+      |import eu.timepit.refined.collection._
+      |import eu.timepit.refined.numeric._
+      |import shapeless._
+      |import eu.timepit.refined.boolean._
+      |import io.circe.refined._
       |
       |trait Http4sRoutesApi[F[_]] {
       |  def `dummyFunction`(implicit request: Request[F]): F[IndividualContact]

@@ -1,9 +1,8 @@
 package com.enfore.apis.generator.http4s
 
+import com.enfore.apis.generator.{ScalaGenerator, SymbolAnnotationMaker}
 import com.enfore.apis.repr._
 import com.enfore.apis.repr.TypeRepr._
-import com.enfore.apis.generator.ShowTypeTag._
-import com.enfore.apis.generator.ShowTypeTag.ops._
 import com.enfore.apis.repr.ReqWithContentType.{PATCH, POST, PUT}
 
 object RouteGenerator {
@@ -29,6 +28,39 @@ object RouteGenerator {
   }
 
   /**
+    * Builds the implicit query parameter decoders for query parameters with refinements
+    * so that matchers can be constructed for those refinement types.
+    *
+    * Examples include: {{{
+    *   implicit lazy val `String Refined AllOf[...]` =
+    *     QueryParameterDecoder[String].emap(input => (new RefinedTypeOps[String Refined AllOf[...], String]).emap(_)
+    *       .left.map(err => ParsingError(err, new Exception("Failed to ..."))))
+    * }}}
+    *
+    * In case of optional query parameters an example might include: {{{
+    *   ... = OptionalQueryParameterDecoder[String].emap(...)
+    * }}}
+    *
+    * @param in route definitions from which the query parameters must be extracted
+    * @param indentationLevel of the created Scala code
+    * @return A list of strings containing each line of Scala code to be injected
+    */
+  def buildRefinementDecoders(in: List[RouteDefinition], indentationLevel: Int): List[String] =
+    in.flatMap(getListQueryParams(_).values.toList)
+      .flatMap {
+        case PrimitiveOption(prim: Primitive, _) =>
+          defineOptionalRefinementOnPrimitive(prim).map(
+            refinementDecoder(_, prim.typeName, indentationLevel)
+          )
+        case x: Primitive =>
+          defineOptionalRefinementOnPrimitive(x).map(
+            refinementDecoder(_, x.typeName, indentationLevel)
+          )
+        case _ => None
+      }
+      .flatten
+
+  /**
     * Get the list decoder matcher if there is any query parameter with list / array type.
     * Array query string is assumed to be split with comma, i.e. ?q=a,b,c,d
     */
@@ -45,11 +77,12 @@ object RouteGenerator {
 
     if (routes.exists(anyListQueryParameter)) {
 
-      val refDecoders =
+      val refDecoders: List[String] =
         routes
           .flatMap(getEnumListQueryParameter)
           .flatten
           .flatMap(typeName => enumDecoder(typeName, indentationLevel))
+
       if (refDecoders.nonEmpty) {
         println("Generating http4s decoders for request references, assuming they all are enums")
         val importLine = List("import org.http4s.QueryParamDecoder.fromUnsafeCast\n")
@@ -81,6 +114,17 @@ object RouteGenerator {
       .toList
       .map(_ + `\t` * indentationLevel)
   }
+
+  def refinementDecoder(
+      refinementSyntax: String,
+      baseTypeSig: String,
+      indentationLevel: Int
+  ): List[String] =
+    s"""implicit lazy val `${refinementSyntax.replace('`', '_')}QueryParamDecoder`: QueryParamDecoder[$refinementSyntax] = 
+       |  QueryParamDecoder[$baseTypeSig].emap((new RefinedTypeOps[$refinementSyntax, $baseTypeSig]).from(_).left.map(errMsg => ParseFailure("Failed to validate input query parameter", errMsg)))""".stripMargin
+      .split('\n')
+      .toList
+      .map(_ + `\t` * indentationLevel)
 
   /**
     * Build decoder matchers corresponding to the contained query parameter types
@@ -186,14 +230,18 @@ object RouteGenerator {
   private val toMatcherTuple: (String, Primitive) =/> (String, String) = {
     case (paramName, paramType) =>
       (
-        s"$paramName ${paramType.showType} Matcher",
+        s"$paramName ${queryParameterDecoderMatcher(paramType).replace('`', '_')} Matcher",
         s"""${queryParameterDecoderMatcher(paramType)}("$paramName")"""
       )
   }
 
+  def defineOptionalRefinementOnPrimitive(dataType: Primitive): Option[String] =
+    ScalaGenerator.primitiveRefinementExtractor(dataType).map(SymbolAnnotationMaker.primitiveTypeSigWithRefinements)
+
   private def queryParameterDecoderMatcher(dataType: Primitive): String = dataType match {
-    case PrimitiveOption(dataType, _) => s"OptionalQueryParamDecoderMatcher[${dataType.showType}]"
-    case other                        => s"QueryParamDecoderMatcher[${other.showType}]"
+    case PrimitiveOption(dataType, _) =>
+      s"OptionalQueryParamDecoderMatcher[${SymbolAnnotationMaker.onlyResolverTopPrimitiveRefinements(dataType)}]"
+    case other => s"QueryParamDecoderMatcher[${SymbolAnnotationMaker.onlyResolverTopPrimitiveRefinements(other)}]"
   }
 
   private def getArgumentList(route: RouteDefinition): String = {

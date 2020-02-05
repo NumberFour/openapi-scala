@@ -1,5 +1,6 @@
 package com.enfore.apis.ast
 
+import cats.data.NonEmptyList
 import cats.implicits._
 import com.enfore.apis.ast.SwaggerAST.RequestType.{PATCH, POST, PUT}
 import com.enfore.apis.ast.SwaggerAST._
@@ -69,9 +70,16 @@ object ASTTranslationFunctions {
             y.schema.get match {
               case a: SchemaObject =>
                 val isRequired: Boolean = y.required.getOrElse(false)
-                // TODO: META-6088 Add support for refinements here
+                val refinements: List[RefinedTags] = List(
+                  a.minimum.map(Minimum),
+                  a.maximum.map(Maximum),
+                  a.minLength.map(MinLength),
+                  a.maxLength.map(MaxLength)
+                ).flatten
                 val value: Primitive =
-                  buildPrimitiveFromSchemaObjectType(refinements = None, a.items)(packageName)(a.`type`.get).get
+                  buildPrimitiveFromSchemaObjectType(NonEmptyList.fromList(refinements), a.items)(packageName)(
+                    a.`type`.get
+                  ).get
                 if (!isRequired) {
                   PrimitiveOption(value, a.default)
                 } else {
@@ -80,7 +88,7 @@ object ASTTranslationFunctions {
               case ReferenceObject(_) =>
                 throw new AssertionError("ReferenceObjects in query parameters are not supported.")
             }
-        }
+          }
       )
       .toMap
 
@@ -181,7 +189,7 @@ object ASTTranslationFunctions {
 
   private def buildPrimitiveFromSchemaObjectTypeForComponents(
       items: Option[SchemaOrReferenceObject],
-      refinements: Option[List[RefinedTags]]
+      refinements: Option[NonEmptyList[RefinedTags]]
   )(
       implicit packageName: PackageName
   ): SchemaObjectType => Option[TypeRepr] = {
@@ -197,7 +205,7 @@ object ASTTranslationFunctions {
   }
 
   private def buildPrimitiveFromSchemaObjectType(
-      refinements: Option[List[TypeRepr.RefinedTags]],
+      refinements: Option[NonEmptyList[TypeRepr.RefinedTags]],
       items: Option[SchemaOrReferenceObject] = None
   )(implicit packageName: PackageName): SchemaObjectType => Option[Primitive] = {
     case SchemaObjectType.string    => Some(PrimitiveString(refinements))
@@ -224,10 +232,11 @@ object ASTTranslationFunctions {
     property match {
       case so: SchemaObject =>
         so.additionalProperties.fold {
-          val refinements: Option[List[CollectionRefinements]] =
+          val refinements: Option[NonEmptyList[CollectionRefinements]] =
             List(so.minLength.map(MinLength), so.maxLength.map(MaxLength))
               .filter(_.isDefined)
               .sequence
+              .flatMap(NonEmptyList.fromList)
           so.`type`
             .flatMap(buildPrimitiveFromSchemaObjectTypeForComponents(so.items, refinements))
         }(loadSingleProperty(_).map(PrimitiveDict(_, None)))
@@ -298,7 +307,8 @@ object ASTTranslationFunctions {
     }
 
   private def loadEnum(typeName: String, values: List[String], summary: Option[String], description: Option[String])(
-      implicit packageName: PackageName): NewType =
+      implicit packageName: PackageName
+  ): NewType =
     PrimitiveEnum(packageName.name, typeName, values.toSet, summary, description)
 
   private def handleSchemaObjectProductType(name: String, schemaObject: SchemaObject)(
@@ -312,7 +322,8 @@ object ASTTranslationFunctions {
           schemaObject.properties.getOrElse(Map.empty),
           required,
           schemaObject.summary,
-          schemaObject.description)
+          schemaObject.description
+        )
       case SchemaObjectType.`string` =>
         schemaObject.enum.map(loadEnum(name, _, schemaObject.summary, schemaObject.description))
       case SchemaObjectType.`integer` =>
@@ -355,8 +366,11 @@ object ASTTranslationFunctions {
         values = references,
         discriminator
           .map(_.propertyName)
-          .getOrElse(throw new AssertionError(
-            "We require that a discriminator be defined to use oneOf in OpenAPI. Checkout oneOf in OpenAPI 3.0 spec for more information.")),
+          .getOrElse(
+            throw new AssertionError(
+              "We require that a discriminator be defined to use oneOf in OpenAPI. Checkout oneOf in OpenAPI 3.0 spec for more information."
+            )
+          ),
         summary,
         description
       )
@@ -413,8 +427,13 @@ object ASTTranslationFunctions {
                   hasReadOnlyBase(v)
               })(components)
           ),
-          oneOf = sor.oneOf.map(_.map(ref =>
-            if (schemaObjectHasReadOnlyComponent(components)(ref)) ref.copy($ref = ref.$ref + "Request") else ref))
+          oneOf = sor.oneOf.map(
+            _.map(
+              ref =>
+                if (schemaObjectHasReadOnlyComponent(components)(ref)) ref.copy($ref = ref.$ref + "Request")
+                else ref
+            )
+          )
         )
     }
     hasNoReadOnlyProps ++ hasReadOnlyProps ++ withRequestPostfix

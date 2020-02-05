@@ -1,8 +1,8 @@
 package com.enfore.apis.generator.http4s
 
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
-import com.enfore.apis.generator.RouteImplementation.FileName
 import com.enfore.apis.generator.ScalaGenerator
+import com.enfore.apis.generator.http4s.RouteGenerator.buildRefinementDecoders
 import com.enfore.apis.repr.PathItemAggregation
 
 object Http4sGenerator {
@@ -10,12 +10,12 @@ object Http4sGenerator {
   /**
     * Case class used as input to create Scala source which holds an object for creating http4s.HttpRoutes
     */
-  final case class RoutesObject(routesMap: Map[FileName, PathItemAggregation])
+  final case class RoutesObject(routesMap: Map[String, PathItemAggregation])
 
   /**
     * Case class used as input to create Scala source which holds a trait for the API implementation
     */
-  final case class ApiTrait(routesMap: Map[FileName, PathItemAggregation])
+  final case class ApiTrait(routesMap: Map[String, PathItemAggregation])
 
   /**
     * The generated Routes object will look something like this:
@@ -59,6 +59,14 @@ object Http4sGenerator {
          |import org.http4s.dsl.Http4sDsl
          |import com.enfore.apis.http4s._
          |
+         |import eu.timepit.refined._
+         |import eu.timepit.refined.api._
+         |import eu.timepit.refined.collection._
+         |import eu.timepit.refined.numeric._
+         |import shapeless._
+         |import eu.timepit.refined.boolean._
+         |import io.circe.refined._
+         |
          |object Routes {
          |  def apply[F[_] : Sync](impl: Http4sRoutesApi[F], errorHandler: ErrorHandler[F]): HttpRoutes[F] = {
          |    val dsl = new Http4sDsl[F]{}
@@ -94,6 +102,13 @@ object Http4sGenerator {
          |package http4s
          |
          |import org.http4s.Request
+         |import eu.timepit.refined._
+         |import eu.timepit.refined.api._
+         |import eu.timepit.refined.collection._
+         |import eu.timepit.refined.numeric._
+         |import shapeless._
+         |import eu.timepit.refined.boolean._
+         |import io.circe.refined._
          |
          |trait Http4sRoutesApi[F[_]] {
          |${implementationTrait(routes, indentationLevel = 1).mkString("\n")}
@@ -107,27 +122,28 @@ object Http4sGenerator {
     * @param indentationLevel set the level of indentation for the scala source string
     */
   private def queryParameterMatchers(
-      routes: Map[FileName, PathItemAggregation],
+      routes: Map[String, PathItemAggregation],
       indentationLevel: Int
   ): List[String] = {
     val routeDefinitions = routes.values.toList.flatMap(_.items)
 
-    val listDecoder = RouteGenerator.listDecoder(routeDefinitions, indentationLevel)
-    val matchers    = RouteGenerator.buildMatchers(routeDefinitions, indentationLevel)
+    val refinementDecoders: List[String] = buildRefinementDecoders(routeDefinitions, indentationLevel)
+    val listDecoder: List[String]        = RouteGenerator.listDecoder(routeDefinitions, indentationLevel)
+    val matchers: List[String]           = RouteGenerator.buildMatchers(routeDefinitions, indentationLevel)
 
     val output = (listDecoder, matchers) match {
-      case (Nil, m) => m
-      case (l, m)   => (l :+ "\n") ++ m
+      case (Nil, m) => (refinementDecoders :+ "\n") ++ m
+      case (l, m)   => ((l :+ "\n") ++ refinementDecoders) ++ m
     }
     output.distinct
   }
 
-  private def routeDefinitions(routes: Map[FileName, PathItemAggregation], indentationLevel: Int): List[String] =
+  private def routeDefinitions(routes: Map[String, PathItemAggregation], indentationLevel: Int): List[String] =
     routes.values.toList
       .flatMap(_.items)
       .map(RouteGenerator.generate(_, indentationLevel).mkString("\n"))
 
-  private def implementationTrait(routes: Map[FileName, PathItemAggregation], indentationLevel: Int): List[String] =
+  private def implementationTrait(routes: Map[String, PathItemAggregation], indentationLevel: Int): List[String] =
     routes.values.toList
       .flatMap(_.items)
       .map(ImplementationGenerator.generate(_, indentationLevel).mkString("\n"))

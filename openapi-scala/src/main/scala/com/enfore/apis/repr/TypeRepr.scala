@@ -1,5 +1,6 @@
 package com.enfore.apis.repr
 
+import cats.data.NonEmptyList
 import com.enfore.apis.generator.ShowTypeTag
 import io.circe._
 import cats.syntax.functor._
@@ -42,25 +43,27 @@ object TypeRepr {
     ).reduceLeft(_ or _)
 
   sealed trait Primitive extends TypeRepr
-  final case class PrimitiveString(refinements: Option[List[RefinedTags]]) extends Primitive {
+  final case class PrimitiveString(refinements: Option[NonEmptyList[RefinedTags]]) extends Primitive {
     override val typeName: String = "String"
   }
-  final case class PrimitiveNumber(refinements: Option[List[RefinedTags]]) extends Primitive {
+  final case class PrimitiveNumber(refinements: Option[NonEmptyList[RefinedTags]]) extends Primitive {
     override val typeName: String = "Double"
   }
-  final case class PrimitiveInt(refinements: Option[List[RefinedTags]]) extends Primitive {
+  final case class PrimitiveInt(refinements: Option[NonEmptyList[RefinedTags]]) extends Primitive {
     override val typeName: String = "Int"
   }
-  final case class PrimitiveBoolean(refinements: Option[List[RefinedTags]]) extends Primitive {
+  final case class PrimitiveBoolean(refinements: Option[NonEmptyList[RefinedTags]]) extends Primitive {
     override val typeName: String = "Boolean"
   }
-  final case class PrimitiveArray(dataType: TypeRepr, refinements: Option[List[RefinedTags]]) extends Primitive {
+  final case class PrimitiveArray(dataType: TypeRepr, refinements: Option[NonEmptyList[RefinedTags]])
+      extends Primitive {
     override val typeName: String = s"Array[${dataType.typeName}]"
   }
   final case class PrimitiveOption(dataType: TypeRepr, defaultValue: Option[PrimitiveValue]) extends Primitive {
     override val typeName: String = s"Option[${dataType.typeName}]"
   }
-  final case class PrimitiveDict(dataType: TypeRepr, defaultValue: Option[List[RefinedTags]]) extends Primitive {
+  final case class PrimitiveDict(dataType: TypeRepr, defaultValue: Option[NonEmptyList[RefinedTags]])
+      extends Primitive {
     override val typeName: String = s"Map[String, ${dataType.typeName}]"
   }
 
@@ -91,23 +94,23 @@ object TypeRepr {
       typeName: String,
       values: Set[String],
       summary: Option[String],
-      description: Option[String])
-      extends NewType
+      description: Option[String]
+  ) extends NewType
   final case class PrimitiveProduct(
       packageName: String,
       typeName: String,
       values: List[Symbol],
       summary: Option[String],
-      description: Option[String])
-      extends NewType
+      description: Option[String]
+  ) extends NewType
   final case class PrimitiveUnion(
       packageName: String,
       typeName: String,
       values: Set[Ref],
       discriminator: String,
       summary: Option[String],
-      description: Option[String])
-      extends NewType
+      description: Option[String]
+  ) extends NewType
 
   final case class PrimitiveSymbol(valName: String, dataType: Primitive) extends Symbol {
     val typeName: String = ShowTypeTag.typeReprShowType.showType(dataType)

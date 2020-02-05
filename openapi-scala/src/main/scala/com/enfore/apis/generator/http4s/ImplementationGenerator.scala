@@ -1,6 +1,6 @@
 package com.enfore.apis.generator.http4s
 
-import com.enfore.apis.generator.ShowTypeTag._
+import com.enfore.apis.generator.SymbolAnnotationMaker
 import com.enfore.apis.repr.ReqWithContentType.{PATCH, POST, PUT}
 import com.enfore.apis.repr._
 import com.enfore.apis.repr.TypeRepr._
@@ -9,8 +9,11 @@ object ImplementationGenerator {
 
   import com.enfore.apis.generator.Utilities._
 
-  private type ArgumentName = String
-  private type ArgumentType = String
+  final case class Argument(name: String, typeName: String)
+
+  object Argument {
+    val fromTuple = (Argument.apply _).tupled
+  }
 
   /**
     * Indentation as a Variable (iaav)
@@ -18,9 +21,9 @@ object ImplementationGenerator {
   private val `\t` = " " * 2
 
   def generate(route: RouteDefinition, indentationLevel: Int): List[String] = {
-    val functionName = route.operationId.getOrElse(s"`${getFunctionName(route)}`")
-    val parameters   = getParameters(route)
-    val responseType = getResponseType(route)
+    val functionName: String = route.operationId.getOrElse(s"`${getFunctionName(route)}`")
+    val parameters: String   = getParameters(route)
+    val responseType: String = getResponseType(route)
     val summaryDocs: List[String] = route.summary
       .map(_.split("\n").toList.map(l => s" * $l"))
       .getOrElse(Nil)
@@ -51,20 +54,20 @@ object ImplementationGenerator {
   }
 
   private def getParameters(route: RouteDefinition): String = {
-    val pathParameters  = getPathParameters(route)
-    val queryParameters = getQueryParams(route)
-    val body            = getRequestBody(route)
+    val pathParameters: List[Argument]  = getPathParameters(route)
+    val queryParameters: List[Argument] = getQueryParams(route)
+    val body: Option[Argument]          = getRequestBody(route)
 
     val allParameters = pathParameters ++ queryParameters ++ body
 
     assert(
-      allParameters.map(_._1).size == allParameters.map(_._1).distinct.size,
+      allParameters.map(_.name).size == allParameters.map(_.name).distinct.size,
       "Parameter names must be unique in path and query parameters altogether and must not be name 'body'"
     )
 
     val parametersAsString =
       allParameters
-        .map { case (key, value) => cleanScalaSymbol(key) -> value }
+        .map { case Argument(key, value) => cleanScalaSymbol(key) -> value }
         .map { case (name, dataType) => s"$name: $dataType" }
         .mkString("(", ", ", ")")
 
@@ -90,22 +93,26 @@ object ImplementationGenerator {
     responseType.fold("Unit")(_.typeName)
   }
 
-  private def getPathParameters(route: RouteDefinition): List[(ArgumentName, ArgumentType)] = {
-    def extractFromPathParameters(parameters: List[PathParameter]): List[(String, String)] = {
+  private def getPathParameters(route: RouteDefinition): List[Argument] = {
+    def extractFromPathParameters(parameters: List[PathParameter]): List[Argument] = {
       assert(
         parameters.map(_.name).size == parameters.map(_.name).distinct.size,
         "Path parameter names must be unique"
       )
 
       parameters.map(param => (param.name, "String"))
-    }
+    } map Argument.fromTuple
 
     extractFromPathParameters(route.pathParams)
   }
 
-  private def getQueryParams(route: RouteDefinition): List[(ArgumentName, ArgumentType)] = {
-    def extractFromQueries(queries: Map[String, Primitive]): List[(String, String)] =
-      queries.mapValues(primitiveShowType.showType).toList.sortBy(_._1)
+  private def getQueryParams(route: RouteDefinition): List[Argument] = {
+    def extractFromQueries(queries: Map[String, Primitive]): List[Argument] =
+      queries
+        .mapValues(SymbolAnnotationMaker.primitiveTypeSigWithRefinements)
+        .toList
+        .sortBy(_._1)
+        .map(Argument.fromTuple)
 
     route match {
       case GetRequest(_, _, _, _, _, queries, _, _)                  => extractFromQueries(queries)
@@ -114,9 +121,9 @@ object ImplementationGenerator {
     }
   }
 
-  private def getRequestBody(route: RouteDefinition): Option[(ArgumentName, ArgumentType)] = route match {
+  private def getRequestBody(route: RouteDefinition): Option[Argument] = route match {
     case req: RequestWithPayload =>
-      req.readOnlyTypeName.map(ro => ("body", ro))
+      req.readOnlyTypeName.map(ro => ("body", ro)).map(Argument.fromTuple)
     case _: Any => None
   }
 }

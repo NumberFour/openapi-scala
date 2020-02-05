@@ -29,8 +29,8 @@ object CombineUtils {
         List.empty[AuthorizationValue].asJava,
         parseOptions
       )
-    val errors = Option(parseResult.getMessages).toList
-      .flatMap(
+    val errors: List[String] = Option(parseResult.getMessages)
+      .fold(List.empty[String])(
         _.asScala.toList
       )
     if (errors.nonEmpty) {

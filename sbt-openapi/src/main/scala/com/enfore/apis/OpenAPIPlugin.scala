@@ -14,9 +14,11 @@ object OpenAPIPlugin extends AutoPlugin {
       generatedCodeOutputDir: File,
       targetSvcUrl: String,
       apiDefTarget: File,
-      packageName: String): Seq[File] = {
+      packageName: String
+  ): Seq[File] = {
     println(
-      s"[info] Creating OpenAPI from $hostProjectOpenAPISourceDir/$openAPIEntryPointFile and writing to target $generatedCodeOutputDir")
+      s"[info] Creating OpenAPI from $hostProjectOpenAPISourceDir/$openAPIEntryPointFile and writing to target $generatedCodeOutputDir"
+    )
     if (hostProjectOpenAPISourceDir.exists() && hostProjectOpenAPISourceDir.isDirectory) {
       IO.withTemporaryDirectory { tmpDir =>
         extraSourcesJarName.foreach(IO.unzip(_, tmpDir))
@@ -51,7 +53,8 @@ object OpenAPIPlugin extends AutoPlugin {
       settingKey[File]("Name of the base file to use for dumping OpenAPI definition in YAML and JSON.")
     val openAPISource =
       settingKey[File](
-        "Source entry directory for OpenAPI (expects to contain main.yaml file). Defaults to src/main/openapi")
+        "Source entry directory for OpenAPI (expects to contain main.yaml file). Defaults to src/main/openapi"
+      )
     val openAPISourceFile =
       settingKey[File]("Source entry file that is inside the source entry directory. Defaults to main.yaml.")
     val extraSourcesJar =
@@ -77,8 +80,10 @@ object OpenAPIPlugin extends AutoPlugin {
           compileAll(
             Def.settingDyn {
               (dependencyClasspath in Compile)
-                .map(_.find((x: Attributed[File]) => x.data.getName.contains(extraSourcesJar.value))
-                  .map(_.data))
+                .map(
+                  _.find((x: Attributed[File]) => x.data.getName.contains(extraSourcesJar.value))
+                    .map(_.data)
+                )
             }.value,
             openAPISource.value,
             openAPISourceFile.value,

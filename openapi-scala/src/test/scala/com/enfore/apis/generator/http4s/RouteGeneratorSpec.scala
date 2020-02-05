@@ -6,7 +6,7 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
 class RouteGeneratorSpec extends FreeSpec with Matchers {
   "http4s.RouteGenerator generates routes based on http4s according to provided route definiton" in tableTest
 
-  def tableTest = forAll(table) { (pathItem, sourceStrings) =>
+  def tableTest = forEvery(table) { (pathItem, sourceStrings) =>
     RouteGenerator.generate(pathItem, indentationLevel = 0) should equal(sourceStrings)
   }
 
@@ -166,7 +166,7 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
   lazy val `GET /contacts/individual?query1&query2&optional1&optional2&list1&optional-list1` = (
     RouteDefinitions.`GET /contacts/individual?query1&query2&optional1&optional2&list1&optional-list1`,
     List(
-      """case request @ GET -> Root / "contacts" / "individual" :? `query1 String Matcher`(query1) +& `query2 Int Matcher`(query2) +& `optional1 Option[String] Matcher`(optional1) +& `optional2 Option[Int] Matcher`(optional2) +& `list1 List[Int] Matcher`(list1) +& `optional-list1 Option[List[String]] Matcher`(optionalList1) =>""",
+      """case request @ GET -> Root / "contacts" / "individual" :? `query1 QueryParamDecoderMatcher[String] Matcher`(query1) +& `query2 QueryParamDecoderMatcher[Int] Matcher`(query2) +& `optional1 OptionalQueryParamDecoderMatcher[String] Matcher`(optional1) +& `optional2 OptionalQueryParamDecoderMatcher[Int] Matcher`(optional2) +& `list1 QueryParamDecoderMatcher[List[Int]] Matcher`(list1) +& `optional-list1 OptionalQueryParamDecoderMatcher[List[String]] Matcher`(optionalList1) =>""",
       "  errorHandler.resolve(impl.`GET /contacts/individual`(list1, optionalList1, optional1, optional2, query1, query2)(request), (x: IndividualContact) => EntityGenerator(200)(x.asJson))"
     )
   )
@@ -174,7 +174,7 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
   lazy val `POST /contacts/individual?query1&query2&optional1&optional2&list1&optional-list1` = (
     RouteDefinitions.`POST /contacts/individual?query1&query2&optional1&optional2&list1&optional-list1`,
     List(
-      """case request @ POST -> Root / "contacts" / "individual" :? `query1 String Matcher`(query1) +& `query2 Int Matcher`(query2) +& `optional1 Option[String] Matcher`(optional1) +& `optional2 Option[Int] Matcher`(optional2) +& `list1 List[Int] Matcher`(list1) +& `optional-list1 Option[List[String]] Matcher`(optionalList1) =>""",
+      """case request @ POST -> Root / "contacts" / "individual" :? `query1 QueryParamDecoderMatcher[String] Matcher`(query1) +& `query2 QueryParamDecoderMatcher[Int] Matcher`(query2) +& `optional1 OptionalQueryParamDecoderMatcher[String] Matcher`(optional1) +& `optional2 OptionalQueryParamDecoderMatcher[Int] Matcher`(optional2) +& `list1 QueryParamDecoderMatcher[List[Int]] Matcher`(list1) +& `optional-list1 OptionalQueryParamDecoderMatcher[List[String]] Matcher`(optionalList1) =>""",
       "  errorHandler.resolve(request.as[IndividualContact].flatMap(impl.`POST /contacts/individual`(list1, optionalList1, optional1, optional2, query1, query2, _)(request)), (x: IndividualContact) => EntityGenerator(200)(x.asJson))"
     )
   )
@@ -182,7 +182,7 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
   lazy val `GET /contacts/individual/{contacts-id}?optional1&optional2` = (
     RouteDefinitions.`GET /contacts/individual/{contacts-id}?optional1&optional2`,
     List(
-      """case request @ GET -> Root / "contacts" / "individual" / contactsId :? `optional1 Option[String] Matcher`(optional1) +& `optional2 Option[Int] Matcher`(optional2) =>""",
+      """case request @ GET -> Root / "contacts" / "individual" / contactsId :? `optional1 OptionalQueryParamDecoderMatcher[String] Matcher`(optional1) +& `optional2 OptionalQueryParamDecoderMatcher[Int] Matcher`(optional2) =>""",
       "  errorHandler.resolve(impl.`GET /contacts/individual/{contacts-id}`(contactsId, optional1, optional2)(request), (x: IndividualContact) => EntityGenerator(200)(x.asJson))"
     )
   )
@@ -190,7 +190,7 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
   lazy val `PUT /contacts/individual/{contacts-id}?optional1&optional2` = (
     RouteDefinitions.`PUT /contacts/individual/{contacts-id}?optional1&optional2`,
     List(
-      """case request @ PUT -> Root / "contacts" / "individual" / contactsId :? `optional1 Option[String] Matcher`(optional1) +& `optional2 Option[Int] Matcher`(optional2) =>""",
+      """case request @ PUT -> Root / "contacts" / "individual" / contactsId :? `optional1 OptionalQueryParamDecoderMatcher[String] Matcher`(optional1) +& `optional2 OptionalQueryParamDecoderMatcher[Int] Matcher`(optional2) =>""",
       "  errorHandler.resolve(request.as[IndividualContact].flatMap(impl.`PUT /contacts/individual/{contacts-id}`(contactsId, optional1, optional2, _)(request)), (x: IndividualContact) => EntityGenerator(200)(x.asJson))"
     )
   )
@@ -206,7 +206,7 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
   lazy val `GET /contacts/organization/{contacts-id}/addresses?query1&query2` = (
     RouteDefinitions.`GET /contacts/organization/{contacts-id}/addresses?query1&query2`,
     List(
-      """case request @ GET -> Root / "contacts" / "organization" / contactsId / "addresses" :? `query1 String Matcher`(query1) +& `query2 Int Matcher`(query2) =>""",
+      """case request @ GET -> Root / "contacts" / "organization" / contactsId / "addresses" :? `query1 QueryParamDecoderMatcher[String] Matcher`(query1) +& `query2 QueryParamDecoderMatcher[Int] Matcher`(query2) =>""",
       "  errorHandler.resolve(impl.`GET /contacts/organization/{contacts-id}/addresses`(contactsId, query1, query2)(request), (x: Address) => EntityGenerator(200)(x.asJson))"
     )
   )
@@ -214,7 +214,7 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
   lazy val `POST /contacts/organization/{contacts-id}/addresses?query1&query2` = (
     RouteDefinitions.`POST /contacts/organization/{contacts-id}/addresses?query1&query2`,
     List(
-      """case request @ POST -> Root / "contacts" / "organization" / contactsId / "addresses" :? `query1 String Matcher`(query1) +& `query2 Int Matcher`(query2) =>""",
+      """case request @ POST -> Root / "contacts" / "organization" / contactsId / "addresses" :? `query1 QueryParamDecoderMatcher[String] Matcher`(query1) +& `query2 QueryParamDecoderMatcher[Int] Matcher`(query2) =>""",
       "  errorHandler.resolve(request.as[Address].flatMap(impl.`POST /contacts/organization/{contacts-id}/addresses`(contactsId, query1, query2, _)(request)), (x: Address) => EntityGenerator(200)(x.asJson))"
     )
   )
@@ -222,7 +222,7 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
   lazy val `GET /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2` = (
     RouteDefinitions.`GET /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2`,
     List(
-      """case request @ GET -> Root / "contacts" / "organization" / contactsId / "addresses" / addressId :? `list1 List[String] Matcher`(list1) +& `list2 List[Int] Matcher`(list2) =>""",
+      """case request @ GET -> Root / "contacts" / "organization" / contactsId / "addresses" / addressId :? `list1 QueryParamDecoderMatcher[List[String]] Matcher`(list1) +& `list2 QueryParamDecoderMatcher[List[Int]] Matcher`(list2) =>""",
       "  errorHandler.resolve(impl.`GET /contacts/organization/{contacts-id}/addresses/{address-id}`(contactsId, addressId, list1, list2)(request), (x: Address) => EntityGenerator(200)(x.asJson))"
     )
   )
@@ -230,7 +230,7 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
   lazy val `PUT /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2` = (
     RouteDefinitions.`PUT /contacts/organization/{contacts-id}/addresses/{address-id}?list1&list2`,
     List(
-      """case request @ PUT -> Root / "contacts" / "organization" / contactsId / "addresses" / addressId :? `list1 List[String] Matcher`(list1) +& `list2 List[Int] Matcher`(list2) =>""",
+      """case request @ PUT -> Root / "contacts" / "organization" / contactsId / "addresses" / addressId :? `list1 QueryParamDecoderMatcher[List[String]] Matcher`(list1) +& `list2 QueryParamDecoderMatcher[List[Int]] Matcher`(list2) =>""",
       "  errorHandler.resolve(request.as[Address].flatMap(impl.`PUT /contacts/organization/{contacts-id}/addresses/{address-id}`(contactsId, addressId, list1, list2, _)(request)), (x: Address) => EntityGenerator(200)(x.asJson))"
     )
   )
@@ -246,7 +246,7 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
   lazy val `GET /contacts/individual?optional-list1&optional-list2` = (
     RouteDefinitions.`GET /contacts/individual?optional-list1&optional-list2`,
     List(
-      """case request @ GET -> Root / "contacts" / "individual" :? `optional-list1 Option[List[String]] Matcher`(optionalList1) +& `optional-list2 Option[List[Int]] Matcher`(optionalList2) =>""",
+      """case request @ GET -> Root / "contacts" / "individual" :? `optional-list1 OptionalQueryParamDecoderMatcher[List[String]] Matcher`(optionalList1) +& `optional-list2 OptionalQueryParamDecoderMatcher[List[Int]] Matcher`(optionalList2) =>""",
       "  errorHandler.resolve(impl.`GET /contacts/individual`(optionalList1, optionalList2)(request), (x: IndividualContact) => EntityGenerator(200)(x.asJson))"
     )
   )
@@ -254,7 +254,7 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
   lazy val `POST /contacts/individual?optionaoListl1&optional-list2` = (
     RouteDefinitions.`POST /contacts/individual?optionaoListl1&optional-list2`,
     List(
-      """case request @ POST -> Root / "contacts" / "individual" :? `optional-list1 Option[List[String]] Matcher`(optionalList1) +& `optional-list2 Option[List[Int]] Matcher`(optionalList2) =>""",
+      """case request @ POST -> Root / "contacts" / "individual" :? `optional-list1 OptionalQueryParamDecoderMatcher[List[String]] Matcher`(optionalList1) +& `optional-list2 OptionalQueryParamDecoderMatcher[List[Int]] Matcher`(optionalList2) =>""",
       "  errorHandler.resolve(request.as[IndividualContact].flatMap(impl.`POST /contacts/individual`(optionalList1, optionalList2, _)(request)), (x: IndividualContact) => EntityGenerator(200)(x.asJson))"
     )
   )
@@ -262,7 +262,7 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
   lazy val `GET /contacts/individual/funny.,argument/type/?other:@funny&trait` = (
     RouteDefinitions.`GET /contacts/individual/funny.,argument/type/?other:@funny&trait`,
     List(
-      """case request @ GET -> Root / "contacts" / "individual" / funny_Argument / typeParameter :? `other:@funny String Matcher`(other_Funny) +& `trait String Matcher`(traitParameter) =>""",
+      """case request @ GET -> Root / "contacts" / "individual" / funny_Argument / typeParameter :? `other:@funny QueryParamDecoderMatcher[String] Matcher`(other_Funny) +& `trait QueryParamDecoderMatcher[String] Matcher`(traitParameter) =>""",
       "  errorHandler.resolve(impl.`GET /contacts/individual/{funny.,argument}/{type}`(funny_Argument, typeParameter, other_Funny, traitParameter)(request), (x: IndividualContact) => EntityGenerator(200)(x.asJson))"
     )
   )

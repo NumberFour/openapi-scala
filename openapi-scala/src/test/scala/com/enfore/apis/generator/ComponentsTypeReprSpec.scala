@@ -1,5 +1,6 @@
 package com.enfore.apis.generator
 
+import cats.data.NonEmptyList
 import com.enfore.apis.generator.ScalaGenerator.ops._
 import com.enfore.apis.repr.TypeRepr
 import org.scalatest._
@@ -175,7 +176,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         "com.enfore.apis",
         "RefinedType",
         List(
-          PrimitiveSymbol("stringVal", PrimitiveString(Some(List(MinLength(3), MaxLength(3)))))
+          PrimitiveSymbol("stringVal", PrimitiveString(Some(NonEmptyList.of(MinLength(3), MaxLength(3)))))
         ),
         None,
         None
@@ -219,7 +220,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         "com.enfore.apis",
         "RefinedType",
         List(
-          PrimitiveSymbol("intVal", PrimitiveInt(Some(List(Minimum(10), Maximum(15)))))
+          PrimitiveSymbol("intVal", PrimitiveInt(Some(NonEmptyList.of(Minimum(10), Maximum(15)))))
         ),
         None,
         None
@@ -268,7 +269,10 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         "com.enfore.apis",
         "RefinedType",
         List(
-          PrimitiveSymbol("listString", PrimitiveArray(PrimitiveString(None), Some(List(MinLength(3), MaxLength(3)))))
+          PrimitiveSymbol(
+            "listString",
+            PrimitiveArray(PrimitiveString(None), Some(NonEmptyList.of(MinLength(3), MaxLength(3))))
+          )
         ),
         None,
         None
@@ -311,7 +315,10 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         "com.enfore.apis",
         "RefinedType",
         List(
-          PrimitiveSymbol("nested", PrimitiveOption(PrimitiveString(Some(List(MinLength(2), MaxLength(2)))), None))
+          PrimitiveSymbol(
+            "nested",
+            PrimitiveOption(PrimitiveString(Some(NonEmptyList.of(MinLength(2), MaxLength(2)))), None)
+          )
         ),
         None,
         None

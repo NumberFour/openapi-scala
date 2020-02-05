@@ -59,7 +59,7 @@ object RouteDefinitions {
     POST,
     List.empty,
     Map.empty,
-    Some(TypeRepr.PrimitiveString(Some(List()))),
+    Some(TypeRepr.PrimitiveString(None)),
     Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
     Some(false),
     200
