@@ -109,11 +109,14 @@ object ASTTranslationFunctions {
       schemaObjectHasReadOnlyComponent(components)(findRefInComponents(components, body.typeName, context))
   }
 
-  private def routeDefFromSwaggerAST(path: String)(route: OperationObject, requestType: RequestType)(
+  private[ast] def routeDefFromSwaggerAST(path: String)(route: OperationObject, requestType: RequestType)(
       components: Map[String, SchemaObject]
   )(implicit packageName: PackageName): RouteDefinition = {
-    val parameters                          = route.parameters.getOrElse(List.empty[ParameterObject])
+    val parameters: List[ParameterObject]   = route.parameters.getOrElse(List.empty[ParameterObject])
     val pathParameters: List[PathParameter] = extractPathParameters(parameters)
+    pathParameters foreach { param: PathParameter =>
+      assert(path.contains(param.name), s"The path $path does not contain parameter ${param.name}")
+    }
     val queryParams: Map[String, Primitive] = extractQueryParameters(parameters)
     val possibleBodies: List[TypeRepr]      = route.requestBody.toList.flatMap(getBodyEncodings)
     val possibleResponse: Option[(Int, Map[String, Ref])] =

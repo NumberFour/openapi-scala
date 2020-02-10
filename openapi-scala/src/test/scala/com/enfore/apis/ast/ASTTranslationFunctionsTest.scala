@@ -1,6 +1,16 @@
 package com.enfore.apis.ast
 
-import com.enfore.apis.ast.SwaggerAST.{ReferenceObject, SchemaObject, SchemaObjectType, SchemaOrReferenceObject}
+import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
+import com.enfore.apis.ast.SwaggerAST.{
+  OperationObject,
+  ParameterLocation,
+  ParameterObject,
+  ReferenceObject,
+  RequestType,
+  SchemaObject,
+  SchemaObjectType,
+  SchemaOrReferenceObject
+}
 import org.scalatest.FunSuite
 
 class ASTTranslationFunctionsTest extends FunSuite {
@@ -12,6 +22,35 @@ class ASTTranslationFunctionsTest extends FunSuite {
     properties = Some(map)
   )
 
+  test("routeDefFromSwaggerAST - fails upon bad parameter patterns") {
+    assertThrows[AssertionError](
+      ASTTranslationFunctions.routeDefFromSwaggerAST("/invoices/{invoice-id}")(
+        OperationObject(
+          summary = None,
+          description = None,
+          operationId = None,
+          requestBody = None,
+          responses = Map.empty,
+          parameters = Some(
+            List(
+              ParameterObject(
+                name = "invoice_id",
+                in = ParameterLocation.path,
+                schema = None,
+                description = None,
+                required = Some(true),
+                deprecated = None,
+                allowEmptyValue = None,
+                content = None
+              )
+            )
+          )
+        ),
+        RequestType.POST
+      )(Map.empty)(PackageName("test"))
+    )
+  }
+
   test("testSplitReadOnlyComponents - base") {
     assert(
       ASTTranslationFunctions.splitReadOnlyComponents(
@@ -21,7 +60,7 @@ class ASTTranslationFunctionsTest extends FunSuite {
       ) ===
         Map(
           "CustomerRole"        -> objectWithProperties(Map("id" -> readOnlyString)),
-          "CustomerRoleRequest" -> objectWithProperties(Map.empty),
+          "CustomerRoleRequest" -> objectWithProperties(Map.empty)
         )
     )
   }
