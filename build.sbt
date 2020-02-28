@@ -29,10 +29,9 @@ lazy val scalaMacros: Seq[Def.Setting[_]] = Seq(
 
 lazy val scalaCompat = "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.2"
 lazy val sharedDependencies = Seq(
-  "com.github.mpilquist" %% "simulacrum"       % "0.19.0",
-  "com.beachape"         %% "enumeratum"       % "1.5.13",
-  "com.beachape"         %% "enumeratum-circe" % "1.5.22",
-  "io.circe"             %% "circe-refined"    % Circe.latestDependencies.head.revision,
+  "com.beachape" %% "enumeratum"       % "1.5.13",
+  "com.beachape" %% "enumeratum-circe" % "1.5.22",
+  "io.circe"     %% "circe-refined"    % Circe.latestDependencies.head.revision,
   scalaCompat
 ) ++ Circe.latestDependencies ++ ScalaTest.latestDependencies
 

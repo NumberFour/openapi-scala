@@ -3,14 +3,14 @@ package com.enfore.apis.generator
 import cats.data.NonEmptyList
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
 import com.enfore.apis.repr.TypeRepr._
-import simulacrum._
 import cats.implicits._
 
 import scala.annotation.tailrec
 
-@typeclass trait ScalaGenerator[T] {
+trait ScalaGenerator[T] {
   def generateScala(in: T): String
 }
+
 object MiniTypeHelpers {
 
   private def resolveRef(ref: Ref)(implicit p: PackageName) = s"${p.name}.${ref.typeName}"
@@ -271,7 +271,7 @@ object ScalaGenerator {
       generateForPrimitiveUnion(packageName, typeName, unionMembers, discriminator, summary, description)
   }
 
-  implicit val codeGenerator: ScalaGenerator[Symbol] = {
+  val codeGenerator: ScalaGenerator[Symbol] = {
     case sym: PrimitiveSymbol => primitiveSymbolGenerator(sym)
     case sym: NewTypeSymbol   => newTypeSymbolGenerator(sym)
     case sym: RefSymbol       => refSymbolGenerator(sym)

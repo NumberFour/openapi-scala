@@ -3,8 +3,7 @@ package com.enfore.apis
 import com.enfore.apis.ast.ASTTranslationFunctions
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
 import com.enfore.apis.ast.SwaggerAST._
-import com.enfore.apis.generator.{Http4sImplementation, RouteImplementation}
-import com.enfore.apis.generator.ScalaGenerator.ops._
+import com.enfore.apis.generator.{Http4sImplementation, RouteImplementation, ScalaGenerator}
 import io.circe
 import io.circe._
 import cats.syntax.functor._
@@ -41,7 +40,7 @@ object Main {
       componentsMap = ASTTranslationFunctions.readComponentsToInterop(representation)(pn)
       routesMap     = ASTTranslationFunctions.readRoutesToInterop(representation)(pn)
     } yield {
-      componentsMap.mapValues(_.generateScala) ++
+      componentsMap.mapValues(ScalaGenerator.codeGenerator.generateScala) ++
         routeImplementations.flatMap(_.generateScala(routesMap, pn))
     }
   }
@@ -52,7 +51,10 @@ object Main {
       componentsMap = ASTTranslationFunctions.readComponentsToInterop(repr)(pn)
       routesMap     = ASTTranslationFunctions.readRoutesToInterop(repr)(pn)
     } yield {
-      componentsMap.mapValues(_.generateScala) ++ Http4sImplementation.generateScala(routesMap, pn)
+      componentsMap.mapValues(ScalaGenerator.codeGenerator.generateScala) ++ Http4sImplementation.generateScala(
+        routesMap,
+        pn
+      )
     }
   }
 }

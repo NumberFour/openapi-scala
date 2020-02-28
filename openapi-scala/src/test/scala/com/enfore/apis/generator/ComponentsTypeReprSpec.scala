@@ -1,7 +1,6 @@
 package com.enfore.apis.generator
 
 import cats.data.NonEmptyList
-import com.enfore.apis.generator.ScalaGenerator.ops._
 import com.enfore.apis.repr.TypeRepr
 import org.scalatest._
 
@@ -41,7 +40,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         | implicit val circeEncoder: Encoder[Person] = deriveEncoder[Person](renaming.snakeCase, None)
         |}
       """.stripMargin.trim.parse[Source]
-    val tree: Parsed[Source] = person.generateScala.parse[Source]
+    val tree: Parsed[Source] = ScalaGenerator.codeGenerator.generateScala(person).parse[Source]
     tree.get.structure shouldBe expected.get.structure
   }
 
@@ -70,7 +69,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         | implicit val circeEncoder: Encoder[Person] = deriveEncoder[Person](renaming.snakeCase, None)
         |}
       """.stripMargin.trim.parse[Source]
-    val tree: Parsed[Source] = person.generateScala.parse[Source]
+    val tree: Parsed[Source] = ScalaGenerator.codeGenerator.generateScala(person).parse[Source]
     tree.get.structure shouldBe expected.get.structure
   }
 
@@ -102,7 +101,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         | implicit val circeEncoder: Encoder[Person] = deriveEncoder[Person](renaming.snakeCase, None)
         |}
       """.stripMargin.trim.parse[Source]
-    val tree: Parsed[Source] = person.generateScala.parse[Source]
+    val tree: Parsed[Source] = ScalaGenerator.codeGenerator.generateScala(person).parse[Source]
     tree.get.structure shouldBe expected.get.structure
   }
 
@@ -125,7 +124,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         | case object Dog extends Animal
         |}
       """.stripMargin.trim.parse[Source]
-    val tree: Parsed[Source] = animal.generateScala.parse[Source]
+    val tree: Parsed[Source] = ScalaGenerator.codeGenerator.generateScala(animal).parse[Source]
     tree.get.structure shouldBe expected.get.structure
   }
 
@@ -165,7 +164,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         |   implicit val circeEncoder: Encoder[ParamedType] = deriveEncoder[ParamedType](renaming.snakeCase, None)
         | }
       """.stripMargin.trim.parse[Source]
-    val tree: Parsed[Source] = paramedType.generateScala.parse[Source]
+    val tree: Parsed[Source] = ScalaGenerator.codeGenerator.generateScala(paramedType).parse[Source]
     tree.get.structure shouldBe expected.get.structure
   }
 
@@ -209,7 +208,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         | type `stringValRefined` = String Refined AllOf[MinSize[W.`3`.T] :: MaxSize[W.`3`.T] :: HNil]
         |}
       """.stripMargin.trim.parse[Source]
-    val tree = refinedType.generateScala.parse[Source]
+    val tree: Parsed[Source] = ScalaGenerator.codeGenerator.generateScala(refinedType).parse[Source]
     tree.get.structure shouldBe expected.get.structure
   }
 
@@ -258,7 +257,8 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
                      |
                      |}""".stripMargin
 
-    val tree = refinedType.generateScala.split("\n").map(_.trim).filter(_.isEmpty).mkString("\n")
+    val tree =
+      ScalaGenerator.codeGenerator.generateScala(refinedType).split("\n").map(_.trim).filter(_.isEmpty).mkString("\n")
     tree shouldBe expected.split("\n").map(_.trim).filter(_.isEmpty).mkString("\n")
   }
 
@@ -304,7 +304,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         | type `listStringRefined` = List[String] Refined AllOf[MinSize[W.`3`.T] :: MaxSize[W.`3`.T] :: HNil]
         |}
       """.stripMargin.trim.parse[Source]
-    val tree = refinedType.generateScala.parse[Source]
+    val tree: Parsed[Source] = ScalaGenerator.codeGenerator.generateScala(refinedType).parse[Source]
     tree.get.structure shouldBe expected.get.structure
   }
 
@@ -357,7 +357,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         | }
         |
       """.stripMargin.trim.parse[Source]
-    val tree = refinedType.generateScala.parse[Source]
+    val tree: Parsed[Source] = ScalaGenerator.codeGenerator.generateScala(refinedType).parse[Source]
     tree.get.structure shouldBe expected.get.structure
   }
 
@@ -412,7 +412,7 @@ class ComponentsTypeReprSpec extends FlatSpec with Matchers {
         |}
         |""".stripMargin.trim.parse[Source]
 
-    val tree = unionTypeSymbol.generateScala.parse[Source]
+    val tree: Parsed[Source] = ScalaGenerator.codeGenerator.generateScala(unionTypeSymbol).parse[Source]
     tree.get.structure shouldBe expected.get.structure
   }
 
