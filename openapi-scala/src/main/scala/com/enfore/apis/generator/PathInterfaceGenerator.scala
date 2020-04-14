@@ -35,9 +35,9 @@ object PathInterfaceGenerator {
       }
       .mkString("\n")
 
-  private def queryListMaker(queries: Map[String, Primitive]): List[String] =
+  private def queryListMaker(queries: Map[String, TypeRepr]): List[String] =
     queries.map {
-      case (name: String, primType: Primitive) =>
+      case (name: String, primType: TypeRepr) =>
         primType match {
           case PrimitiveInt(_)    => s""""$name" -> "int""""
           case PrimitiveNumber(_) => s""""$name" -> "double""""
@@ -46,7 +46,7 @@ object PathInterfaceGenerator {
         }
     }.toList
 
-  private def paramsMaker(queries: Map[String, Primitive], pathParams: List[String], reqType: Option[TypeRepr])(
+  private def paramsMaker(queries: Map[String, TypeRepr], pathParams: List[String], reqType: Option[TypeRepr])(
       implicit p: PackageName
   ): String = {
     val querySyntax: Option[String] = NonEmptyList
@@ -65,7 +65,7 @@ object PathInterfaceGenerator {
   }
 
   private def typelessParamsMaker(
-      queries: Map[String, Primitive],
+      queries: Map[String, TypeRepr],
       pathParams: List[String],
       request: Boolean = false
   ): String =
@@ -104,7 +104,7 @@ object PathInterfaceGenerator {
       path: String,
       reqType: ReqWithContentType,
       pathParams: List[PathParameter],
-      queries: Map[String, Primitive],
+      queries: Map[String, TypeRepr],
       request: Option[TypeRepr],
       response: Option[Map[String, Ref]]
   )(implicit p: PackageName): String = {
@@ -143,7 +143,7 @@ object PathInterfaceGenerator {
   private def getRequestGenerator(
       path: String,
       pathParams: List[PathParameter],
-      queries: Map[String, Primitive],
+      queries: Map[String, TypeRepr],
       response: Option[Map[String, Ref]]
   )(implicit p: PackageName): String = {
     val cleanEncodingReferences: Option[Map[String, Ref]] = response.map(_.map {

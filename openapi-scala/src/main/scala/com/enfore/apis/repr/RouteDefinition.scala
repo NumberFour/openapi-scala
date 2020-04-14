@@ -1,7 +1,7 @@
 package com.enfore.apis.repr
 
 import cats.implicits._
-import com.enfore.apis.repr.TypeRepr.{Primitive, Ref}
+import com.enfore.apis.repr.TypeRepr.Ref
 
 sealed trait RouteDefinition {
   val path: String
@@ -34,7 +34,7 @@ final case class GetRequest(
     description: Option[String],
     operationId: Option[String],
     pathParams: List[PathParameter],
-    queries: Map[String, Primitive],
+    queries: Map[String, TypeRepr],
     response: Option[Map[String, Ref]],
     successStatusCode: Int
 ) extends RouteDefinition
@@ -46,7 +46,7 @@ final case class RequestWithPayload(
     operationId: Option[String],
     `type`: ReqWithContentType,
     pathParams: List[PathParameter],
-    queries: Map[String, Primitive],
+    queries: Map[String, TypeRepr],
     request: Option[TypeRepr],
     response: Option[Map[String, Ref]],
     hasReadOnlyType: Option[Boolean],
@@ -71,6 +71,7 @@ final case class DeleteRequest(
     description: Option[String],
     operationId: Option[String],
     pathParams: List[PathParameter],
+    // TODO: This should probably also have queries
     response: Option[Map[String, Ref]],
     successStatusCode: Int
 ) extends RouteDefinition

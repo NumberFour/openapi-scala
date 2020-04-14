@@ -107,7 +107,7 @@ object ImplementationGenerator {
   }
 
   private def getQueryParams(route: RouteDefinition): List[Argument] = {
-    def extractFromQueries(queries: Map[String, Primitive]): List[Argument] =
+    def extractFromQueries(queries: Map[String, TypeRepr]): List[Argument] =
       queries
         .mapValues(SymbolAnnotationMaker.primitiveTypeSigWithRefinements)
         .toList

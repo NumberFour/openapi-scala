@@ -30,7 +30,7 @@ object SymbolAnnotationMaker {
     * @param in Primitive type
     * @return Type signature as a string (including refinements)
     */
-  def primitiveTypeSigWithRefinements(in: Primitive): String = in match {
+  def primitiveTypeSigWithRefinements(in: TypeRepr): String = in match {
     case PrimitiveString(refinements) =>
       val base = "String"
       refinements

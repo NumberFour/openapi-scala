@@ -61,15 +61,15 @@ object ASTTranslationFunctions {
 
   private def extractQueryParameters(
       parameters: List[SwaggerAST.ParameterObject]
-  )(implicit packageName: PackageName): Map[String, Primitive] =
+  )(implicit packageName: PackageName): Map[String, TypeRepr] =
     parameters
       .filter(_.in == ParameterLocation.query)
       .map(
         (y: ParameterObject) =>
           y.name -> {
+            val isRequired: Boolean = y.required.getOrElse(false)
             y.schema.get match {
               case a: SchemaObject =>
-                val isRequired: Boolean = y.required.getOrElse(false)
                 val refinements: List[RefinedTags] = List(
                   a.minimum.map(Minimum),
                   a.maximum.map(Maximum),
@@ -81,12 +81,17 @@ object ASTTranslationFunctions {
                     a.`type`.get
                   ).get
                 if (!isRequired) {
-                  PrimitiveOption(value, a.default)
+                  PrimitiveOption(dataType = value, defaultValue = a.default)
                 } else {
                   value
                 }
-              case ReferenceObject(_) =>
-                throw new AssertionError("ReferenceObjects in query parameters are not supported.")
+              case referenceObject: ReferenceObject =>
+                val value = loadSingleProperty(referenceObject).get
+                if (!isRequired) {
+                  PrimitiveOption(dataType = value, defaultValue = None)
+                } else {
+                  value
+                }
             }
           }
       )
@@ -117,8 +122,8 @@ object ASTTranslationFunctions {
     pathParameters foreach { param: PathParameter =>
       assert(path.contains(param.name), s"The path $path does not contain parameter ${param.name}")
     }
-    val queryParams: Map[String, Primitive] = extractQueryParameters(parameters)
-    val possibleBodies: List[TypeRepr]      = route.requestBody.toList.flatMap(getBodyEncodings)
+    val queryParams: Map[String, TypeRepr] = extractQueryParameters(parameters)
+    val possibleBodies: List[TypeRepr]     = route.requestBody.toList.flatMap(getBodyEncodings)
     val possibleResponse: Option[(Int, Map[String, Ref])] =
       getNameContentEncoding(route.responses, httpStatus => httpStatus >= 200 && httpStatus < 300)
     assert(possibleResponse.nonEmpty, "There has to be one successful (>=200 and <300) return code")
@@ -216,13 +221,13 @@ object ASTTranslationFunctions {
     case SchemaObjectType.number    => Some(PrimitiveNumber(refinements))
     case SchemaObjectType.`integer` => Some(PrimitiveInt(refinements))
     case SchemaObjectType.`array` =>
-      val someType: Option[TypeRepr] = items.flatMap {
+      val loadedType = items.flatMap {
         case so: SchemaObject =>
           so.`type`.flatMap(sot => buildPrimitiveFromSchemaObjectType(refinements)(packageName)(sot))
         case ro: ReferenceObject =>
           loadSingleProperty(ro)
-      }
-      Some(PrimitiveArray(someType.get, None))
+      } getOrElse (throw new Exception("Unexpected behavior in buildPrimitiveFromSchemaObjectType"))
+      Some(PrimitiveArray(dataType = loadedType, refinements = None))
     case x =>
       throw new AssertionError(
         s"The case $x does not seem to be supported by the generator: buildPrimitiveFromSchemaObjectType"

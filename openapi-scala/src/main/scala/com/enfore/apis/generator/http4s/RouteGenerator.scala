@@ -46,7 +46,7 @@ object RouteGenerator {
     * @return A list of strings containing each line of Scala code to be injected
     */
   def buildRefinementDecoders(in: List[RouteDefinition], indentationLevel: Int): List[String] =
-    in.flatMap(getListQueryParams(_).values.toList)
+    in.flatMap(getQueryParams(_).values.toList)
       .flatMap {
         case PrimitiveOption(prim: Primitive, _) =>
           defineOptionalRefinementOnPrimitive(prim).map(
@@ -79,7 +79,7 @@ object RouteGenerator {
 
       val refDecoders: List[String] =
         routes
-          .flatMap(getEnumListQueryParameter)
+          .flatMap(getEnumQueryParameter)
           .flatten
           .flatMap(typeName => enumDecoder(typeName, indentationLevel))
 
@@ -130,7 +130,7 @@ object RouteGenerator {
     * Build decoder matchers corresponding to the contained query parameter types
     */
   def buildMatchers(routes: List[RouteDefinition], indentationLevel: Int): List[String] = {
-    val queryParameters = routes.map(getListQueryParams)
+    val queryParameters = routes.map(getQueryParams)
 
     queryParameters
       .flatMap(_.toList)
@@ -190,30 +190,35 @@ object RouteGenerator {
     s"""errorHandler.resolve($requestDecoding${flatmapPutOrPost(s"impl.$functionName$arguments")}, $status)"""
   }
 
-  private val anyListQueryParameter: RouteDefinition => Boolean = {
-    getListQueryParams(_).values.toList.exists(listParameterType)
-  }
-
-  private val getEnumListQueryParameter: RouteDefinition => List[Option[String]] = {
-    getListQueryParams(_).values.toList.map(enumListParameterType)
-  }
-
-  private val getListQueryParams: RouteDefinition =/> Map[String, TypeRepr.Primitive] = {
+  private val getQueryParams: RouteDefinition =/> Map[String, TypeRepr] = {
     case GetRequest(_, _, _, _, _, queries, _, _)                  => queries
     case RequestWithPayload(_, _, _, _, _, _, queries, _, _, _, _) => queries
-    case _: DeleteRequest                                          => Map.empty
+    case _: DeleteRequest => {
+      println("Warning: We are ignoring query parameters of DELETE requests")
+      Map.empty
+    }
   }
 
-  private val enumListParameterType: TypeRepr.Primitive =/> Option[String] = {
+  private val isListParameterType: TypeRepr =/> Boolean = {
+    case _: PrimitiveArray                     => true
+    case PrimitiveOption(_: PrimitiveArray, _) => true
+    case _: Any                                => false
+  }
+
+  private val getEnumParameterType: TypeRepr =/> Option[String] = {
+    case ref: Ref                                        => Some(ref.path + "." + ref.typeName)
     case PrimitiveArray(ref: Ref, _)                     => Some(ref.path + "." + ref.typeName)
+    case PrimitiveOption(ref: Ref, _)                    => Some(ref.path + "." + ref.typeName)
     case PrimitiveOption(PrimitiveArray(ref: Ref, _), _) => Some(ref.path + "." + ref.typeName)
     case _: Any                                          => None
   }
 
-  private val listParameterType: TypeRepr.Primitive =/> Boolean = {
-    case _: PrimitiveArray                     => true
-    case PrimitiveOption(_: PrimitiveArray, _) => true
-    case _: Any                                => false
+  private val anyListQueryParameter: RouteDefinition => Boolean = {
+    getQueryParams(_).values.toList.exists(isListParameterType)
+  }
+
+  private val getEnumQueryParameter: RouteDefinition => List[Option[String]] = {
+    getQueryParams(_).values.toList.map(getEnumParameterType)
   }
 
   /**
@@ -227,7 +232,7 @@ object RouteGenerator {
     *   )
     * }}}
     */
-  private val toMatcherTuple: (String, Primitive) =/> (String, String) = {
+  private val toMatcherTuple: (String, TypeRepr) =/> (String, String) = {
     case (paramName, paramType) =>
       (
         s"$paramName ${queryParameterDecoderMatcher(paramType).replace('`', '_')} Matcher",
@@ -238,7 +243,7 @@ object RouteGenerator {
   def defineOptionalRefinementOnPrimitive(dataType: Primitive): Option[String] =
     ScalaGenerator.primitiveRefinementExtractor(dataType).map(SymbolAnnotationMaker.primitiveTypeSigWithRefinements)
 
-  private def queryParameterDecoderMatcher(dataType: Primitive): String = dataType match {
+  private def queryParameterDecoderMatcher(dataType: TypeRepr): String = dataType match {
     case PrimitiveOption(dataType, _) =>
       s"OptionalQueryParamDecoderMatcher[${SymbolAnnotationMaker.onlyResolverTopPrimitiveRefinements(dataType)}]"
     case other => s"QueryParamDecoderMatcher[${SymbolAnnotationMaker.onlyResolverTopPrimitiveRefinements(other)}]"
@@ -290,7 +295,7 @@ object RouteGenerator {
       .mkString(" / ")
 
   private def getQueryStringParameters(route: RouteDefinition): String = {
-    val queries = getListQueryParams(route).toList
+    val queries = getQueryParams(route).toList
       .map { case tuple @ (paramName, _) => paramName -> toMatcherTuple(tuple)._1 }
       .map { case (paramName, matcherName) => s"""`$matcherName`(${sanitiseScalaName(paramName)})""" }
 

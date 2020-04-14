@@ -40,7 +40,8 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
     `GET /contacts/individual?optional-list1&optional-list2`,
     `POST /contacts/individual?optionaoListl1&optional-list2`,
     `GET /contacts/individual/funny.,argument/type/?other:@funny&trait`,
-    `POST /contacts/single`
+    `POST /contacts/single`,
+    `GET /contacts/individual?queryEnum`
   )
 
   lazy val `GET /contacts/individual` = (
@@ -274,4 +275,13 @@ class RouteGeneratorSpec extends FreeSpec with Matchers {
       """  errorHandler.resolve(request.as[String].flatMap(impl.`POST /contacts/single`(_)(request)), (x: IndividualContact) => EntityGenerator(200)(x.asJson))"""
     )
   )
+
+  lazy val `GET /contacts/individual?queryEnum` = (
+    RouteDefinitions.`GET /contacts/individual?queryEnum`,
+    List(
+      """case request @ GET -> Root / "contacts" / "individual" :? `queryEnum QueryParamDecoderMatcher[#/components/schemas/IndividualContact.IndividualContact] Matcher`(queryEnum) =>""",
+      """  errorHandler.resolve(impl.`GET /contacts/individual`(queryEnum)(request), (x: IndividualContact) => EntityGenerator(200)(x.asJson))"""
+    )
+  )
+
 }
