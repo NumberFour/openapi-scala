@@ -129,12 +129,9 @@ object Http4sGenerator {
 
     val refinementDecoders: List[String] = buildRefinementDecoders(routeDefinitions, indentationLevel)
     val listDecoder: List[String]        = RouteGenerator.listDecoder(routeDefinitions, indentationLevel)
+    val enumDecoder: List[String]        = RouteGenerator.enumDecoders(routeDefinitions, indentationLevel)
     val matchers: List[String]           = RouteGenerator.buildMatchers(routeDefinitions, indentationLevel)
-
-    val output = (listDecoder, matchers) match {
-      case (Nil, m) => (refinementDecoders :+ "\n") ++ m
-      case (l, m)   => ((l :+ "\n") ++ refinementDecoders) ++ m
-    }
+    val output                           = listDecoder ++ enumDecoder ++ (refinementDecoders :+ "\n") ++ matchers
     output.distinct
   }
 

@@ -65,7 +65,7 @@ object RouteGenerator {
     * Array query string is assumed to be split with comma, i.e. ?q=a,b,c,d
     */
   def listDecoder(routes: List[RouteDefinition], indentationLevel: Int): List[String] = {
-    val decoder =
+    val decoder: List[String] =
       s"""implicit def listDecoder[T](implicit decoder: QueryParamDecoder[T]): QueryParamDecoder[List[T]] =
          |      QueryParamDecoder[String]
          |          .map(
@@ -76,20 +76,22 @@ object RouteGenerator {
         .toList
 
     if (routes.exists(anyListQueryParameter)) {
+      decoder.map(`\t` * indentationLevel + _)
+    } else {
+      Nil
+    }
+  }
 
-      val refDecoders: List[String] =
-        routes
-          .flatMap(getEnumQueryParameter)
-          .flatten
-          .flatMap(typeName => enumDecoder(typeName, indentationLevel))
-
-      if (refDecoders.nonEmpty) {
-        println("Generating http4s decoders for request references, assuming they all are enums")
-        val importLine = List("import org.http4s.QueryParamDecoder.fromUnsafeCast\n")
-        (importLine ++ refDecoders ++ decoder).map(`\t` * indentationLevel + _)
-      } else {
-        decoder.map(`\t` * indentationLevel + _)
-      }
+  def enumDecoders(routes: List[RouteDefinition], indentationLevel: Int): List[String] = {
+    val refDecoders: List[String] =
+      routes
+        .flatMap(getEnumQueryParameter)
+        .flatten
+        .flatMap(typeName => enumDecoder(typeName, indentationLevel))
+    if (refDecoders.nonEmpty) {
+      println("Generating http4s decoders for request references, assuming they all are enums")
+      val importLine = List("import org.http4s.QueryParamDecoder.fromUnsafeCast\n")
+      (importLine ++ refDecoders).map(`\t` * indentationLevel + _)
     } else {
       Nil
     }
@@ -103,7 +105,7 @@ object RouteGenerator {
     *
     * @return generated decoder string lines
     */
-  def enumDecoder(enumFullTypeName: String, indentationLevel: Int): List[String] = {
+  private def enumDecoder(enumFullTypeName: String, indentationLevel: Int): List[String] = {
     val typeNameLowerCase = enumFullTypeName.toLowerCase
       .split("\\.")
       .last
