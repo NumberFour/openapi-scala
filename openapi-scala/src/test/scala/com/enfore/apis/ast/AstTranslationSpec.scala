@@ -1,10 +1,10 @@
 package com.enfore.apis.ast
 
 import cats.data.NonEmptyList
+import cats.syntax.functor._
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
 import com.enfore.apis.ast.SwaggerAST._
 import com.enfore.apis.repr.ReqWithContentType.{PATCH, POST}
-import com.enfore.apis.repr.{PathItemAggregation, RequestWithPayload, TypeRepr}
 import com.enfore.apis.repr.TypeRepr.{
   Maximum,
   Minimum,
@@ -21,15 +21,16 @@ import com.enfore.apis.repr.TypeRepr.{
   PrimitiveUnion,
   Ref
 }
-import org.scalatest._
+import com.enfore.apis.repr.{PathItemAggregation, RequestWithPayload, TypeRepr}
 import io.circe
 import io.circe._
-import cats.syntax.functor._
 import io.circe.generic.auto._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should
 
 import scala.io.Source
 
-class AstTranslationSpec extends FlatSpec with Matchers {
+class AstTranslationSpec extends AnyFlatSpec with should.Matchers {
 
   implicit val decoder: Decoder[SchemaOrReferenceObject] =
     List[Decoder[SchemaOrReferenceObject]](

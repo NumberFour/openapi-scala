@@ -1,8 +1,8 @@
 package com.enfore.apis.generator
 
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class UtilitiesTest extends FunSuite {
+class UtilitiesTest extends AnyFunSuite {
   test("cleanScalaSymbolEnum") {
     assert(Utilities.cleanScalaSymbolEnum("DE_STANDARD_VAT_2007") === "DE_STANDARD_VAT_2007")
   }

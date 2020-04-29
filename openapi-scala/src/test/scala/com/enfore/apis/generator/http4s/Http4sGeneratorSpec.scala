@@ -2,12 +2,14 @@ package com.enfore.apis.generator.http4s
 
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
 import com.enfore.apis.repr.{GetRequest, PathItemAggregation, TypeRepr}
-import org.scalatest.{Assertion, FreeSpec, Matchers}
+import org.scalatest.Assertion
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should
 
 import scala.collection.immutable.ListMap
 import scala.meta._
 
-class Http4sGeneratorSpec extends FreeSpec with Matchers {
+class Http4sGeneratorSpec extends AnyFreeSpec with should.Matchers {
   "The Http4sGenerator generates sources which directly use and utilise http4s as a server library" - {
     "It generates a file containing the routes" in routesTest
     "It generates a file containing a trait representing the implementation used by the routes" in implementationTest

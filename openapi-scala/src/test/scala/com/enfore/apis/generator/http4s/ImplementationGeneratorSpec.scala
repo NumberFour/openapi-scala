@@ -1,9 +1,10 @@
 package com.enfore.apis.generator.http4s
 
-import org.scalatest.{FreeSpec, Matchers}
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.should
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
-class ImplementationGeneratorSpec extends FreeSpec with Matchers {
+class ImplementationGeneratorSpec extends AnyFreeSpec with should.Matchers {
   "http4s.ImplementationGenerator generates trait methods for the implementation " +
     "based on http4s according to provided route definiton" in tableTest
 

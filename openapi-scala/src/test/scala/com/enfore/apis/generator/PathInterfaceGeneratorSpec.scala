@@ -3,11 +3,12 @@ package com.enfore.apis.generator
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
 import com.enfore.apis.repr.TypeRepr.{Ref => TypeReprRef}
 import com.enfore.apis.repr.{GetRequest, PathParameter, ReqWithContentType, RequestWithPayload}
-import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should
 
 import scala.meta._
 
-class PathInterfaceGeneratorSpec extends FlatSpec with Matchers {
+class PathInterfaceGeneratorSpec extends AnyFlatSpec with should.Matchers {
 
   implicit val packageName: PackageName = PackageName("com.enfore.apis")
 

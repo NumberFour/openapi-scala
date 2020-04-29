@@ -1,9 +1,10 @@
 package com.enfore.apis
 
 import com.enfore.apis.generator.{GenericImplementation, Http4sImplementation}
-import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should
 
-class MainSpec extends FlatSpec with Matchers {
+class MainSpec extends AnyFlatSpec with should.Matchers {
 
   it should "be able to generate scala for all yamls" in {
     val sources = List("catalog", "Contacts-API", "ERP-API", "problem", "purchasing", "registry").map(_ + ".json")

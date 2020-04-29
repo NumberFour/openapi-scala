@@ -2,9 +2,10 @@ package com.enfore.apis.generator
 
 import cats.data.NonEmptyList
 import com.enfore.apis.repr.TypeRepr.{MaxLength, MinLength, PrimitiveString}
-import org.scalatest._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should
 
-class SymbolAnnotationMakerSpec extends FlatSpec with Matchers {
+class SymbolAnnotationMakerSpec extends AnyFlatSpec with should.Matchers {
 
   "dataRefinementMatcher" should "generate proper type signatures for refined primitives" in {
     val op: String =
