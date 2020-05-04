@@ -1,11 +1,15 @@
 package com.enfore.apis
 
-import sbt.{Compile, Def, _}
+import sbt._
 import Keys._
 import java.io.File
 import java.nio.file._
 
+import org.scalafmt.interfaces.Scalafmt
+
 object OpenAPIPlugin extends AutoPlugin {
+
+  val scalafmt = Scalafmt.create(this.getClass.getClassLoader)
 
   def compileAll(
       extraSourcesJarName: Option[File],
@@ -39,7 +43,12 @@ object OpenAPIPlugin extends AutoPlugin {
             case (name: String, content: String) =>
               val file = generatedCodeOutputDir / s"$name.scala"
               Files.createDirectories(file.getParentFile.toPath)
-              CombineUtils.writeFile(file, content.replaceAll("\t", "  "))
+              val writable = scalafmt.format(
+                java.nio.file.Path.of(ClassLoader.getSystemClassLoader.getResource("scalafmt.conf").toURI),
+                file.toPath,
+                content
+              )
+              CombineUtils.writeFile(file, writable)
               file
           }
           .toSeq

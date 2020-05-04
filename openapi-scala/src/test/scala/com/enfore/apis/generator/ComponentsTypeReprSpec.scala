@@ -3,11 +3,11 @@ package com.enfore.apis.generator
 import cats.data.NonEmptyList
 import com.enfore.apis.repr.TypeRepr
 import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should
+import org.scalatest.matchers.should.Matchers
 
 import scala.meta._
 
-class ComponentsTypeReprSpec extends AnyFlatSpec with should.Matchers {
+class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
   import TypeRepr._
 
   "ComponentsObject TypeRepr Generator" should "be able to generate a basic case class" in {

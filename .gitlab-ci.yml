@@ -22,6 +22,7 @@ build and test and publish:
     - internal
     - medium
   script:
+    - export GITHUB_TOKEN=foo # Until we move to Github, this is required for making the application work
     - sbt coverage testOnly coverageReport coverageAggregate
     - if [ ! -z $CI_COMMIT_TAG ]; then export VERSION=$CI_COMMIT_TAG ; fi
     - sed "s/unstable-SNAPSHOT/${VERSION}/" build.sbt > build.sbt.2

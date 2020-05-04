@@ -1,7 +1,16 @@
 package com.enfore.apis.ast
 
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
-import com.enfore.apis.ast.SwaggerAST._
+import com.enfore.apis.ast.SwaggerAST.{
+  OperationObject,
+  ParameterLocation,
+  ParameterObject,
+  ReferenceObject,
+  RequestType,
+  SchemaObject,
+  SchemaObjectType,
+  SchemaOrReferenceObject
+}
 import org.scalatest.funsuite.AnyFunSuite
 
 class ASTTranslationFunctionsTest extends AnyFunSuite {

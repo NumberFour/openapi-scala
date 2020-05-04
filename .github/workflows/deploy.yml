@@ -1,0 +1,43 @@
+name: Publish Library & Plugin
+
+on:
+  push:
+    tags:
+      - '*'
+    branches-ignore:
+      - '*'
+
+jobs:
+  build-test-and-publish:
+
+    runs-on: ubuntu-latest
+
+    env:
+      PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE}}
+      SECRING: ${{ secrets.SECRING}}
+      PUBRING: ${{ secrets.PUBRING}}
+      SONATYPE_SBT: ${{ secrets.SONATYPE_SBT}}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Setup Keyring
+        run: mkdir -p ~/.sbt/gpg && echo ${SECRING} > ~/.sbt/gpg/secring.asc && echo ${PUBRING} > ~/.sbt/gpg/pubring.asc
+      - name: Import Keyring
+        run: gpg --import ~/.sbt/gpg/secring.asc
+      - name: Setup Sonatype Credentials
+        run: mkdir -p ~/.sbt/1.0 && echo ${SONATYPE_SBT} > ~/.sbt/1.0/sonatype.sbt
+      - name: Setup Version
+        run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF:10}
+      - name: Update Version
+        run: sed "s/unstable-SNAPSHOT/${RELEASE_VERSION}/" build.sbt > build.sbt.2
+      - name: Replace Build File
+        run: mv build.sbt.2 build.sbt
+      - name: Run tests
+        run: sbt test
+      - name: Publish
+        run: sbt publishSigned
+

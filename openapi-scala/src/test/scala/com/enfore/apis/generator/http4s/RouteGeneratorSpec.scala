@@ -1,10 +1,10 @@
 package com.enfore.apis.generator.http4s
 
 import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.should
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
-class RouteGeneratorSpec extends AnyFreeSpec with should.Matchers {
+class RouteGeneratorSpec extends AnyFreeSpec with Matchers {
   "http4s.RouteGenerator generates routes based on http4s according to provided route definiton" in tableTest
 
   def tableTest = forEvery(table) { (pathItem, sourceStrings) =>

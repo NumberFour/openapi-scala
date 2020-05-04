@@ -1,15 +1,26 @@
 package com.enfore.apis.ast
 
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
+import com.enfore.apis.ast.SwaggerAST.{
+  ComponentsObject,
+  CoreASTRepr,
+  MediaTypeObject,
+  OperationObject,
+  ParameterObject,
+  ReferenceObject,
+  RequestBodyObject,
+  ResponseObject,
+  SchemaObject,
+  SchemaObjectType
+}
 import com.enfore.apis.ast.SwaggerAST.ParameterLocation.path
-import com.enfore.apis.ast.SwaggerAST._
 import com.enfore.apis.repr.ReqWithContentType.PUT
 import com.enfore.apis.repr.TypeRepr.Ref
 import com.enfore.apis.repr.{GetRequest, PathItemAggregation, PathParameter, RequestWithPayload}
 import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.should
+import org.scalatest.matchers.should.Matchers
 
-class ReadRoutesToInteropSpec extends AnyFlatSpec with should.Matchers {
+class ReadRoutesToInteropSpec extends AnyFlatSpec with Matchers {
   "readRoutesToInerop" should "be able to read multiple methods per route" in {
     val expected = Map(
       "_contacts_individual_{contact-id}" ->
