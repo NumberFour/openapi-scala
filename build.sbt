@@ -2,7 +2,8 @@ import Dependencies._
 import ScalaOptions._
 
 organization in ThisBuild := "com.enfore"
-version in ThisBuild := "unstable-SNAPSHOT"
+version in ThisBuild := "1.3.2"
+//version in ThisBuild := "unstable-SNAPSHOT"
 fork in Test in ThisBuild := true
 
 lazy val http4s = Seq(http4sCore, http4sDsl, http4sCirce, http4sServer)
@@ -87,10 +88,19 @@ lazy val publishSettings = Seq(
   crossPaths := false,
   autoAPIMappings := true,
   publishTo := Some(
-    if (isSnapshot.value) Opts.resolver.sonatypeSnapshots
-    else Opts.resolver.sonatypeStaging
+    Opts.resolver.sonatypeStaging
   ),
+  useGpg := false,
+  usePgpKeyHex("1EAA6358E4812E9E"),
+  pgpPublicRing := file(".") / "project" / ".gnupg" / "pubring.gpg",
+  pgpSecretRing := file(".") / "project" / ".gnupg" / "secring.gpg",
+  pgpPassphrase := sys.env.get("PGP_PASSPHRASE").map(_.toArray),
+  publishMavenStyle := true,
   homepage := Some(url("https://github.com/NumberFour/openapi-scala")),
+  developers := List(
+    Developer("ChetanBhasin", "Chetan Bhasin", "chetan.bhasin@numberfour.eu", url("https://github.com/ChetanBhasin")),
+    Developer("bijancn", "Bijan Chokoufe Nejad", "bijan.nejad@numberfour.eu", url("https://github.com/bijancn"))
+  ),
   licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
   scmInfo := Some(
     ScmInfo(
