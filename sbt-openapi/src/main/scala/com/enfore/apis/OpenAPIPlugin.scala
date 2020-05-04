@@ -9,6 +9,18 @@ import org.scalafmt.interfaces.Scalafmt
 
 object OpenAPIPlugin extends AutoPlugin {
 
+  val scalafmtConf =
+    """
+      |version = 2.0.0
+      |style = defaultWithAlign
+      |align = most
+      |maxColumn = 120
+      |rewrite.rules = [PreferCurlyFors, SortImports, SortModifiers, RedundantParens, RedundantBraces]
+      |includeCurlyBraceInSelectChains = true
+      |align.openParenCallSite = false
+      |align.openParenDefnSite = false
+      |""".stripMargin
+
   val scalafmt = Scalafmt.create(this.getClass.getClassLoader)
 
   def compileAll(
@@ -33,25 +45,28 @@ object OpenAPIPlugin extends AutoPlugin {
         val apiCombined = CombineUtils.resolvedApi(new File(tmpDir, openAPIEntryPointFile.name), targetSvcUrl)
         val jsonRepr    = CombineUtils.jsonRepr(apiCombined)
         CombineUtils.writeFile(apiDefTarget, jsonRepr)
-        Main
-          .genHttp4sFromJson(jsonRepr, packageName)
-          .left
-          .map(err => println(s"[error] Errors while convertiong: $err"))
-          .right
-          .get
-          .map {
-            case (name: String, content: String) =>
-              val file = generatedCodeOutputDir / s"$name.scala"
-              Files.createDirectories(file.getParentFile.toPath)
-              val writable = scalafmt.format(
-                java.nio.file.Path.of(ClassLoader.getSystemClassLoader.getResource("scalafmt.conf").toURI),
-                file.toPath,
-                content
-              )
-              CombineUtils.writeFile(file, writable)
-              file
-          }
-          .toSeq
+        IO.withTemporaryFile("scalafmt", "conf", false) { scalaFmtFile =>
+          Files.write(scalaFmtFile.toPath, scalafmtConf.getBytes())
+          Main
+            .genHttp4sFromJson(jsonRepr, packageName)
+            .left
+            .map(err => println(s"[error] Errors while convertiong: $err"))
+            .right
+            .get
+            .map {
+              case (name: String, content: String) =>
+                val file = generatedCodeOutputDir / s"$name.scala"
+                Files.createDirectories(file.getParentFile.toPath)
+                val writable = scalafmt.format(
+                  scalaFmtFile.toPath,
+                  file.toPath,
+                  content
+                )
+                CombineUtils.writeFile(file, writable)
+                file
+            }
+            .toSeq
+        }
       }
     } else Seq.empty
   }
@@ -67,7 +82,7 @@ object OpenAPIPlugin extends AutoPlugin {
     val openAPISourceFile =
       settingKey[File]("Source entry file that is inside the source entry directory. Defaults to main.yaml.")
     val extraSourcesJar =
-      settingKey[String]("Name of the Jar/Zip file that contains extra YAML definitions for shared objects")
+      settingKey[Option[String]]("Name of the Jar/Zip file that contains extra YAML definitions for shared objects")
     val openAPIOutput =
       settingKey[File]("Output directory for OpenAPI. Defaults to managed sources - openapi.")
     val openAPIOutputPackage =
@@ -90,8 +105,9 @@ object OpenAPIPlugin extends AutoPlugin {
             Def.settingDyn {
               (dependencyClasspath in Compile)
                 .map(
-                  _.find((x: Attributed[File]) => x.data.getName.contains(extraSourcesJar.value))
-                    .map(_.data)
+                  _.find(
+                    (x: Attributed[File]) => extraSourcesJar.value.fold(false)(x.data.getName.contains)
+                  ).map(_.data)
                 )
             }.value,
             openAPISource.value,

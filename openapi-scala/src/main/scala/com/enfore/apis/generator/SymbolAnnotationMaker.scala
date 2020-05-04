@@ -74,6 +74,9 @@ object SymbolAnnotationMaker {
     case PrimitiveSymbol(_, PrimitiveOption(data: Primitive, Some(defaultValue))) =>
       val possibleDefault = if (generateForAlias) s" = $defaultValue" else ""
       s"${primitiveTypeSigWithRefinements(data)}$possibleDefault"
+    case RefSymbol(_, r @ Ref(_, _, Some(defaultValue))) =>
+      val possibleDefault = if (generateForAlias) s" = $defaultValue" else ""
+      s"${typeReprShowType.showType(r)}$possibleDefault"
     case PrimitiveSymbol(_, PrimitiveOption(data: Primitive, None)) =>
       val content = primitiveTypeSigWithRefinements(data)
       if (generateForAlias) s"Option[$content]" else content

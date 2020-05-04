@@ -11,7 +11,7 @@ sealed trait TypeRepr {
 
 object TypeRepr {
 
-  final case class Ref(path: String, typeName: String) extends TypeRepr
+  final case class Ref(path: String, typeName: String, defaultValue: Option[PrimitiveValue]) extends TypeRepr
 
   sealed trait PrimitiveValue
   final case class PrimitiveStringValue(value: String) extends PrimitiveValue {
@@ -26,6 +26,9 @@ object TypeRepr {
   final case class PrimitiveBooleanValue(value: Boolean) extends PrimitiveValue {
     override def toString: String = value.toString
   }
+  final case class PrimitiveRefValue(value: String) extends PrimitiveValue {
+    override def toString: String = value
+  }
 
   implicit val primitiveStringDecoder: Decoder[PrimitiveStringValue] = (c: HCursor) =>
     c.as[String].map(PrimitiveStringValue)
@@ -34,12 +37,14 @@ object TypeRepr {
   implicit val primitiveIntDecoder: Decoder[PrimitiveIntValue] = (c: HCursor) => c.as[Int].map(PrimitiveIntValue)
   implicit val primitiveBooleanDecoder: Decoder[PrimitiveBooleanValue] = (c: HCursor) =>
     c.as[Boolean].map(PrimitiveBooleanValue)
+  implicit val primitiveObjectDecoder: Decoder[PrimitiveRefValue] = (c: HCursor) => c.as[String].map(PrimitiveRefValue)
   implicit val PrimitiveDecoder: Decoder[PrimitiveValue] =
     List[Decoder[PrimitiveValue]](
       Decoder[PrimitiveStringValue].widen,
       Decoder[PrimitiveNumberValue].widen,
       Decoder[PrimitiveIntValue].widen,
-      Decoder[PrimitiveBooleanValue].widen
+      Decoder[PrimitiveBooleanValue].widen,
+      Decoder[PrimitiveRefValue].widen
     ).reduceLeft(_ or _)
 
   sealed trait Primitive extends TypeRepr
@@ -114,13 +119,13 @@ object TypeRepr {
 
   final case class PrimitiveSymbol(valName: String, dataType: Primitive) extends Symbol {
     val typeName: String = ShowTypeTag.typeReprShowType.showType(dataType)
-    val ref              = Ref("root", typeName)
+    val ref              = Ref("root", typeName, None)
   }
 
   final case class NewTypeSymbol(valName: String, data: NewType) extends Symbol {
     val path: String     = data.packageName
     val typeName: String = data.typeName
-    val ref: Ref         = Ref(path, typeName)
+    val ref: Ref         = Ref(path, typeName, None)
   }
 
   final case class RefSymbol(valName: String, ref: Ref) extends Symbol {

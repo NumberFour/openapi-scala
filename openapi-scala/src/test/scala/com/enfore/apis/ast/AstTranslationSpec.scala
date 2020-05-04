@@ -132,8 +132,8 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
                 pathParams = List(),
                 queries =
                   Map("limit" -> PrimitiveOption(PrimitiveInt(Some(NonEmptyList.of(Minimum(1), Maximum(5000)))), None)),
-                request = Some(Ref("foo", "Money")),
-                response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money"))),
+                request = Some(Ref("foo", "Money", None)),
+                response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money", None))),
                 hasReadOnlyType = Some(false),
                 successStatusCode = 201
               )
@@ -371,7 +371,7 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
                 pathParams = List(),
                 queries = Map.empty,
                 request = Some(PrimitiveString(None)),
-                response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money"))),
+                response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money", None))),
                 hasReadOnlyType = Some(false),
                 successStatusCode = 200
               )
@@ -463,8 +463,8 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
                 `type` = PATCH,
                 pathParams = List(),
                 queries = Map.empty,
-                request = Some(Ref("foo", "Money")),
-                response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money"))),
+                request = Some(Ref("foo", "Money", None)),
+                response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money", None))),
                 hasReadOnlyType = Some(false),
                 successStatusCode = 200
               )

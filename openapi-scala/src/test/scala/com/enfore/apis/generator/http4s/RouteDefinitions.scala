@@ -16,7 +16,7 @@ object RouteDefinitions {
     queries = Map.empty,
     response = Some(
       Map(
-        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
+        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)
       )
     ),
     successStatusCode = 200
@@ -31,7 +31,7 @@ object RouteDefinitions {
     queries = Map.empty,
     response = Some(
       Map(
-        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
+        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)
       )
     ),
     successStatusCode = 200
@@ -45,9 +45,10 @@ object RouteDefinitions {
     `type` = POST,
     pathParams = List.empty,
     queries = Map.empty,
-    request = Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")),
-    response =
-      Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    request = Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)),
+    response = Some(
+      Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None))
+    ),
     hasReadOnlyType = Some(false),
     successStatusCode = 200
   )
@@ -61,8 +62,9 @@ object RouteDefinitions {
     pathParams = List.empty,
     queries = Map.empty,
     request = Some(TypeRepr.PrimitiveString(None)),
-    response =
-      Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    response = Some(
+      Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None))
+    ),
     hasReadOnlyType = Some(false),
     successStatusCode = 200
   )
@@ -76,8 +78,9 @@ object RouteDefinitions {
     pathParams = List.empty,
     queries = Map.empty,
     request = None,
-    response =
-      Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    response = Some(
+      Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None))
+    ),
     hasReadOnlyType = None,
     successStatusCode = 200
   )
@@ -91,7 +94,7 @@ object RouteDefinitions {
     queries = Map.empty,
     response = Some(
       Map(
-        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
+        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)
       )
     ),
     successStatusCode = 200
@@ -106,7 +109,7 @@ object RouteDefinitions {
     queries = Map.empty,
     response = Some(
       Map(
-        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
+        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)
       )
     ),
     successStatusCode = 200
@@ -120,9 +123,10 @@ object RouteDefinitions {
     `type` = PUT,
     pathParams = List(PathParameter("contacts-id")),
     queries = Map.empty,
-    request = Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")),
-    response =
-      Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    request = Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)),
+    response = Some(
+      Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None))
+    ),
     hasReadOnlyType = Some(false),
     successStatusCode = 200
   )
@@ -136,8 +140,9 @@ object RouteDefinitions {
     pathParams = List(PathParameter("contacts-id")),
     queries = Map.empty,
     request = None,
-    response =
-      Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    response = Some(
+      Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None))
+    ),
     hasReadOnlyType = None,
     successStatusCode = 200
   )
@@ -150,9 +155,10 @@ object RouteDefinitions {
     `type` = PATCH,
     pathParams = List(PathParameter("contacts-id")),
     queries = Map.empty,
-    request = Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")),
-    response =
-      Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    request = Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)),
+    response = Some(
+      Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None))
+    ),
     hasReadOnlyType = Some(false),
     successStatusCode = 200
   )
@@ -163,8 +169,9 @@ object RouteDefinitions {
     description = None,
     operationId = None,
     pathParams = List(PathParameter("contacts-id")),
-    response =
-      Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    response = Some(
+      Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None))
+    ),
     successStatusCode = 200
   )
 
@@ -177,7 +184,7 @@ object RouteDefinitions {
     queries = Map.empty,
     response = Some(
       Map(
-        "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
+        "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address", None)
       )
     ),
     successStatusCode = 200
@@ -191,8 +198,8 @@ object RouteDefinitions {
     `type` = POST,
     pathParams = List(PathParameter("contacts-id")),
     queries = Map.empty,
-    request = Some(TypeRepr.Ref("#/components/schemas/Address", "Address")),
-    response = Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address"))),
+    request = Some(TypeRepr.Ref("#/components/schemas/Address", "Address", None)),
+    response = Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address", None))),
     hasReadOnlyType = Some(false),
     successStatusCode = 200
   )
@@ -209,7 +216,7 @@ object RouteDefinitions {
     queries = Map.empty,
     response = Some(
       Map(
-        "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
+        "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address", None)
       )
     ),
     successStatusCode = 200
@@ -226,10 +233,10 @@ object RouteDefinitions {
       PathParameter("address-id")
     ),
     queries = Map.empty,
-    request = Some(TypeRepr.Ref("#/components/schemas/Address", "Address")),
+    request = Some(TypeRepr.Ref("#/components/schemas/Address", "Address", None)),
     response = Some(
       Map(
-        "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
+        "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address", None)
       )
     ),
     hasReadOnlyType = Some(false),
@@ -247,7 +254,7 @@ object RouteDefinitions {
     ),
     response = Some(
       Map(
-        "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
+        "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address", None)
       )
     ),
     successStatusCode = 200
@@ -269,7 +276,7 @@ object RouteDefinitions {
     ),
     response = Some(
       Map(
-        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
+        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)
       )
     ),
     successStatusCode = 200
@@ -290,9 +297,10 @@ object RouteDefinitions {
       "list1"          -> PrimitiveArray(PrimitiveInt(None), None),
       "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None), None), None)
     ),
-    request = Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")),
-    response =
-      Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    request = Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)),
+    response = Some(
+      Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None))
+    ),
     hasReadOnlyType = Some(false),
     successStatusCode = 200
   )
@@ -309,7 +317,7 @@ object RouteDefinitions {
     ),
     response = Some(
       Map(
-        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
+        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)
       )
     ),
     successStatusCode = 200
@@ -326,9 +334,10 @@ object RouteDefinitions {
       "optional1" -> PrimitiveOption(PrimitiveString(None), None),
       "optional2" -> PrimitiveOption(PrimitiveInt(None), None)
     ),
-    request = Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")),
-    response =
-      Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    request = Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)),
+    response = Some(
+      Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None))
+    ),
     hasReadOnlyType = Some(false),
     successStatusCode = 200
   )
@@ -339,8 +348,9 @@ object RouteDefinitions {
     description = None,
     operationId = None,
     pathParams = List(PathParameter("contacts-id")),
-    response =
-      Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    response = Some(
+      Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None))
+    ),
     successStatusCode = 200
   )
 
@@ -356,7 +366,7 @@ object RouteDefinitions {
     ),
     response = Some(
       Map(
-        "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
+        "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address", None)
       )
     ),
     successStatusCode = 200
@@ -373,8 +383,8 @@ object RouteDefinitions {
       "query1" -> PrimitiveString(None),
       "query2" -> PrimitiveInt(None)
     ),
-    request = Some(TypeRepr.Ref("#/components/schemas/Address", "Address")),
-    response = Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address"))),
+    request = Some(TypeRepr.Ref("#/components/schemas/Address", "Address", None)),
+    response = Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address", None))),
     hasReadOnlyType = Some(false),
     successStatusCode = 200
   )
@@ -394,7 +404,7 @@ object RouteDefinitions {
     ),
     response = Some(
       Map(
-        "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
+        "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address", None)
       )
     ),
     successStatusCode = 200
@@ -414,10 +424,10 @@ object RouteDefinitions {
       "list1" -> PrimitiveArray(PrimitiveString(None), None),
       "list2" -> PrimitiveArray(PrimitiveInt(None), None)
     ),
-    request = Some(TypeRepr.Ref("#/components/schemas/Address", "Address")),
+    request = Some(TypeRepr.Ref("#/components/schemas/Address", "Address", None)),
     response = Some(
       Map(
-        "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
+        "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address", None)
       )
     ),
     hasReadOnlyType = Some(false),
@@ -435,7 +445,7 @@ object RouteDefinitions {
     ),
     response = Some(
       Map(
-        "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address")
+        "application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address", None)
       )
     ),
     successStatusCode = 200
@@ -453,7 +463,7 @@ object RouteDefinitions {
     ),
     response = Some(
       Map(
-        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
+        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)
       )
     ),
     successStatusCode = 200
@@ -470,9 +480,10 @@ object RouteDefinitions {
       "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None), None), None),
       "optional-list2" -> PrimitiveOption(PrimitiveArray(PrimitiveInt(None), None), None)
     ),
-    request = Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")),
-    response =
-      Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"))),
+    request = Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)),
+    response = Some(
+      Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None))
+    ),
     hasReadOnlyType = Some(false),
     successStatusCode = 200
   )
@@ -492,7 +503,7 @@ object RouteDefinitions {
     ),
     response = Some(
       Map(
-        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
+        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)
       )
     ),
     successStatusCode = 200
@@ -505,11 +516,14 @@ object RouteDefinitions {
     operationId = None,
     pathParams = List.empty,
     queries = Map(
-      "queryEnum" -> PrimitiveArray(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact"), None)
+      "queryEnum" -> PrimitiveArray(
+        TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None),
+        None
+      )
     ),
     response = Some(
       Map(
-        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
+        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)
       )
     ),
     successStatusCode = 200
@@ -522,11 +536,11 @@ object RouteDefinitions {
     operationId = None,
     pathParams = List.empty,
     queries = Map(
-      "queryEnum" -> TypeRepr.Ref(path = "#/components/schemas/IndividualContact", typeName = "IndividualContact")
+      "queryEnum" -> TypeRepr.Ref(path = "#/components/schemas/IndividualContact", typeName = "IndividualContact", None)
     ),
     response = Some(
       Map(
-        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact")
+        "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)
       )
     ),
     successStatusCode = 200

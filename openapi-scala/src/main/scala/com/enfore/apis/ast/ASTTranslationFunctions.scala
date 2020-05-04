@@ -30,10 +30,9 @@ object ASTTranslationFunctions {
   private def extractRefOfMediaTypeObject(schemaObject: MediaTypeObject): Option[Ref] =
     schemaObject.schema
       .flatMap {
-        case _: SchemaObject      => None
-        case ReferenceObject(ref) => Some(ref)
+        case _: SchemaObject               => None
+        case ReferenceObject(ref, default) => Some(Ref(ref, ref.split("/").last, default))
       }
-      .map(x => Ref(x, x.split("/").last))
 
   private def getBodyEncodings(media: RequestBodyObject)(implicit packageName: PackageName): List[TypeRepr] =
     media.content.values.toList.map { extractMediaTypeObject }.sequence.toList.flatten
@@ -88,7 +87,7 @@ object ASTTranslationFunctions {
               case referenceObject: ReferenceObject =>
                 val value = loadSingleProperty(referenceObject).get
                 if (!isRequired) {
-                  PrimitiveOption(dataType = value, defaultValue = None)
+                  PrimitiveOption(dataType = value, defaultValue = referenceObject.default)
                 } else {
                   value
                 }
@@ -248,10 +247,10 @@ object ASTTranslationFunctions {
           so.`type`
             .flatMap(buildPrimitiveFromSchemaObjectTypeForComponents(so.items, refinements))
         }(loadSingleProperty(_).map(PrimitiveDict(_, None)))
-      case ReferenceObject(ref) =>
+      case ReferenceObject(ref, defaultValue) =>
         val name: String = ref.split("/").last
         val path: String = ref.split("/").dropRight(1).mkString(".")
-        (Ref(path.replace("#.components.schemas", packageName.name), name): TypeRepr).some
+        (Ref(path.replace("#.components.schemas", packageName.name), name, defaultValue): TypeRepr).some
     }
 
   private def makeSymbolFromTypeRepr(name: String, repr: TypeRepr): Symbol = repr match {
@@ -295,6 +294,9 @@ object ASTTranslationFunctions {
       case s: PrimitiveStringValue =>
         assert(value.isInstanceOf[PrimitiveString], mismatchErr)
         s
+      case obj: PrimitiveRefValue =>
+        assert(value.isInstanceOf[PrimitiveEnum], mismatchErr)
+        obj
       case self => self
     }
     PrimitiveOption(value, mappedDefault)
@@ -306,7 +308,7 @@ object ASTTranslationFunctions {
     repr match {
       case r: ReferenceObject =>
         val loadedTypeRepr = loadSingleProperty(r)
-        if (required.contains(name)) loadedTypeRepr else loadedTypeRepr.map(PrimitiveOption(_, None))
+        if (required.contains(name)) loadedTypeRepr else loadedTypeRepr.map(PrimitiveOption(_, r.default))
       case o: SchemaObject if o.oneOf.isEmpty =>
         val loadedTypeRepr: Option[TypeRepr] = loadSingleProperty(o)
         if (required.contains(name)) loadedTypeRepr else loadedTypeRepr.map(typedDefaultMapping(_, o.default))
@@ -314,7 +316,12 @@ object ASTTranslationFunctions {
         throw new AssertionError("Discriminated Unions (OpenAPI: oneOf) are only supported as top-level types for now.")
     }
 
-  private def loadEnum(typeName: String, values: List[String], summary: Option[String], description: Option[String])(
+  private def loadEnum(
+      typeName: String,
+      values: List[String],
+      summary: Option[String],
+      description: Option[String]
+  )(
       implicit packageName: PackageName
   ): NewType =
     PrimitiveEnum(packageName.name, typeName, values.toSet, summary, description)
@@ -362,10 +369,10 @@ object ASTTranslationFunctions {
       implicit packageName: PackageName
   ): Option[Symbol] = {
     val references: Set[Ref] = unionMembers.map {
-      case ReferenceObject(ref) =>
+      case ReferenceObject(ref, defaultValue) =>
         val name: String = ref.split("/").last
         val path: String = ref.split("/").dropRight(1).mkString(".")
-        Ref(path, name)
+        Ref(path, name, defaultValue)
     }.toSet
     val newType: NewType =
       PrimitiveUnion(
@@ -399,13 +406,13 @@ object ASTTranslationFunctions {
       so.readOnly.getOrElse(
         so.properties.exists { _.values.exists { schemaObjectHasReadOnlyComponent(components) } }
       ) || so.oneOf.fold(false)(_.map(schemaObjectHasReadOnlyComponent(components)(_)).reduce(_ || _))
-    case ReferenceObject(ref) =>
+    case ReferenceObject(ref, _) =>
       schemaObjectHasReadOnlyComponent(components)(findRefInComponents(components, ref.split("/").last))
   }
 
   private def hasReadOnlyBase: SchemaOrReferenceObject => Boolean = {
-    case so: SchemaObject   => so.readOnly.getOrElse(false)
-    case ReferenceObject(_) => false
+    case so: SchemaObject      => so.readOnly.getOrElse(false)
+    case ReferenceObject(_, _) => false
   }
 
   private def enrichSublevelPropsWithRequest(
@@ -415,7 +422,7 @@ object ASTTranslationFunctions {
       .map {
         case (k, v: ReferenceObject) =>
           if (schemaObjectHasReadOnlyComponent(components)(v)) {
-            (k, ReferenceObject(v.$ref + "Request"))
+            (k, ReferenceObject(v.$ref + "Request", v.default))
           } else {
             (k, v)
           }
