@@ -17,8 +17,8 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         "com.enfore.apis",
         "Person",
         List(
-          PrimitiveSymbol("name", PrimitiveString(None)),
-          PrimitiveSymbol("age", PrimitiveInt(None))
+          PrimitiveSymbol("name", PrimitiveString(None, None)),
+          PrimitiveSymbol("age", PrimitiveInt(None, None))
         ),
         Some("Test Summary"),
         None
@@ -82,7 +82,7 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         "Person",
         List(
           RefSymbol("name", Ref("com.enfore.apis", "Name", None)),
-          PrimitiveSymbol("age", PrimitiveInt(None))
+          PrimitiveSymbol("age", PrimitiveInt(None, None))
         ),
         None,
         None
@@ -129,6 +129,38 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
     tree.get.structure shouldBe expected.get.structure
   }
 
+  it should "be able to resolve references with default values" in {
+    val person: Symbol = NewTypeSymbol(
+      "none",
+      PrimitiveProduct(
+        "com.enfore.apis",
+        "Person",
+        List(
+          RefSymbol("name", Ref("com.enfore.apis", "Name", Some("MAGIC"))),
+          PrimitiveSymbol("age", PrimitiveInt(None, None))
+        ),
+        None,
+        None
+      )
+    )
+    val expected =
+      """
+        |package com.enfore.apis
+        |
+        |import io.circe._
+        |import io.circe.derivation._
+        |
+        |final case class Person(name: com.enfore.apis.Name = com.enfore.apis.Name.MAGIC, age: Int)
+        |
+        |object Person {
+        | implicit val circeDecoder: Decoder[Person] = deriveDecoder[Person](renaming.snakeCase, true, None)
+        | implicit val circeEncoder: Encoder[Person] = deriveEncoder[Person](renaming.snakeCase, None)
+        |}
+      """.stripMargin.trim.parse[Source]
+    val tree: Parsed[Source] = ScalaGenerator.codeGenerator.generateScala(person).parse[Source]
+    tree.get.structure shouldBe expected.get.structure
+  }
+
   it should "be able to handle type parameters" in {
     val paramedType: Symbol = NewTypeSymbol(
       "null",
@@ -136,11 +168,11 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         "com.enfore.apis",
         "ParamedType",
         List(
-          PrimitiveSymbol("optionalVal", PrimitiveOption(PrimitiveString(None), None)),
-          PrimitiveSymbol("listVal", PrimitiveArray(PrimitiveInt(None), None)),
-          PrimitiveSymbol("dictVal", PrimitiveDict(PrimitiveInt(None), None)),
-          PrimitiveSymbol("opListVal", PrimitiveOption(PrimitiveArray(PrimitiveBoolean(None), None), None)),
-          PrimitiveSymbol("listOpVal", PrimitiveArray(PrimitiveOption(PrimitiveNumber(None), None), None))
+          PrimitiveSymbol("optionalVal", PrimitiveOption(PrimitiveString(None, None))),
+          PrimitiveSymbol("listVal", PrimitiveArray(PrimitiveInt(None, None), None)),
+          PrimitiveSymbol("dictVal", PrimitiveDict(PrimitiveInt(None, None), None)),
+          PrimitiveSymbol("opListVal", PrimitiveOption(PrimitiveArray(PrimitiveBoolean(None, None), None))),
+          PrimitiveSymbol("listOpVal", PrimitiveArray(PrimitiveOption(PrimitiveNumber(None, None)), None))
         ),
         None,
         None
@@ -176,7 +208,7 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         "com.enfore.apis",
         "RefinedType",
         List(
-          PrimitiveSymbol("stringVal", PrimitiveString(Some(NonEmptyList.of(MinLength(3), MaxLength(3)))))
+          PrimitiveSymbol("stringVal", PrimitiveString(Some(NonEmptyList.of(MinLength(3), MaxLength(3))), None))
         ),
         None,
         None
@@ -220,7 +252,7 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         "com.enfore.apis",
         "RefinedType",
         List(
-          PrimitiveSymbol("intVal", PrimitiveInt(Some(NonEmptyList.of(Minimum(10), Maximum(15)))))
+          PrimitiveSymbol("intVal", PrimitiveInt(Some(NonEmptyList.of(Minimum(10), Maximum(15))), None))
         ),
         None,
         None
@@ -272,7 +304,7 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         List(
           PrimitiveSymbol(
             "listString",
-            PrimitiveArray(PrimitiveString(None), Some(NonEmptyList.of(MinLength(3), MaxLength(3))))
+            PrimitiveArray(PrimitiveString(None, None), Some(NonEmptyList.of(MinLength(3), MaxLength(3))))
           )
         ),
         None,
@@ -318,7 +350,7 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         List(
           PrimitiveSymbol(
             "nested",
-            PrimitiveOption(PrimitiveString(Some(NonEmptyList.of(MinLength(2), MaxLength(2)))), None)
+            PrimitiveOption(PrimitiveString(Some(NonEmptyList.of(MinLength(2), MaxLength(2))), None))
           )
         ),
         None,

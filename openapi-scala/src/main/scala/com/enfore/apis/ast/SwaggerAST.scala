@@ -39,7 +39,9 @@ object SwaggerAST {
    * definition relies on optional value to represent the nature of type (i.e., sum, product, primitive, etc.),
    * we clean them up at load time.
    */
-  sealed trait SchemaOrReferenceObject
+  sealed trait SchemaOrReferenceObject {
+    val default: Option[PrimitiveValue]
+  }
 
   /*
    * Marker trait for pointing to a type definition. This is to identify between different types of type definitions

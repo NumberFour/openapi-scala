@@ -61,7 +61,7 @@ object RouteDefinitions {
     `type` = POST,
     pathParams = List.empty,
     queries = Map.empty,
-    request = Some(TypeRepr.PrimitiveString(None)),
+    request = Some(TypeRepr.PrimitiveString(None, None)),
     response = Some(
       Map("application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None))
     ),
@@ -267,12 +267,12 @@ object RouteDefinitions {
     operationId = None,
     pathParams = List.empty,
     queries = ListMap(
-      "query1"         -> PrimitiveString(None),
-      "query2"         -> PrimitiveInt(None),
-      "optional1"      -> PrimitiveOption(PrimitiveString(None), None),
-      "optional2"      -> PrimitiveOption(PrimitiveInt(None), None),
-      "list1"          -> PrimitiveArray(PrimitiveInt(None), None),
-      "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None), None), None)
+      "query1"         -> PrimitiveString(None, None),
+      "query2"         -> PrimitiveInt(None, None),
+      "optional1"      -> PrimitiveOption(PrimitiveString(None, None)),
+      "optional2"      -> PrimitiveOption(PrimitiveInt(None, None)),
+      "list1"          -> PrimitiveArray(PrimitiveInt(None, None), None),
+      "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None, None), None))
     ),
     response = Some(
       Map(
@@ -290,12 +290,12 @@ object RouteDefinitions {
     `type` = POST,
     pathParams = List.empty,
     queries = ListMap(
-      "query1"         -> PrimitiveString(None),
-      "query2"         -> PrimitiveInt(None),
-      "optional1"      -> PrimitiveOption(PrimitiveString(None), None),
-      "optional2"      -> PrimitiveOption(PrimitiveInt(None), None),
-      "list1"          -> PrimitiveArray(PrimitiveInt(None), None),
-      "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None), None), None)
+      "query1"         -> PrimitiveString(None, None),
+      "query2"         -> PrimitiveInt(None, None),
+      "optional1"      -> PrimitiveOption(PrimitiveString(None, None)),
+      "optional2"      -> PrimitiveOption(PrimitiveInt(None, None)),
+      "list1"          -> PrimitiveArray(PrimitiveInt(None, None), None),
+      "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None, None), None))
     ),
     request = Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)),
     response = Some(
@@ -312,8 +312,8 @@ object RouteDefinitions {
     operationId = None,
     pathParams = List(PathParameter("contacts-id")),
     queries = ListMap(
-      "optional1" -> PrimitiveOption(PrimitiveString(None), None),
-      "optional2" -> PrimitiveOption(PrimitiveInt(None), None)
+      "optional1" -> PrimitiveOption(PrimitiveString(None, None)),
+      "optional2" -> PrimitiveOption(PrimitiveInt(None, None))
     ),
     response = Some(
       Map(
@@ -331,8 +331,8 @@ object RouteDefinitions {
     `type` = PUT,
     pathParams = List(PathParameter("contacts-id")),
     queries = ListMap(
-      "optional1" -> PrimitiveOption(PrimitiveString(None), None),
-      "optional2" -> PrimitiveOption(PrimitiveInt(None), None)
+      "optional1" -> PrimitiveOption(PrimitiveString(None, None)),
+      "optional2" -> PrimitiveOption(PrimitiveInt(None, None))
     ),
     request = Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)),
     response = Some(
@@ -361,8 +361,8 @@ object RouteDefinitions {
     operationId = None,
     pathParams = List(PathParameter("contacts-id")),
     queries = ListMap(
-      "query1" -> PrimitiveString(None),
-      "query2" -> PrimitiveInt(None)
+      "query1" -> PrimitiveString(None, None),
+      "query2" -> PrimitiveInt(None, None)
     ),
     response = Some(
       Map(
@@ -380,8 +380,8 @@ object RouteDefinitions {
     `type` = POST,
     pathParams = List(PathParameter("contacts-id")),
     queries = ListMap(
-      "query1" -> PrimitiveString(None),
-      "query2" -> PrimitiveInt(None)
+      "query1" -> PrimitiveString(None, None),
+      "query2" -> PrimitiveInt(None, None)
     ),
     request = Some(TypeRepr.Ref("#/components/schemas/Address", "Address", None)),
     response = Some(Map("application/json" -> TypeRepr.Ref("#/components/schemas/Address", "Address", None))),
@@ -399,8 +399,8 @@ object RouteDefinitions {
       PathParameter("address-id")
     ),
     queries = ListMap(
-      "list1" -> PrimitiveArray(PrimitiveString(None), None),
-      "list2" -> PrimitiveArray(PrimitiveInt(None), None)
+      "list1" -> PrimitiveArray(PrimitiveString(None, None), None),
+      "list2" -> PrimitiveArray(PrimitiveInt(None, None), None)
     ),
     response = Some(
       Map(
@@ -421,8 +421,8 @@ object RouteDefinitions {
       PathParameter("address-id")
     ),
     queries = ListMap(
-      "list1" -> PrimitiveArray(PrimitiveString(None), None),
-      "list2" -> PrimitiveArray(PrimitiveInt(None), None)
+      "list1" -> PrimitiveArray(PrimitiveString(None, None), None),
+      "list2" -> PrimitiveArray(PrimitiveInt(None, None), None)
     ),
     request = Some(TypeRepr.Ref("#/components/schemas/Address", "Address", None)),
     response = Some(
@@ -458,8 +458,8 @@ object RouteDefinitions {
     operationId = None,
     pathParams = List.empty,
     queries = ListMap(
-      "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None), None), None),
-      "optional-list2" -> PrimitiveOption(PrimitiveArray(PrimitiveInt(None), None), None)
+      "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None, None), None)),
+      "optional-list2" -> PrimitiveOption(PrimitiveArray(PrimitiveInt(None, None), None))
     ),
     response = Some(
       Map(
@@ -477,8 +477,8 @@ object RouteDefinitions {
     `type` = POST,
     pathParams = List.empty,
     queries = ListMap(
-      "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None), None), None),
-      "optional-list2" -> PrimitiveOption(PrimitiveArray(PrimitiveInt(None), None), None)
+      "optional-list1" -> PrimitiveOption(PrimitiveArray(PrimitiveString(None, None), None)),
+      "optional-list2" -> PrimitiveOption(PrimitiveArray(PrimitiveInt(None, None), None))
     ),
     request = Some(TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)),
     response = Some(
@@ -498,8 +498,8 @@ object RouteDefinitions {
       PathParameter("type")
     ),
     queries = Map(
-      "other:@funny" -> PrimitiveString(None),
-      "trait"        -> PrimitiveString(None)
+      "other:@funny" -> PrimitiveString(None, None),
+      "trait"        -> PrimitiveString(None, None)
     ),
     response = Some(
       Map(

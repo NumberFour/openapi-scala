@@ -39,10 +39,10 @@ object PathInterfaceGenerator {
     queries.map {
       case (name: String, primType: TypeRepr) =>
         primType match {
-          case PrimitiveInt(_)    => s""""$name" -> "int""""
-          case PrimitiveNumber(_) => s""""$name" -> "double""""
-          case PrimitiveString(_) => s""""$name" -> "string""""
-          case _                  => s""""$name" -> "string""""
+          case PrimitiveInt(_, _)    => s""""$name" -> "int""""
+          case PrimitiveNumber(_, _) => s""""$name" -> "double""""
+          case PrimitiveString(_, _) => s""""$name" -> "string""""
+          case _                     => s""""$name" -> "string""""
         }
     }.toList
 

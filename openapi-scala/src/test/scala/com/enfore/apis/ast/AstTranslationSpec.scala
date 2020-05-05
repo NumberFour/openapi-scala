@@ -11,16 +11,14 @@ import com.enfore.apis.repr.TypeRepr.{
   NewTypeSymbol,
   PrimitiveEnum,
   PrimitiveInt,
-  PrimitiveIntValue,
   PrimitiveNumber,
-  PrimitiveNumberValue,
   PrimitiveOption,
   PrimitiveProduct,
   PrimitiveString,
-  PrimitiveStringValue,
   PrimitiveSymbol,
   PrimitiveUnion,
-  Ref
+  Ref,
+  RefSymbol
 }
 import com.enfore.apis.repr.{PathItemAggregation, RequestWithPayload, TypeRepr}
 import io.circe
@@ -105,10 +103,10 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
               packageName = "foo",
               typeName = "Money",
               values = List(
-                PrimitiveSymbol("value", PrimitiveNumber(None)),
+                PrimitiveSymbol("value", PrimitiveNumber(None, None)),
                 PrimitiveSymbol(
                   "unit",
-                  PrimitiveOption(PrimitiveString(None), Some(PrimitiveStringValue("EUR")))
+                  PrimitiveString(None, Some("EUR"))
                 )
               ),
               summary = None,
@@ -132,7 +130,7 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
                 `type` = POST,
                 pathParams = List(),
                 queries =
-                  Map("limit" -> PrimitiveOption(PrimitiveInt(Some(NonEmptyList.of(Minimum(1), Maximum(5000)))), None)),
+                  Map("limit" -> PrimitiveOption(PrimitiveInt(Some(NonEmptyList.of(Minimum(1), Maximum(5000))), None))),
                 request = Some(Ref("foo", "Money", None)),
                 response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money", None))),
                 hasReadOnlyType = Some(false),
@@ -167,7 +165,7 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
           values = List(
             PrimitiveSymbol(
               "something",
-              PrimitiveOption(PrimitiveInt(None), Some(PrimitiveIntValue(10)))
+              PrimitiveInt(None, Some(10))
             )
           ),
           summary = None,
@@ -212,7 +210,7 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
           values = List(
             PrimitiveSymbol(
               "something",
-              PrimitiveOption(PrimitiveNumber(None), Some(PrimitiveNumberValue(10.2)))
+              PrimitiveNumber(None, Some(10.2))
             )
           ),
           summary = None,
@@ -244,7 +242,7 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
           values = List(
             PrimitiveSymbol(
               "something",
-              PrimitiveOption(PrimitiveString(None), Some(PrimitiveStringValue("foo")))
+              PrimitiveString(None, Some("foo"))
             )
           ),
           summary = None,
@@ -265,12 +263,12 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
         |      properties:
         |        something:
         |          $ref: '#/components/schemas/SomeType'
-        |          default: NONE
         |    SomeType:
         |      type: string
         |      enum:
         |        - NONE
         |        - SOME
+        |      default: NONE
         |""".stripMargin
     val expectedComp: Map[String, NewTypeSymbol] = Map(
       "ContainsDefault" -> NewTypeSymbol(
@@ -279,13 +277,7 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
           packageName = "foo",
           typeName = "ContainsDefault",
           values = List(
-            PrimitiveSymbol(
-              valName = "something",
-              dataType = PrimitiveOption(
-                Ref(path = "foo", typeName = "SomeType", defaultValue = Some(PrimitiveStringValue("NONE"))),
-                Some(PrimitiveStringValue("NONE"))
-              )
-            )
+            RefSymbol("something", Ref("foo", "SomeType", Some("NONE")))
           ),
           summary = None,
           description = None
@@ -424,8 +416,8 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
               packageName = "foo",
               typeName = "Money",
               values = List(
-                PrimitiveSymbol("value", PrimitiveNumber(None)),
-                PrimitiveSymbol("unit", PrimitiveString(None))
+                PrimitiveSymbol("value", PrimitiveNumber(None, None)),
+                PrimitiveSymbol("unit", PrimitiveString(None, None))
               ),
               summary = None,
               description = Some(
@@ -448,7 +440,7 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
                 `type` = POST,
                 pathParams = List(),
                 queries = Map.empty,
-                request = Some(PrimitiveString(None)),
+                request = Some(PrimitiveString(None, None)),
                 response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money", None))),
                 hasReadOnlyType = Some(false),
                 successStatusCode = 200
@@ -517,8 +509,8 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
               packageName = "foo",
               typeName = "Money",
               values = List(
-                PrimitiveSymbol("value", PrimitiveNumber(None)),
-                PrimitiveSymbol("unit", PrimitiveString(None))
+                PrimitiveSymbol("value", PrimitiveNumber(None, None)),
+                PrimitiveSymbol("unit", PrimitiveString(None, None))
               ),
               summary = None,
               description = Some(

@@ -48,7 +48,7 @@ object RouteGenerator {
   def buildRefinementDecoders(in: List[RouteDefinition], indentationLevel: Int): List[String] =
     in.flatMap(getQueryParams(_).values.toList)
       .flatMap {
-        case PrimitiveOption(prim: Primitive, _) =>
+        case PrimitiveOption(prim: Primitive) =>
           defineOptionalRefinementOnPrimitive(prim).map(
             refinementDecoder(_, prim.typeName, indentationLevel)
           )
@@ -202,17 +202,17 @@ object RouteGenerator {
   }
 
   private val isListParameterType: TypeRepr =/> Boolean = {
-    case _: PrimitiveArray                     => true
-    case PrimitiveOption(_: PrimitiveArray, _) => true
-    case _: Any                                => false
+    case _: PrimitiveArray                  => true
+    case PrimitiveOption(_: PrimitiveArray) => true
+    case _: Any                             => false
   }
 
   private val getEnumParameterType: TypeRepr =/> Option[String] = {
-    case ref: Ref                                        => Some(ref.path + "." + ref.typeName)
-    case PrimitiveArray(ref: Ref, _)                     => Some(ref.path + "." + ref.typeName)
-    case PrimitiveOption(ref: Ref, _)                    => Some(ref.path + "." + ref.typeName)
-    case PrimitiveOption(PrimitiveArray(ref: Ref, _), _) => Some(ref.path + "." + ref.typeName)
-    case _: Any                                          => None
+    case ref: Ref                                     => Some(ref.path + "." + ref.typeName)
+    case PrimitiveArray(ref: Ref, _)                  => Some(ref.path + "." + ref.typeName)
+    case PrimitiveOption(ref: Ref)                    => Some(ref.path + "." + ref.typeName)
+    case PrimitiveOption(PrimitiveArray(ref: Ref, _)) => Some(ref.path + "." + ref.typeName)
+    case _: Any                                       => None
   }
 
   private val anyListQueryParameter: RouteDefinition => Boolean = {
@@ -246,7 +246,7 @@ object RouteGenerator {
     ScalaGenerator.primitiveRefinementExtractor(dataType).map(SymbolAnnotationMaker.primitiveTypeSigWithRefinements)
 
   private def queryParameterDecoderMatcher(dataType: TypeRepr): String = dataType match {
-    case PrimitiveOption(dataType, _) =>
+    case PrimitiveOption(dataType) =>
       s"OptionalQueryParamDecoderMatcher[${SymbolAnnotationMaker.onlyResolverTopPrimitiveRefinements(dataType)}]"
     case other => s"QueryParamDecoderMatcher[${SymbolAnnotationMaker.onlyResolverTopPrimitiveRefinements(other)}]"
   }

@@ -84,15 +84,15 @@ object ScalaGenerator {
     s"${symbol.valName}: ${SymbolAnnotationMaker.makeAnnotation(symbol)}".trim
 
   @tailrec def primitiveRefinementExtractor(in: Primitive): Option[Primitive] = in match {
-    case s @ PrimitiveString(refinements: Option[NonEmptyList[RefinedTags]]) =>
+    case s @ PrimitiveString(refinements: Option[NonEmptyList[RefinedTags]], _) =>
       if (refinements.map(_.head).isDefined) Some(s) else None
     case a @ PrimitiveArray(_, refinements: Option[NonEmptyList[RefinedTags]]) =>
       if (refinements.map(_.head).isDefined) Some(a) else None
-    case i @ PrimitiveInt(refinements: Option[NonEmptyList[RefinedTags]]) =>
+    case i @ PrimitiveInt(refinements: Option[NonEmptyList[RefinedTags]], _) =>
       if (refinements.map(_.head).isDefined) Some(i) else None
-    case n @ PrimitiveNumber(refinements: Option[NonEmptyList[RefinedTags]]) =>
+    case n @ PrimitiveNumber(refinements: Option[NonEmptyList[RefinedTags]], _) =>
       if (refinements.map(_.head).isDefined) Some(n) else None
-    case PrimitiveOption(data: Primitive, _) =>
+    case PrimitiveOption(data: Primitive) =>
       primitiveRefinementExtractor(data)
     case _ => None
   }
@@ -112,7 +112,7 @@ object ScalaGenerator {
     val helpers = in
       .flatMap(sym => refinementExtractor(sym).map(_ => sym))
       .map {
-        case PrimitiveSymbol(vn, PrimitiveOption(typeRepr: Primitive, _)) =>
+        case PrimitiveSymbol(vn, PrimitiveOption(typeRepr: Primitive)) =>
           PrimitiveSymbol(vn, typeRepr)
         case t @ _ => t
       }
