@@ -1,14 +1,15 @@
 package com.enfore.apis.ast
 
 import cats.data.NonEmptyList
+import cats.syntax.functor._
 import com.enfore.apis.ast.ASTTranslationFunctions.PackageName
 import com.enfore.apis.ast.SwaggerAST._
 import com.enfore.apis.repr.ReqWithContentType.{PATCH, POST}
-import com.enfore.apis.repr.{PathItemAggregation, RequestWithPayload, TypeRepr}
 import com.enfore.apis.repr.TypeRepr.{
   Maximum,
   Minimum,
   NewTypeSymbol,
+  PrimitiveEnum,
   PrimitiveInt,
   PrimitiveIntValue,
   PrimitiveNumber,
@@ -21,9 +22,9 @@ import com.enfore.apis.repr.TypeRepr.{
   PrimitiveUnion,
   Ref
 }
+import com.enfore.apis.repr.{PathItemAggregation, RequestWithPayload, TypeRepr}
 import io.circe
 import io.circe._
-import cats.syntax.functor._
 import io.circe.generic.auto._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
@@ -145,8 +146,8 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
     ast.isRight shouldBe true
   }
 
-  it should "be able to translate the default values properly" in {
-    val yamlCode1: String =
+  it should "be able to translate the default values for integers properly" in {
+    val yamlCode: String =
       """
         |components:
         | schemas:
@@ -157,7 +158,7 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
         |         type: integer
         |         default: 10
         |""".stripMargin
-    val expectedComp1 = Map(
+    val expectedComp: Map[String, NewTypeSymbol] = Map(
       "ContainsDefault" -> NewTypeSymbol(
         valName = "ContainsDefault",
         data = PrimitiveProduct(
@@ -174,7 +175,24 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
         )
       )
     )
-    val yamlCode2: String =
+    parseYamlAndCompare(yamlCode, expectedComp)
+  }
+
+  private def parseYamlAndCompare(yamlCode: String, expectedComp: Map[String, TypeRepr.NewTypeSymbol]) = {
+    val ast = circe.yaml.parser.parse(yamlCode).flatMap(_.as[CoreASTRepr])
+    ast.left.map(println)
+    ast
+      .map { representation =>
+        implicit val packageName: PackageName = PackageName("foo")
+        val componentsMap =
+          ASTTranslationFunctions.readComponentsToInterop(representation)(packageName)
+        componentsMap shouldBe expectedComp
+      }
+      .getOrElse(throw new Exception("Could not parse yamlCode"))
+  }
+
+  it should "be able to translate the default values for numbers properly" in {
+    val yamlCode: String =
       """
         |components:
         | schemas:
@@ -185,7 +203,7 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
         |         type: number
         |         default: 10.2
         |""".stripMargin
-    val expectedComp2 = Map(
+    val expectedComp: Map[String, NewTypeSymbol] = Map(
       "ContainsDefault" -> NewTypeSymbol(
         valName = "ContainsDefault",
         data = PrimitiveProduct(
@@ -202,8 +220,87 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
         )
       )
     )
+    parseYamlAndCompare(yamlCode, expectedComp)
+  }
 
-    val yamlCode3: String =
+  it should "be able to translate the default values for strings properly" in {
+    val yamlCode: String =
+      """
+        |components:
+        | schemas:
+        |   ContainsDefault:
+        |     type: object
+        |     properties:
+        |       something:
+        |         type: string
+        |         default: foo
+        |""".stripMargin
+    val expectedComp: Map[String, NewTypeSymbol] = Map(
+      "ContainsDefault" -> NewTypeSymbol(
+        valName = "ContainsDefault",
+        data = PrimitiveProduct(
+          packageName = "foo",
+          typeName = "ContainsDefault",
+          values = List(
+            PrimitiveSymbol(
+              "something",
+              PrimitiveOption(PrimitiveString(None), Some(PrimitiveStringValue("foo")))
+            )
+          ),
+          summary = None,
+          description = None
+        )
+      )
+    )
+    parseYamlAndCompare(yamlCode, expectedComp)
+  }
+
+  it should "be able to translate the default values for enums properly" in {
+    val yamlCode: String =
+      """
+        |components:
+        |  schemas:
+        |    ContainsDefault:
+        |      type: object
+        |      properties:
+        |        something:
+        |          $ref: '#/components/schemas/SomeType'
+        |          default: NONE
+        |    SomeType:
+        |      type: string
+        |      enum:
+        |        - NONE
+        |        - SOME
+        |""".stripMargin
+    val expectedComp: Map[String, NewTypeSymbol] = Map(
+      "ContainsDefault" -> NewTypeSymbol(
+        valName = "ContainsDefault",
+        data = PrimitiveProduct(
+          packageName = "foo",
+          typeName = "ContainsDefault",
+          values = List(
+            PrimitiveSymbol(
+              valName = "something",
+              dataType = PrimitiveOption(
+                Ref(path = "foo", typeName = "SomeType", defaultValue = Some(PrimitiveStringValue("NONE"))),
+                Some(PrimitiveStringValue("NONE"))
+              )
+            )
+          ),
+          summary = None,
+          description = None
+        )
+      ),
+      "SomeType" -> NewTypeSymbol(
+        "SomeType",
+        PrimitiveEnum("foo", "SomeType", Set("NONE", "SOME"), None, None)
+      )
+    )
+    parseYamlAndCompare(yamlCode, expectedComp)
+  }
+
+  it should "fail to translate a float default value for an integer type" in {
+    val yamlCode: String =
       """
         |components:
         | schemas:
@@ -214,28 +311,9 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
         |         type: integer
         |         default: 10.2
         |""".stripMargin
-
-    val ast1 = circe.yaml.parser.parse(yamlCode1).flatMap(_.as[CoreASTRepr])
-    ast1.left.map(println) // For debugging the failing tests
-    ast1.map { representation =>
-      implicit val packageName: PackageName = PackageName("foo")
-      val componentsMap =
-        ASTTranslationFunctions.readComponentsToInterop(representation)(packageName)
-      componentsMap shouldBe expectedComp1
-    }
-
-    val ast2 = circe.yaml.parser.parse(yamlCode2).flatMap(_.as[CoreASTRepr])
-    ast2.left.map(println) // For debugging the failing tests
-    ast2.map { representation =>
-      implicit val packageName: PackageName = PackageName("foo")
-      val componentsMap =
-        ASTTranslationFunctions.readComponentsToInterop(representation)(packageName)
-      componentsMap shouldBe expectedComp2
-    }
-
-    val ast3 = circe.yaml.parser.parse(yamlCode3).flatMap(_.as[CoreASTRepr])
-    ast3.left.map(println) // For debugging the failing tests
-    ast3.map { representation =>
+    val ast = circe.yaml.parser.parse(yamlCode).flatMap(_.as[CoreASTRepr])
+    ast.left.map(println) // For debugging the failing tests
+    ast.map { representation =>
       implicit val packageName: PackageName = PackageName("foo")
       an[AssertionError] shouldBe thrownBy(ASTTranslationFunctions.readComponentsToInterop(representation)(packageName))
     }
