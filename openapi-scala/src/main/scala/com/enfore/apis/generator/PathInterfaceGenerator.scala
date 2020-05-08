@@ -39,10 +39,10 @@ object PathInterfaceGenerator {
     queries.map {
       case (name: String, primType: TypeRepr) =>
         primType match {
-          case PrimitiveInt(_)    => s""""$name" -> "int""""
-          case PrimitiveNumber(_) => s""""$name" -> "double""""
-          case PrimitiveString(_) => s""""$name" -> "string""""
-          case _                  => s""""$name" -> "string""""
+          case PrimitiveInt(_, _)    => s""""$name" -> "int""""
+          case PrimitiveNumber(_, _) => s""""$name" -> "double""""
+          case PrimitiveString(_, _) => s""""$name" -> "string""""
+          case _                     => s""""$name" -> "string""""
         }
     }.toList
 
@@ -57,8 +57,8 @@ object PathInterfaceGenerator {
     val pathParamsSyntax: Option[String] =
       NonEmptyList.fromList(pathParams.map(param => s"$param: String")).map(_.toList.mkString(", "))
     val reqSyntax: Option[String] = reqType.map {
-      case request @ Ref(_, _) => s"request: ${resolveRef(request)(p)}"
-      case x                   => s"request: ${x.typeName}"
+      case request @ Ref(_, _, _) => s"request: ${resolveRef(request)(p)}"
+      case x                      => s"request: ${x.typeName}"
     }
     List(querySyntax, pathParamsSyntax, reqSyntax).flatten
       .mkString(", ")

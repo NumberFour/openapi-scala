@@ -30,10 +30,9 @@ object ASTTranslationFunctions {
   private def extractRefOfMediaTypeObject(schemaObject: MediaTypeObject): Option[Ref] =
     schemaObject.schema
       .flatMap {
-        case _: SchemaObject      => None
-        case ReferenceObject(ref) => Some(ref)
+        case _: SchemaObject         => None
+        case ReferenceObject(ref, _) => Some(Ref(ref, ref.split("/").last, None))
       }
-      .map(x => Ref(x, x.split("/").last))
 
   private def getBodyEncodings(media: RequestBodyObject)(implicit packageName: PackageName): List[TypeRepr] =
     media.content.values.toList.map { extractMediaTypeObject }.sequence.toList.flatten
@@ -80,15 +79,15 @@ object ASTTranslationFunctions {
                   buildPrimitiveFromSchemaObjectType(NonEmptyList.fromList(refinements), a.items)(packageName)(
                     a.`type`.get
                   ).get
-                if (!isRequired) {
-                  PrimitiveOption(dataType = value, defaultValue = a.default)
+                if (!isRequired && a.default.isEmpty) {
+                  PrimitiveOption(dataType = value)
                 } else {
                   value
                 }
               case referenceObject: ReferenceObject =>
                 val value = loadSingleProperty(referenceObject).get
-                if (!isRequired) {
-                  PrimitiveOption(dataType = value, defaultValue = None)
+                if (!isRequired && referenceObject.default.isEmpty) {
+                  PrimitiveOption(dataType = value)
                 } else {
                   value
                 }
@@ -216,10 +215,10 @@ object ASTTranslationFunctions {
       refinements: Option[NonEmptyList[TypeRepr.RefinedTags]],
       items: Option[SchemaOrReferenceObject] = None
   )(implicit packageName: PackageName): SchemaObjectType => Option[Primitive] = {
-    case SchemaObjectType.string    => Some(PrimitiveString(refinements))
-    case SchemaObjectType.boolean   => Some(PrimitiveBoolean(refinements))
-    case SchemaObjectType.number    => Some(PrimitiveNumber(refinements))
-    case SchemaObjectType.`integer` => Some(PrimitiveInt(refinements))
+    case SchemaObjectType.string    => Some(PrimitiveString(refinements, None))
+    case SchemaObjectType.boolean   => Some(PrimitiveBoolean(refinements, None))
+    case SchemaObjectType.number    => Some(PrimitiveNumber(refinements, None))
+    case SchemaObjectType.`integer` => Some(PrimitiveInt(refinements, None))
     case SchemaObjectType.`array` =>
       val loadedType = items.flatMap {
         case so: SchemaObject =>
@@ -248,10 +247,10 @@ object ASTTranslationFunctions {
           so.`type`
             .flatMap(buildPrimitiveFromSchemaObjectTypeForComponents(so.items, refinements))
         }(loadSingleProperty(_).map(PrimitiveDict(_, None)))
-      case ReferenceObject(ref) =>
+      case ReferenceObject(ref, _) =>
         val name: String = ref.split("/").last
         val path: String = ref.split("/").dropRight(1).mkString(".")
-        (Ref(path.replace("#.components.schemas", packageName.name), name): TypeRepr).some
+        (Ref(path.replace("#.components.schemas", packageName.name), name, None): TypeRepr).some
     }
 
   private def makeSymbolFromTypeRepr(name: String, repr: TypeRepr): Symbol = repr match {
@@ -265,61 +264,67 @@ object ASTTranslationFunctions {
       properties: Map[String, SchemaOrReferenceObject],
       required: List[String],
       summary: Option[String],
-      description: Option[String]
+      description: Option[String],
+      allSchemas: Map[String, SchemaObject]
   )(
       implicit packageName: PackageName
   ): Option[NewType] = {
     val mapped: immutable.Iterable[Option[Symbol]] = properties map {
       case (name: String, repr: SchemaOrReferenceObject) =>
-        val loaded = getTypeRepr(required, name, repr)
+        val loaded: Option[TypeRepr] = getTypeRepr(required, name, repr, allSchemas)
         assert(loaded.isDefined, s"$name in $typeName could not be parsed.")
         loaded map (makeSymbolFromTypeRepr(name, _))
     }
     mapped.toList.sequence.map(PrimitiveProduct(packageName.name, typeName, _, summary, description))
   }
 
-  private def typedDefaultMapping(value: TypeRepr, default: Option[PrimitiveValue]): PrimitiveOption = {
-    val mismatchErr = s"${value.typeName} has wrong default value type"
-    val mappedDefault = default map {
-      case PrimitiveNumberValue(n) =>
-        value match {
-          case _: PrimitiveNumber => PrimitiveNumberValue(n)
-          case _: PrimitiveInt =>
-            assert(n.isValidInt, "Implicit double to integer type coercion")
-            PrimitiveIntValue(n.toInt)
-          case _ => throw new AssertionError(mismatchErr)
-        }
-      case i: PrimitiveIntValue =>
-        assert(value.isInstanceOf[PrimitiveInt], mismatchErr)
-        i
-      case s: PrimitiveStringValue =>
-        assert(value.isInstanceOf[PrimitiveString], mismatchErr)
-        s
-      case self => self
-    }
-    PrimitiveOption(value, mappedDefault)
-  }
-
-  private def getTypeRepr(required: List[String], name: String, repr: SchemaOrReferenceObject)(
+  private def getTypeRepr(
+      required: List[String],
+      name: String,
+      repr: SchemaOrReferenceObject,
+      allProps: Map[String, SchemaObject]
+  )(
       implicit packageName: PackageName
   ): Option[TypeRepr] =
     repr match {
-      case r: ReferenceObject =>
-        val loadedTypeRepr = loadSingleProperty(r)
-        if (required.contains(name)) loadedTypeRepr else loadedTypeRepr.map(PrimitiveOption(_, None))
-      case o: SchemaObject if o.oneOf.isEmpty =>
-        val loadedTypeRepr: Option[TypeRepr] = loadSingleProperty(o)
-        if (required.contains(name)) loadedTypeRepr else loadedTypeRepr.map(typedDefaultMapping(_, o.default))
-      case _ =>
+      case o: SchemaObject if o.oneOf.nonEmpty =>
         throw new AssertionError("Discriminated Unions (OpenAPI: oneOf) are only supported as top-level types for now.")
+      case r: ReferenceObject =>
+        val typeRepr    = loadSingleProperty(repr)
+        val referenceTo = r.$ref.split("/").last.stripSuffix("Request")
+        allProps
+          .getOrElse(
+            referenceTo,
+            throw new Exception(
+              s"You're referencing ${r.$ref} which does not exist. Available components are ${allProps.keys.mkString(", ")}"
+            )
+          )
+          .default
+          .fold(if (required contains name) typeRepr else typeRepr.map(PrimitiveOption))(
+            dv => typeRepr.map(_.packDefault(dv))
+          )
+      case _ =>
+        val typeRepr: Option[TypeRepr] = loadSingleProperty(repr)
+        repr.default.fold(if (required contains name) typeRepr else typeRepr.map(PrimitiveOption))(
+          dv => typeRepr.map(_.packDefault(dv))
+        )
     }
 
-  private def loadEnum(typeName: String, values: List[String], summary: Option[String], description: Option[String])(
+  private def loadEnum(
+      typeName: String,
+      values: List[String],
+      summary: Option[String],
+      description: Option[String]
+  )(
       implicit packageName: PackageName
   ): NewType =
     PrimitiveEnum(packageName.name, typeName, values.toSet, summary, description)
 
-  private def handleSchemaObjectProductType(name: String, schemaObject: SchemaObject)(
+  private def handleSchemaObjectProductType(
+      name: String,
+      schemaObject: SchemaObject,
+      allSchemas: Map[String, SchemaObject]
+  )(
       implicit packageName: PackageName
   ): Option[Symbol] = {
     val required = schemaObject.required.getOrElse(List.empty[String])
@@ -330,7 +335,8 @@ object ASTTranslationFunctions {
           schemaObject.properties.getOrElse(Map.empty),
           required,
           schemaObject.summary,
-          schemaObject.description
+          schemaObject.description,
+          allSchemas
         )
       case SchemaObjectType.`string` =>
         schemaObject.enum.map(loadEnum(name, _, schemaObject.summary, schemaObject.description))
@@ -362,10 +368,10 @@ object ASTTranslationFunctions {
       implicit packageName: PackageName
   ): Option[Symbol] = {
     val references: Set[Ref] = unionMembers.map {
-      case ReferenceObject(ref) =>
+      case ReferenceObject(ref, _) =>
         val name: String = ref.split("/").last
         val path: String = ref.split("/").dropRight(1).mkString(".")
-        Ref(path, name)
+        Ref(path, name, None)
     }.toSet
     val newType: NewType =
       PrimitiveUnion(
@@ -385,10 +391,10 @@ object ASTTranslationFunctions {
     NewTypeSymbol(name, newType).some
   }
 
-  private def evalSchema(name: String, schemaObject: SchemaObject)(
+  private def evalSchema(name: String, schemaObject: SchemaObject, allSchemas: Map[String, SchemaObject])(
       implicit packageName: PackageName
   ): Option[Symbol] =
-    schemaObject.oneOf.fold(handleSchemaObjectProductType(name, schemaObject))(
+    schemaObject.oneOf.fold(handleSchemaObjectProductType(name, schemaObject, allSchemas))(
       handleSchemaObjectUnionType(name, schemaObject.discriminator, _, schemaObject.summary, schemaObject.description)
     )
 
@@ -399,13 +405,13 @@ object ASTTranslationFunctions {
       so.readOnly.getOrElse(
         so.properties.exists { _.values.exists { schemaObjectHasReadOnlyComponent(components) } }
       ) || so.oneOf.fold(false)(_.map(schemaObjectHasReadOnlyComponent(components)(_)).reduce(_ || _))
-    case ReferenceObject(ref) =>
+    case ReferenceObject(ref, _) =>
       schemaObjectHasReadOnlyComponent(components)(findRefInComponents(components, ref.split("/").last))
   }
 
   private def hasReadOnlyBase: SchemaOrReferenceObject => Boolean = {
-    case so: SchemaObject   => so.readOnly.getOrElse(false)
-    case ReferenceObject(_) => false
+    case so: SchemaObject      => so.readOnly.getOrElse(false)
+    case ReferenceObject(_, _) => false
   }
 
   private def enrichSublevelPropsWithRequest(
@@ -415,7 +421,7 @@ object ASTTranslationFunctions {
       .map {
         case (k, v: ReferenceObject) =>
           if (schemaObjectHasReadOnlyComponent(components)(v)) {
-            (k, ReferenceObject(v.$ref + "Request"))
+            (k, ReferenceObject(v.$ref + "Request", v.default))
           } else {
             (k, v)
           }
@@ -451,7 +457,7 @@ object ASTTranslationFunctions {
     splitReadOnlyComponents(ast.components.schemas)
       .flatMap {
         case (name: String, schemaObject: SchemaObject) =>
-          evalSchema(name, schemaObject)
+          evalSchema(name, schemaObject, ast.components.schemas)
             .map { cleanFilename(name) -> _ }
       }
       .toList

@@ -2,8 +2,8 @@ import Dependencies._
 import ScalaOptions._
 
 organization in ThisBuild := "com.enfore"
-version in ThisBuild := "1.3.2"
-//version in ThisBuild := "unstable-SNAPSHOT"
+ThisBuild / crossScalaVersions := supportedVersions
+version in ThisBuild := "unstable-SNAPSHOT"
 fork in Test in ThisBuild := true
 
 lazy val http4s = Seq(http4sCore, http4sDsl, http4sCirce, http4sServer)
@@ -45,7 +45,6 @@ lazy val root = (project in file("."))
 lazy val `openapi-scala` = (project in file("openapi-scala"))
   .settings(
     name := "openapi-scala",
-    // publishMavenStyle := true,
     libraryDependencies ++= Seq(
       circeYaml % "test",
       scalameta % "test"
@@ -73,7 +72,6 @@ lazy val `sbt-openapi` = (project in file("sbt-openapi"))
   .settings(
     name := "sbt-openapi",
     sbtPlugin := true,
-    publishMavenStyle := true,
     libraryDependencies ++= Seq(
       Dependencies.scalafmt,
       swaggerCore,
@@ -88,7 +86,7 @@ lazy val publishSettings = Seq(
   crossPaths := false,
   autoAPIMappings := true,
   publishTo := Some(
-    Opts.resolver.sonatypeStaging
+    Opts.resolver.sonatypeSnapshots
   ),
   useGpg := false,
   usePgpKeyHex("1EAA6358E4812E9E"),

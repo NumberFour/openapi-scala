@@ -31,7 +31,7 @@ object SymbolAnnotationMaker {
     * @return Type signature as a string (including refinements)
     */
   def primitiveTypeSigWithRefinements(in: TypeRepr): String = in match {
-    case PrimitiveString(refinements) =>
+    case PrimitiveString(refinements, _) =>
       val base = "String"
       refinements
         .fold(base)(r => s"$base ${refinementTagGenerator(r)}")
@@ -39,16 +39,16 @@ object SymbolAnnotationMaker {
       val base = s"List[${ShowTypeTag.typeReprShowType.showType(data)}]"
       refinements
         .fold(base)(r => s"$base ${refinementTagGenerator(r)}")
-    case PrimitiveInt(refinements) =>
+    case PrimitiveInt(refinements, _) =>
       val base = "Int"
       refinements
         .fold(base)(r => s"$base ${refinementTagGenerator(r)}")
-    case PrimitiveNumber(refinements) =>
+    case PrimitiveNumber(refinements, _) =>
       val base = "Double"
       refinements
         .fold(base)(r => s"$base ${refinementTagGenerator(r)}")
-    case PrimitiveOption(x: Primitive, _) => s"Option[${this.primitiveTypeSigWithRefinements(x)}]"
-    case x @ _                            => ShowTypeTag.typeReprShowType.showType(x)
+    case PrimitiveOption(x: Primitive) => s"Option[${this.primitiveTypeSigWithRefinements(x)}]"
+    case x @ _                         => ShowTypeTag.typeReprShowType.showType(x)
   }
 
   /**
@@ -71,19 +71,21 @@ object SymbolAnnotationMaker {
     *                         or type alias definition
     */
   def refinedAnnotation(symbol: Symbol)(generateForAlias: Boolean = true): String = symbol match {
-    case PrimitiveSymbol(_, PrimitiveOption(data: Primitive, Some(defaultValue))) =>
-      val possibleDefault = if (generateForAlias) s" = $defaultValue" else ""
-      s"${primitiveTypeSigWithRefinements(data)}$possibleDefault"
-    case PrimitiveSymbol(_, PrimitiveOption(data: Primitive, None)) =>
+    case PrimitiveSymbol(_, PrimitiveOption(data: Primitive)) =>
       val content = primitiveTypeSigWithRefinements(data)
       if (generateForAlias) s"Option[$content]" else content
-    case PrimitiveSymbol(_, data: Primitive) => primitiveTypeSigWithRefinements(data)
-    case x @ _                               => makeAnnotation(x)
+    case PrimitiveSymbol(_, x) =>
+      val possibleDefault = if (generateForAlias && x.default.nonEmpty) s" = ${x.defaultString.get}" else ""
+      s"${primitiveTypeSigWithRefinements(x)}$possibleDefault"
+    case RefSymbol(_, r) =>
+      val possibleDefault = if (generateForAlias && r.default.nonEmpty) s" = ${r.defaultString.get}" else ""
+      s"${typeReprShowType.showType(r)}$possibleDefault"
+    case x @ _ => makeAnnotation(x)
   }
 
   def refinementOnType(symbol: Symbol): String = symbol match {
-    case x @ PrimitiveSymbol(_, PrimitiveOption(data: Primitive, _)) => makeAnnotation(x.copy(dataType = data))
-    case x @ _                                                       => makeAnnotation(x)
+    case x @ PrimitiveSymbol(_, PrimitiveOption(data: Primitive)) => makeAnnotation(x.copy(dataType = data))
+    case x @ _                                                    => makeAnnotation(x)
   }
 
 }

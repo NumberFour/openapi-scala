@@ -10,7 +10,7 @@ class SymbolAnnotationMakerSpec extends AnyFlatSpec with Matchers {
   "dataRefinementMatcher" should "generate proper type signatures for refined primitives" in {
     val op: String =
       SymbolAnnotationMaker.primitiveTypeSigWithRefinements(
-        PrimitiveString(Some(NonEmptyList.of(MinLength(1), MaxLength(256))))
+        PrimitiveString(Some(NonEmptyList.of(MinLength(1), MaxLength(256))), None)
       )
 
     op shouldBe "String Refined AllOf[MinSize[W.`1`.T] :: MaxSize[W.`256`.T] :: HNil]"

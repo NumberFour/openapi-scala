@@ -9,16 +9,13 @@ trait ShowTypeTag[T] {
 
 object ShowTypeTag {
   implicit val primitiveShowType: ShowTypeTag[Primitive] = {
-    case PrimitiveString(_)                => "String"
-    case PrimitiveNumber(_)                => "Double"
-    case PrimitiveInt(_)                   => "Int"
-    case PrimitiveBoolean(_)               => "Boolean"
+    case _: PrimitiveString                => "String"
+    case _: PrimitiveNumber                => "Double"
+    case _: PrimitiveInt                   => "Int"
+    case _: PrimitiveBoolean               => "Boolean"
     case PrimitiveArray(data: TypeRepr, _) => s"List[${typeReprShowType.showType(data)}]"
-    case PrimitiveOption(data: TypeRepr, default) =>
-      default.fold(s"Option[${typeReprShowType.showType(data)}]")(
-        d => s"${typeReprShowType.showType(data)} = ${d.toString}"
-      )
-    case PrimitiveDict(data: TypeRepr, _) => s"Map[String, ${typeReprShowType.showType(data)}]"
+    case PrimitiveOption(data: TypeRepr)   => s"Option[${typeReprShowType.showType(data)}]"
+    case PrimitiveDict(data: TypeRepr, _)  => s"Map[String, ${typeReprShowType.showType(data)}]"
   }
 
   implicit private val newTypeShowType: ShowTypeTag[NewType] = {

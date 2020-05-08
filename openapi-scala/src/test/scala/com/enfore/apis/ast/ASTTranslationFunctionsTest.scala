@@ -70,7 +70,7 @@ class ASTTranslationFunctionsTest extends AnyFunSuite {
       ASTTranslationFunctions.splitReadOnlyComponents(
         Map(
           "CustomerRole" -> objectWithProperties(
-            Map("enforeCard" -> ReferenceObject("#/components/schemas/CustomerCard"))
+            Map("enforeCard" -> ReferenceObject("#/components/schemas/CustomerCard", None))
           ),
           "CustomerCard" -> objectWithProperties(
             Map("added" -> readOnlyString)
@@ -79,10 +79,10 @@ class ASTTranslationFunctionsTest extends AnyFunSuite {
       ) ===
         Map(
           "CustomerRole" -> objectWithProperties(
-            Map("enforeCard" -> ReferenceObject("#/components/schemas/CustomerCard"))
+            Map("enforeCard" -> ReferenceObject("#/components/schemas/CustomerCard", None))
           ),
           "CustomerRoleRequest" -> objectWithProperties(
-            Map("enforeCard" -> ReferenceObject("#/components/schemas/CustomerCardRequest"))
+            Map("enforeCard" -> ReferenceObject("#/components/schemas/CustomerCardRequest", None))
           ),
           "CustomerCard" -> objectWithProperties(
             Map("added" -> readOnlyString)
@@ -99,10 +99,10 @@ class ASTTranslationFunctionsTest extends AnyFunSuite {
       ASTTranslationFunctions.splitReadOnlyComponents(
         Map(
           "CustomerRole" -> objectWithProperties(
-            Map("enforeCard" -> ReferenceObject("#/components/schemas/CustomerCard"))
+            Map("enforeCard" -> ReferenceObject("#/components/schemas/CustomerCard", None))
           ),
           "CustomerCard" -> objectWithProperties(
-            Map("foo" -> ReferenceObject("#/components/schemas/FooObject"))
+            Map("foo" -> ReferenceObject("#/components/schemas/FooObject", None))
           ),
           "FooObject" -> objectWithProperties(
             Map("added" -> readOnlyString)
@@ -111,16 +111,16 @@ class ASTTranslationFunctionsTest extends AnyFunSuite {
       ) ===
         Map(
           "CustomerRole" -> objectWithProperties(
-            Map("enforeCard" -> ReferenceObject("#/components/schemas/CustomerCard"))
+            Map("enforeCard" -> ReferenceObject("#/components/schemas/CustomerCard", None))
           ),
           "CustomerRoleRequest" -> objectWithProperties(
-            Map("enforeCard" -> ReferenceObject("#/components/schemas/CustomerCardRequest"))
+            Map("enforeCard" -> ReferenceObject("#/components/schemas/CustomerCardRequest", None))
           ),
           "CustomerCard" -> objectWithProperties(
-            Map("foo" -> ReferenceObject("#/components/schemas/FooObject"))
+            Map("foo" -> ReferenceObject("#/components/schemas/FooObject", None))
           ),
           "CustomerCardRequest" -> objectWithProperties(
-            Map("foo" -> ReferenceObject("#/components/schemas/FooObjectRequest"))
+            Map("foo" -> ReferenceObject("#/components/schemas/FooObjectRequest", None))
           ),
           "FooObject" -> objectWithProperties(
             Map("added" -> readOnlyString)

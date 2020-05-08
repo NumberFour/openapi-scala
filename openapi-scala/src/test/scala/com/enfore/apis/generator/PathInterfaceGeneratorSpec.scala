@@ -20,7 +20,7 @@ class PathInterfaceGeneratorSpec extends AnyFlatSpec with Matchers {
       Some("dummyFunction"),
       List(PathParameter("id")),
       Map.empty,
-      Some(Map("application/json" -> TypeReprRef("#components/schemas/Product", "Product"))),
+      Some(Map("application/json" -> TypeReprRef("#components/schemas/Product", "Product", None))),
       200
     )
     val expected =
@@ -53,8 +53,8 @@ class PathInterfaceGeneratorSpec extends AnyFlatSpec with Matchers {
       ReqWithContentType.POST,
       List.empty,
       Map.empty,
-      Some(TypeReprRef("#components/schemas/Product", "Product")),
-      Some(Map("application/json" -> TypeReprRef("#components/schemas/Product", "Product"))),
+      Some(TypeReprRef("#components/schemas/Product", "Product", None)),
+      Some(Map("application/json" -> TypeReprRef("#components/schemas/Product", "Product", None))),
       Some(false),
       200
     )
@@ -88,7 +88,7 @@ class PathInterfaceGeneratorSpec extends AnyFlatSpec with Matchers {
       ReqWithContentType.POST,
       List.empty,
       Map.empty,
-      Some(TypeReprRef("#components/schemas/Subscription", "Subscription")),
+      Some(TypeReprRef("#components/schemas/Subscription", "Subscription", None)),
       None,
       Some(false),
       200

@@ -38,7 +38,8 @@ class ReadRoutesToInteropSpec extends AnyFlatSpec with Matchers {
                 Map(
                   "application/vnd.enfore.contacts+json" -> Ref(
                     "#/components/schemas/IndividualContact",
-                    "IndividualContact"
+                    "IndividualContact",
+                    None
                   )
                 )
               ),
@@ -52,12 +53,13 @@ class ReadRoutesToInteropSpec extends AnyFlatSpec with Matchers {
               PUT,
               List(PathParameter("contact-id")),
               Map(),
-              Some(Ref("foo", "IndividualContact")),
+              Some(Ref("foo", "IndividualContact", None)),
               Some(
                 Map(
                   "application/vnd.enfore.contacts+json" -> Ref(
                     "#/components/schemas/IndividualContact",
-                    "IndividualContact"
+                    "IndividualContact",
+                    None
                   )
                 )
               ),
@@ -127,7 +129,7 @@ class ReadRoutesToInteropSpec extends AnyFlatSpec with Matchers {
               "dateOfBirth" -> SchemaObject(`type` = Some(SchemaObjectType.string)),
               "id"          -> SchemaObject(`type` = Some(SchemaObjectType.string)),
               "anniversary" -> SchemaObject(`type` = Some(SchemaObjectType.string)),
-              "gender"      -> ReferenceObject("#/components/schemas/Gender")
+              "gender"      -> ReferenceObject("#/components/schemas/Gender", None)
             )
           )
         ),
@@ -153,7 +155,7 @@ class ReadRoutesToInteropSpec extends AnyFlatSpec with Matchers {
                 Some(
                   Map(
                     "application/vnd.enfore.contacts+json" -> MediaTypeObject(
-                      Some(ReferenceObject("#/components/schemas/IndividualContact"))
+                      Some(ReferenceObject("#/components/schemas/IndividualContact", None))
                     )
                   )
                 )
@@ -163,7 +165,13 @@ class ReadRoutesToInteropSpec extends AnyFlatSpec with Matchers {
             ),
             Some(
               List(
-                ParameterObject("contact-id", path, Some(ReferenceObject("")), Some("ID of the contact to load"), None)
+                ParameterObject(
+                  "contact-id",
+                  path,
+                  Some(ReferenceObject("", None)),
+                  Some("ID of the contact to load"),
+                  None
+                )
               )
             )
           ),
@@ -176,7 +184,7 @@ class ReadRoutesToInteropSpec extends AnyFlatSpec with Matchers {
                 None,
                 Map(
                   "application/vnd.enfore.contacts+json" -> MediaTypeObject(
-                    Some(ReferenceObject("#/components/schemas/IndividualContact"))
+                    Some(ReferenceObject("#/components/schemas/IndividualContact", None))
                   )
                 ),
                 None
@@ -189,7 +197,7 @@ class ReadRoutesToInteropSpec extends AnyFlatSpec with Matchers {
                 Some(
                   Map(
                     "application/vnd.enfore.contacts+json" -> MediaTypeObject(
-                      Some(ReferenceObject("#/components/schemas/IndividualContact"))
+                      Some(ReferenceObject("#/components/schemas/IndividualContact", None))
                     )
                   )
                 )
@@ -203,7 +211,7 @@ class ReadRoutesToInteropSpec extends AnyFlatSpec with Matchers {
                 ParameterObject(
                   "contact-id",
                   path,
-                  Some(ReferenceObject("")),
+                  Some(ReferenceObject("", None)),
                   Some("ID of the contact to update"),
                   None
                 )
