@@ -9,8 +9,11 @@ import com.enfore.apis.repr.TypeRepr._
 import com.enfore.apis.repr._
 
 import scala.collection.immutable
+import scala.util.matching.Regex
 
 object ASTTranslationFunctions {
+
+  val camelCaseExpr: Regex = "(([^_A-Z])([A-Z])+)".r
 
   final case class PackageName(name: String)
 
@@ -271,6 +274,8 @@ object ASTTranslationFunctions {
   ): Option[NewType] = {
     val mapped: immutable.Iterable[Option[Symbol]] = properties map {
       case (name: String, repr: SchemaOrReferenceObject) =>
+        if (camelCaseExpr.findAllIn(name).nonEmpty)
+          println(s"[WARN] You are using camel case name in $name. JSON serialiser will only respect snake cases.")
         val loaded: Option[TypeRepr] = getTypeRepr(required, name, repr, allSchemas)
         assert(loaded.isDefined, s"$name in $typeName could not be parsed.")
         loaded map (makeSymbolFromTypeRepr(name, _))

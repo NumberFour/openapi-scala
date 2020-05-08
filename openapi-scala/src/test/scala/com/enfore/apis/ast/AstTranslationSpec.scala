@@ -616,4 +616,13 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
     filtered.get("regularComponent") shouldBe components.get("regularComponent")
   }
 
+  "Helper functions" should "ensure that a warning is produced on camelCase strings" in {
+    val expr = ASTTranslationFunctions.camelCaseExpr
+
+    expr.findAllIn("myCamelCase").toList shouldBe List("yC", "lC")
+    expr.findAllIn("SimpleCase").toList shouldBe List("eC")
+    expr.findAllIn("myMix_case_Expr").toList shouldBe List("yM")
+    expr.findAllIn("my_snake_case").toList shouldBe List()
+  }
+
 }
