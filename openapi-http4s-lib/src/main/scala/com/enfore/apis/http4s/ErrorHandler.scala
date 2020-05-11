@@ -50,28 +50,28 @@ class ErrorHandlerImplementation(convertThrowableToServiceExceptionFn: Throwable
     err match {
       case e: ServiceError =>
         logger.error("ServiceError", err)
-        InternalServerError(e.asJson)
+        InternalServerError(e.asJson.dropNullValues)
       case e: ItemAlreadyExists =>
         logger.info("ItemAlreadyExists", err)
-        Conflict(e.asJson)
+        Conflict(e.asJson.dropNullValues)
       case e: ServiceObjectLocked =>
         logger.info("ObjectLocked", err)
-        Locked(e.asJson)
+        Locked(e.asJson.dropNullValues)
       case e: ItemDoesNotExist =>
         logger.info("ItemDoesNotExist", err)
-        NotFound(e.asJson)
+        NotFound(e.asJson.dropNullValues)
       case e: RequestConflict =>
         logger.warn("RequestConflict", err)
-        Conflict(e.asJson)
+        Conflict(e.asJson.dropNullValues)
       case e: PermissionRequired =>
         logger.info("PermissionRequired", err)
-        Forbidden(e.asJson)
+        Forbidden(e.asJson.dropNullValues)
       case e: WrongRequestContent =>
         logger.info("WrongRequestContent", err)
-        BadRequest(e.asJson)
+        BadRequest(e.asJson.dropNullValues)
       case e: UnprocessableContent =>
         logger.info("UnprocessableContent", err)
-        UnprocessableEntity(e.asJson)
+        UnprocessableEntity(e.asJson.dropNullValues)
     }
 
 }

@@ -315,7 +315,7 @@ object RouteGenerator {
     if (response.isEmpty) {
       s"(_: ${firstResponseType(response)}) => EmptyGenerator($status)()"
     } else {
-      s"(x: ${firstResponseType(response)}) => EntityGenerator($status)(x.asJson)"
+      s"(x: ${firstResponseType(response)}) => EntityGenerator($status)(x.asJson.dropNullValues)"
     }
 
   private def getResponseStatus(route: RouteDefinition): String =
