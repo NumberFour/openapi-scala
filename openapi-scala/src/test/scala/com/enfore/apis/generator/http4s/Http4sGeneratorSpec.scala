@@ -89,7 +89,7 @@ class Http4sGeneratorSpec extends AnyFreeSpec with Matchers {
       |
       |    HttpRoutes.of[F] {
       |      case request @ GET -> Root / "contacts" / "individual" =>
-      |        errorHandler.resolve(impl.`dummyFunction`(request), (x: IndividualContact) => EntityGenerator(200)(x.asJson))
+      |        errorHandler.resolve(impl.`dummyFunction`(request), (x: IndividualContact) => EntityGenerator(200)(x.asJson.dropNullValues))
       |    }
       |  }
       |}

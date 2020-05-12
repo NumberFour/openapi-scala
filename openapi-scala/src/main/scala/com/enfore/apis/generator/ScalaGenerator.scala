@@ -196,7 +196,7 @@ object ScalaGenerator {
       .map(_.typeName)
       .map(
         member =>
-          s"""implicit def case${member} = at[$member](_.asJson.deepMerge(Json.obj("$discriminator" -> Json.fromString("$member"))))"""
+          s"""implicit def case${member} = at[$member](_.asJson.dropNullValues.deepMerge(Json.obj("$discriminator" -> Json.fromString("$member"))))"""
       )
       .mkString(s"\n$margin")
 
