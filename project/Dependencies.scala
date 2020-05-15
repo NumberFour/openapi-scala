@@ -13,6 +13,7 @@ object Dependencies {
   lazy val circeCore       = "io.circe"               %% "circe-core"              % "0.13.0"
   lazy val circeParser     = "io.circe"               %% "circe-parser"            % "0.13.0"
   lazy val circeGeneric    = "io.circe"               %% "circe-generic"           % "0.13.0"
+  lazy val circeExtras     = "io.circe"               %% "circe-generic-extras"    % "0.13.0"
   lazy val circeYaml       = "io.circe"               %% "circe-yaml"              % "0.13.0"
   lazy val circeDerivation = "io.circe"               %% "circe-derivation"        % "0.13.0-M4"
   lazy val scalaCompat     = "org.scala-lang.modules" %% "scala-collection-compat" % "2.1.2"

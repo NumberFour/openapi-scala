@@ -29,7 +29,8 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         |package com.enfore.apis
         |
         |import io.circe._
-        |import io.circe.derivation._
+        |import io.circe.generic.extras.Configuration
+        |import io.circe.generic.extras.semiauto._
         |
         |/**
         |* Test Summary
@@ -37,6 +38,7 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         |final case class Person(name: String, age: Int)
         |
         |object Person {
+        | implicit val customConfig = Configuration.default.withDefaults
         | implicit val circeDecoder: Decoder[Person] = deriveDecoder[Person](renaming.snakeCase, true, None)
         | implicit val circeEncoder: Encoder[Person] = deriveEncoder[Person](renaming.snakeCase, None)
         |}
@@ -61,11 +63,13 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         |package com.enfore.apis
         |
         |import io.circe._
-        |import io.circe.derivation._
+        |import io.circe.generic.extras.Configuration
+        |import io.circe.generic.extras.semiauto._
         |
         |final case class Person()
         |
         |object Person {
+        | implicit val customConfig = Configuration.default.withDefaults
         | implicit val circeDecoder: Decoder[Person] = deriveDecoder[Person](renaming.snakeCase, true, None)
         | implicit val circeEncoder: Encoder[Person] = deriveEncoder[Person](renaming.snakeCase, None)
         |}
@@ -93,11 +97,13 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         |package com.enfore.apis
         |
         |import io.circe._
-        |import io.circe.derivation._
+        |import io.circe.generic.extras.Configuration
+        |import io.circe.generic.extras.semiauto._
         |
         |final case class Person(name: com.enfore.apis.Name, age: Int)
         |
         |object Person {
+        | implicit val customConfig = Configuration.default.withDefaults
         | implicit val circeDecoder: Decoder[Person] = deriveDecoder[Person](renaming.snakeCase, true, None)
         | implicit val circeEncoder: Encoder[Person] = deriveEncoder[Person](renaming.snakeCase, None)
         |}
@@ -148,11 +154,13 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         |package com.enfore.apis
         |
         |import io.circe._
-        |import io.circe.derivation._
+        |import io.circe.generic.extras.Configuration
+        |import io.circe.generic.extras.semiauto._
         |
         |final case class Person(name: com.enfore.apis.Name = com.enfore.apis.Name.MAGIC, age: Int)
         |
         |object Person {
+        | implicit val customConfig = Configuration.default.withDefaults
         | implicit val circeDecoder: Decoder[Person] = deriveDecoder[Person](renaming.snakeCase, true, None)
         | implicit val circeEncoder: Encoder[Person] = deriveEncoder[Person](renaming.snakeCase, None)
         |}
@@ -184,7 +192,8 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         |package com.enfore.apis
         |
         |import io.circe._
-        |import io.circe.derivation._
+        |import io.circe.generic.extras.Configuration
+        |import io.circe.generic.extras.semiauto._
         |
         |final case class ParamedType(optionalVal: Option[String],
         | listVal: List[Int],
@@ -193,6 +202,7 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         | listOpVal: List[Option[Double]])
         |
         | object ParamedType {
+        |   implicit val customConfig = Configuration.default.withDefaults
         |   implicit val circeDecoder: Decoder[ParamedType] = deriveDecoder[ParamedType](renaming.snakeCase, true, None)
         |   implicit val circeEncoder: Encoder[ParamedType] = deriveEncoder[ParamedType](renaming.snakeCase, None)
         | }
@@ -220,7 +230,8 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         |package com.enfore.apis
         |
         |import io.circe._
-        |import io.circe.derivation._
+        |import io.circe.generic.extras.Configuration
+        |import io.circe.generic.extras.semiauto._
         |
         |import eu.timepit.refined._
         |import eu.timepit.refined.api._
@@ -233,6 +244,7 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         |final case class RefinedType(stringVal : String Refined AllOf[MinSize[W.`3`.T] :: MaxSize[W.`3`.T] :: HNil])
         |
         |object RefinedType {
+        | implicit val customConfig = Configuration.default.withDefaults
         | implicit val circeDecoder: Decoder[RefinedType] = deriveDecoder[RefinedType](renaming.snakeCase, true, None)
         | implicit val circeEncoder: Encoder[RefinedType] = deriveEncoder[RefinedType](renaming.snakeCase, None)
         | object RefinementConstructors {
@@ -316,7 +328,8 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         |package com.enfore.apis
         |
         |import io.circe._
-        |import io.circe.derivation._
+        |import io.circe.generic.extras.Configuration
+        |import io.circe.generic.extras.semiauto._
         |
         |import eu.timepit.refined._
         |import eu.timepit.refined.api._
@@ -329,6 +342,7 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         |final case class RefinedType(listString : List[String] Refined AllOf[MinSize[W.`3`.T] :: MaxSize[W.`3`.T] :: HNil])
         |
         |object RefinedType {
+        | implicit val customConfig = Configuration.default.withDefaults
         | implicit val circeDecoder: Decoder[RefinedType] = deriveDecoder[RefinedType](renaming.snakeCase, true, None)
         | implicit val circeEncoder: Encoder[RefinedType] = deriveEncoder[RefinedType](renaming.snakeCase, None)
         | object RefinementConstructors {
@@ -363,7 +377,8 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         |package com.enfore.apis
         |
         |import io.circe._
-        |import io.circe.derivation._
+        |import io.circe.generic.extras.Configuration
+        |import io.circe.generic.extras.semiauto._
         |
         |
         |import eu.timepit.refined._
@@ -377,6 +392,7 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         |final case class RefinedType(nested : Option[String Refined AllOf[MinSize[W.`2`.T] :: MaxSize[W.`2`.T] :: HNil]])
         |
         | object RefinedType {
+        |  implicit val customConfig = Configuration.default.withDefaults
         |  implicit val circeDecoder: Decoder[RefinedType] = deriveDecoder[RefinedType](renaming.snakeCase, true, None)
         |  implicit val circeEncoder: Encoder[RefinedType] = deriveEncoder[RefinedType](renaming.snakeCase, None)
         |
