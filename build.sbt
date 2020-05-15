@@ -84,7 +84,7 @@ lazy val `sbt-openapi` = (project in file("sbt-openapi"))
   .dependsOn(`openapi-scala`)
 
 lazy val publishSettings = Seq(
-  crossPaths := false,
+  crossPaths := true,
   autoAPIMappings := true,
   publishTo := Some(
     Opts.resolver.sonatypeSnapshots
