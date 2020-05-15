@@ -30,6 +30,7 @@ lazy val sharedDependencies =
     circeRefined,
     circeCore,
     circeParser,
+    circeExtras,
     circeGeneric,
     circeDerivation,
     scalaCompat,

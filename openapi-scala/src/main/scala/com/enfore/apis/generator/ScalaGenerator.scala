@@ -175,7 +175,8 @@ object ScalaGenerator {
     s"""
        |package $packageName\n
        |import io.circe._
-       |import io.circe.derivation._\n${refinementImports.getOrElse("")}
+       |import io.circe.generic.extras.Configuration
+       |import io.circe.generic.extras.semiauto._\n${refinementImports.getOrElse("")}
        |$docs
        |final case class $typeName${values
          .map(
@@ -184,6 +185,7 @@ object ScalaGenerator {
          )
          .mkString("(\n\t", ",\n\t", "\n)")} \n
        |object $typeName {
+       |\timplicit val customConfig = Configuration.default.withDefaults
        |\timplicit val circeDecoder: Decoder[$typeName] = deriveDecoder[$typeName](renaming.snakeCase, true, None)
        |\timplicit val circeEncoder: Encoder[$typeName] = deriveEncoder[$typeName](renaming.snakeCase, None)${refinedCode
          .getOrElse("")}
