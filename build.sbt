@@ -3,7 +3,7 @@ import ScalaOptions._
 
 organization in ThisBuild := "com.enfore"
 ThisBuild / crossScalaVersions := supportedVersions
-version in ThisBuild := "1.3.5"
+version in ThisBuild := "unstable-SNAPSHOT"
 fork in Test in ThisBuild := true
 
 lazy val http4s = Seq(http4sCore, http4sDsl, http4sCirce, http4sServer)
@@ -86,9 +86,13 @@ lazy val `sbt-openapi` = (project in file("sbt-openapi"))
 lazy val publishSettings = Seq(
   crossPaths := true,
   autoAPIMappings := true,
-  publishTo := Some(
-    Opts.resolver.sonatypeSnapshots
-  ),
+  publishTo := {
+    if (isSnapshot.value)
+      Some(
+        Opts.resolver.sonatypeSnapshots
+      )
+    else Some(Opts.resolver.sonatypeStaging)
+  },
   useGpg := false,
   usePgpKeyHex("1EAA6358E4812E9E"),
   pgpPublicRing := file(".") / "project" / ".gnupg" / "pubring.gpg",

@@ -1,0 +1,44 @@
+name: Cross Release After Testing
+
+on:
+  create:
+    branches:
+      - 'refs/tags/*'
+
+jobs:
+  test-and-release:
+
+    runs-on: ubuntu-latest
+
+    env:
+      PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE}}
+      GPG_KEYS: ${{ secrets.GPG_KEYS}}
+      SONATYPE_SBT: ${{ secrets.SONATYPE_SBT }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Setup GPG Keys
+        run: |
+          echo $GPG_KEYS | base64 -di > keys.zip
+          unzip -d project/.gnupg keys.zip
+          mkdir -p ~/.sbt/1.0
+          echo $SONATYPE_SBT > ~/.sbt/1.0/sonatype.sbt
+      - name: Setup version in SBT
+        run: |
+          VERSION=${GITHUB_REF/refs\/tags\//}
+          echo $VERSION
+          sed "s/unstable-SNAPSHOT/${VERSION}/" build.sbt > build.sbt.2
+          mv build.sbt.2 build.sbt
+      - name: Test & Release
+        run: |
+          VERSION=${GITHUB_REF/refs\/tags\//}
+          if [[ $VERSION =~ \-SNAPSHOT$ ]]; then 
+            sbt test +publishSigned 
+          else 
+            sbt test +publishSigned sonatypeRelease
+          fi
+
