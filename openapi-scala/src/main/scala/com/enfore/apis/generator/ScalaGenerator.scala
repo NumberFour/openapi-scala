@@ -185,9 +185,9 @@ object ScalaGenerator {
          )
          .mkString("(\n\t", ",\n\t", "\n)")} \n
        |object $typeName {
-       |\timplicit val customConfig = Configuration.default.withDefaults
-       |\timplicit val circeDecoder: Decoder[$typeName] = deriveDecoder[$typeName](renaming.snakeCase, true, None)
-       |\timplicit val circeEncoder: Encoder[$typeName] = deriveEncoder[$typeName](renaming.snakeCase, None)${refinedCode
+       |\timplicit val customConfig = Configuration.default.withDefaults.withSnakeCaseMemberNames.withSnakeCaseConstructorNames
+       |\timplicit val circeDecoder: Decoder[$typeName] = deriveDecoder[$typeName]
+       |\timplicit val circeEncoder: Encoder[$typeName] = deriveEncoder[$typeName]${refinedCode
          .getOrElse("")}
        |}
        """.stripMargin.trim
