@@ -2,27 +2,44 @@
 
 This project contains an opinionated library and SBT Plugin for Scala code generation from [OpenAPI 3.0](https://swagger.io/specification/) compliant YAML. 
 
-This will generate Components (i.e., schemas or types), and Paths (i.e., route definitions) for REST APIs.
+This will generate data structures(i.e., schemas or types), Circe JSON serializers, and Paths (i.e., route definitions) for REST APIs.
 
 We do not support all OpenAPI 3.0 features. For more details on what is supported, look at the [Limitations](#limitations) section.
 
-### OpenAPI Scala
+## Modules
 
-SBT sub-project `openapi-scala` contains the main logic and library for loading, representing, and translating YAML to Scala code.
-These contain components that are translated into Scala's `case classes` and Routes, which are explained in the next section.
+### sbt-openapi
+The SBT module `sbt-openapi` is the interface for the generator toolchain and contains:
+a) an interface to easily add the openAPI generator to a project
+b) Put external openAPI resources/definitions/yaml-files next to internal definitions to make them referable. This enables
+sharing artifact across multiple openAPI projects (like shared error messages/ data structures).
+c) logic to load, resolve and aggregate openAPI definitions using the io.swagger.parser and generated a single combined
+ openapi.json definition as output
+d) trigger code generation. (`openapi-scala`) 
+
+### openapi-scala
+`openapi-scala`s main responsibility is to parse a single openAPI.json file into memory (`ast`), transform it into a
+generator friendly intermediate representation (`repr`) and generate scala code (`generator`).
+
+### openapi-lib & openapi-htt4s-lib
+Libraries used by the generated code.
 
 #### Routes
 
-We support different types of Route generation, depending on the backend you need it for. 
+We support different types of Route generation, depending on the backend you need it for.  //TODO which backends do we have and how do we configure it?
 
 - The generic Routes are each translated to a Scala `trait` declaring interfaces for that particular HTTP route.
-- The http4s Routes translate into two files, one file with a trait for the implementation you'll need to provide and one file with an object apply function of which accepts mentioned implementation trait. 
+- The http4s Routes translate into two files, one file with a trait for the implementation you'll need to provide and 
+one file with an object apply function of which accepts mentioned implementation trait. 
 
-The names of the functions and values for the routes is generated at run-time. However, if an `operationId` field is defined (as specified in OAS 3.0) we will use those to generate user-friendly function names.
-
+The names of the functions implementing the route are either
+ a) the concatenation of http method and path or
+ b) the optionally more descriptive content of the `operationId` field (as specified in OAS 3.0) 
+ 
 ## Components
 
-Components in OpenAPI are the types that can be referred to as inputs/outputs for routes. A common use of components is to define product types. We take these components and translate them to Scala case classes. Consider the following example:
+Components in OpenAPI are the types that can be referred to as inputs/outputs for routes. A common use of components is 
+to define product types. We take these components and translate them to Scala case classes. Consider the following example:
 
 ```yaml
 components:
@@ -75,6 +92,7 @@ libraryDependencies += "com.enfore" %% "openapi-lib" % "<openapi-scala-version>"
 
 Additionally, you will need to satisfy these library dependencies for `openapi-lib`. The provided versions are tested and made sure to work. You should be able to use any version compatible with your project though.
 
+// TODO shouldn't we automatically add these dependencies via the SBT auto plugin via flag?
 ```scala
 "com.beachape" %% "enumeratum"       % "1.5.13",
 "com.beachape" %% "enumeratum-circe" % "1.5.20",
