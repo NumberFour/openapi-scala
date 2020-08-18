@@ -3,6 +3,7 @@ import ScalaOptions._
 
 ThisBuild / organization := "com.enfore"
 ThisBuild / crossScalaVersions := supportedVersions
+ThisBuild / version := "unstable-SNAPSHOT"
 fork in Test in ThisBuild := true
 
 lazy val http4s = Seq(http4sCore, http4sDsl, http4sCirce, http4sServer)
