@@ -27,12 +27,6 @@ jobs:
           unzip -d project/.gnupg keys.zip
           mkdir -p ~/.sbt/1.0
           echo $SONATYPE_SBT > ~/.sbt/1.0/sonatype.sbt
-      - name: Setup version in SBT
-        run: |
-          VERSION=${GITHUB_REF/refs\/tags\//}
-          echo $VERSION
-          sed "s/unstable-SNAPSHOT/${VERSION}/" build.sbt > build.sbt.2
-          mv build.sbt.2 build.sbt
       - name: Test & Release
         run: |
           VERSION=${GITHUB_REF/refs\/tags\//}

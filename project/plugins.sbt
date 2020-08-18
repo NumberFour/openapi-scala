@@ -17,4 +17,4 @@ addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.2")
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.1.1")
 
 // Automate relase using environment variables
-addSbtPlugin("com.geirsson" % "sbt-ci-release" % "1.5.0")
+addSbtPlugin("com.geirsson" % "sbt-ci-release" % "1.5.3")
