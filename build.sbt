@@ -25,7 +25,7 @@ lazy val commonScalaSettings = Seq(
 
 lazy val sharedDependencies =
   Seq(
-    enumaratum,
+    enumeratum,
     enumeratumCirce,
     circeRefined,
     circeCore,
