@@ -131,8 +131,8 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
                 pathParams = List(),
                 queries =
                   Map("limit" -> PrimitiveOption(PrimitiveInt(Some(NonEmptyList.of(Minimum(1), Maximum(5000))), None))),
-                request = Some(Ref("foo", "Money", None)),
-                response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money", None))),
+                request = Some(Ref("foo", "Money", None, None, None)),
+                response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money", None, None, None))),
                 hasReadOnlyType = Some(false),
                 successStatusCode = 201
               )
@@ -277,7 +277,7 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
           packageName = "foo",
           typeName = "ContainsDefault",
           values = List(
-            RefSymbol("something", Ref("foo", "SomeType", Some("NONE")))
+            RefSymbol("something", Ref("foo", "SomeType", Some("NONE"), None, None))
           ),
           summary = None,
           description = None
@@ -441,7 +441,7 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
                 pathParams = List(),
                 queries = Map.empty,
                 request = Some(PrimitiveString(None, None)),
-                response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money", None))),
+                response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money", None, None, None))),
                 hasReadOnlyType = Some(false),
                 successStatusCode = 200
               )
@@ -533,8 +533,8 @@ class AstTranslationSpec extends AnyFlatSpec with Matchers {
                 `type` = PATCH,
                 pathParams = List(),
                 queries = Map.empty,
-                request = Some(Ref("foo", "Money", None)),
-                response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money", None))),
+                request = Some(Ref("foo", "Money", None, None, None)),
+                response = Some(Map("application/json" -> Ref("#/components/schemas/Money", "Money", None, None, None))),
                 hasReadOnlyType = Some(false),
                 successStatusCode = 200
               )

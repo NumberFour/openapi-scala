@@ -35,19 +35,15 @@ object SwaggerAST {
   }
 
   /*
-   * This is a marker trait for all type definitions that are possible in Swagger. Since OpenAPI YAML
-   * definition relies on optional value to represent the nature of type (i.e., sum, product, primitive, etc.),
-   * we clean them up at load time.
+   * This is a marker trait for all type definitions that are possible in Swagger.
+   * This has to correspond exactly to the OpenAPI specification (currently we target 3.1.0-RC0),
+   * as we load these objects directly from JSON.
    */
   sealed trait SchemaOrReferenceObject {
     val default: Option[PrimitiveValue]
+    val readOnly: Option[Boolean]
+    val writeOnly: Option[Boolean]
   }
-
-  /*
-   * Marker trait for pointing to a type definition. This is to identify between different types of type definitions
-   *   (such as unions and products)
-   */
-  sealed trait TypeDef
 
   final case class Discriminator(propertyName: String)
 
@@ -65,6 +61,7 @@ object SwaggerAST {
       enum: Option[List[String]] = None,
       required: Option[List[String]] = None,
       readOnly: Option[Boolean] = None,  // Points out whether a property is readOnly (defaults to false)
+      writeOnly: Option[Boolean] = None, // Points out whether a property is writeOnly (defaults to false)
       minLength: Option[Int] = None,     // Optional refinement
       maxLength: Option[Int] = None,     // Optional refinement
       maxItems: Option[Int] = None,      // Optional refinement
@@ -75,16 +72,24 @@ object SwaggerAST {
       minimum: Option[Int] = None,       // Optional refinement
       default: Option[PrimitiveValue] = None
   ) extends SchemaOrReferenceObject
-      with TypeDef
 
   /*
    *  Example : {{{
    *   schema:
    *     $ref: '...'
    *     default: NONE // An optional field (used only for Enum references)
+   *     readOnly: true // An optional field (used only for Enum references)
+   *     writeOnly: false // An optional field (used only for Enum references)
    *  }}}
+   *
+   * Note: Our modelling is a bit pedestrian
    */
-  final case class ReferenceObject($ref: String, default: Option[PrimitiveValue]) extends SchemaOrReferenceObject
+  final case class ReferenceObject(
+      $ref: String,
+      default: Option[PrimitiveValue],
+      readOnly: Option[Boolean] = None,
+      writeOnly: Option[Boolean] = None
+  ) extends SchemaOrReferenceObject
 
   // --- Types for Routes ---
 

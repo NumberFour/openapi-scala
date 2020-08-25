@@ -85,7 +85,7 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         "com.enfore.apis",
         "Person",
         List(
-          RefSymbol("name", Ref("com.enfore.apis", "Name", None)),
+          RefSymbol("name", Ref("com.enfore.apis", "Name", None, None, None)),
           PrimitiveSymbol("age", PrimitiveInt(None, None))
         ),
         None,
@@ -142,7 +142,7 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         "com.enfore.apis",
         "Person",
         List(
-          RefSymbol("name", Ref("com.enfore.apis", "Name", Some("MAGIC"))),
+          RefSymbol("name", Ref("com.enfore.apis", "Name", Some("MAGIC"), None, None)),
           PrimitiveSymbol("age", PrimitiveInt(None, None))
         ),
         None,
@@ -417,8 +417,8 @@ class ComponentsTypeReprSpec extends AnyFlatSpec with Matchers {
         "com.enfore.test",
         "Customer",
         Set(
-          Ref("#.components.schemas", "IndividualCustomer", None),
-          Ref("#.components.schemas", "OrganizationCustomer", None)
+          Ref("#.components.schemas", "IndividualCustomer", None, None, None),
+          Ref("#.components.schemas", "OrganizationCustomer", None, None, None)
         ),
         "@type",
         None,

@@ -137,7 +137,7 @@ object ScalaGenerator {
        | }
        """.stripMargin.trim
 
-  private def generateForPrimitive(
+  private def generateForPrimitiveProduct(
       packageName: String,
       typeName: String,
       values: List[Symbol],
@@ -160,7 +160,11 @@ object ScalaGenerator {
       .map(_.toList.mkString("\n\nobject RefinementConstructors {\n\t", "\n\t\t", "\n\t}"))
     val refinementTypeDefs: Option[String] = refinementTypeDef(values).map(_.toList.mkString("\n", "\n\t", "\n"))
     val refinedCode                        = (refinements, refinementTypeDefs).mapN(_ + _)
-
+    val cleanedValues = values
+      .map(
+        sym =>
+          s"${cleanScalaSymbol(sym.valName)} : ${SymbolAnnotationMaker.refinedAnnotation(sym)(generateForAlias = true)}"
+      )
     val refinementImports = refinements.map(_ => """
       |
       |import eu.timepit.refined._
@@ -178,12 +182,7 @@ object ScalaGenerator {
        |import io.circe.generic.extras.Configuration
        |import io.circe.generic.extras.semiauto._\n${refinementImports.getOrElse("")}
        |$docs
-       |final case class $typeName${values
-         .map(
-           sym =>
-             s"${cleanScalaSymbol(sym.valName)} : ${SymbolAnnotationMaker.refinedAnnotation(sym)(generateForAlias = true)}"
-         )
-         .mkString("(\n\t", ",\n\t", "\n)")} \n
+       |final case class $typeName${cleanedValues.mkString("(\n\t", ",\n\t", "\n)")} \n
        |object $typeName {
        |\timplicit val customConfig = Configuration.default.withDefaults.withSnakeCaseMemberNames.withSnakeCaseConstructorNames
        |\timplicit val circeDecoder: Decoder[$typeName] = deriveDecoder[$typeName]
@@ -268,7 +267,7 @@ object ScalaGenerator {
     case NewTypeSymbol(_, PrimitiveEnum(packageName, typeName, content, _, _)) =>
       generateForPrimitiveEnum(packageName, typeName, content)
     case NewTypeSymbol(_, PrimitiveProduct(packageName, typeName, values, summary, description)) =>
-      generateForPrimitive(packageName, typeName, values, summary, description)
+      generateForPrimitiveProduct(packageName, typeName, values, summary, description)
     case NewTypeSymbol(_, PrimitiveUnion(packageName, typeName, unionMembers, discriminator, summary, description)) =>
       generateForPrimitiveUnion(packageName, typeName, unionMembers, discriminator, summary, description)
   }

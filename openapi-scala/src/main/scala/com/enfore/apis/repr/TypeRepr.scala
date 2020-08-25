@@ -9,6 +9,10 @@ sealed trait TypeRepr {
   val typeName: String
   def packDefault(value: TypeRepr.PrimitiveValue): TypeRepr
   def default: Option[_]
+
+  /**
+    * @return The string representation of `default`
+    */
   def defaultString: Option[String] =
     throw new IllegalAccessError(
       s"$typeName with type ${this.getClass.getName} has no default value implementation. This should never have happened. Default case encountered is ${default.toString}"
@@ -46,7 +50,13 @@ object TypeRepr {
       Decoder[PrimitiveBooleanValue].widen
     ).reduceLeft(_ or _)
 
-  final case class Ref(path: String, typeName: String, default: Option[String]) extends TypeRepr {
+  final case class Ref(
+      path: String,
+      typeName: String,
+      default: Option[String],
+      readOnly: Option[Boolean],
+      writeOnly: Option[Boolean]
+  ) extends TypeRepr {
     override def packDefault(value: PrimitiveValue): TypeRepr = value match {
       case PrimitiveStringValue(defaultValue) => this.copy(default = Some(defaultValue))
       case _                                  => throw new AssertionError(s"Could not use $value as default for Ref $typeName")
@@ -169,7 +179,19 @@ object TypeRepr {
   sealed trait Symbol {
     val valName: String
     val typeName: String
-    val ref: Ref
+  }
+
+  final case class PrimitiveSymbol(valName: String, dataType: Primitive) extends Symbol {
+    val typeName: String = ShowTypeTag.typeReprShowType.showType(dataType)
+  }
+
+  final case class NewTypeSymbol(valName: String, data: NewType) extends Symbol {
+    val path: String     = data.packageName
+    val typeName: String = data.typeName
+  }
+
+  final case class RefSymbol(valName: String, ref: Ref) extends Symbol {
+    val typeName: String = ref.typeName
   }
 
   final case class PrimitiveEnum(
@@ -214,21 +236,6 @@ object TypeRepr {
       )
 
     override def default: Option[_] = None
-  }
-
-  final case class PrimitiveSymbol(valName: String, dataType: Primitive) extends Symbol {
-    val typeName: String = ShowTypeTag.typeReprShowType.showType(dataType)
-    val ref              = Ref("root", typeName, None)
-  }
-
-  final case class NewTypeSymbol(valName: String, data: NewType) extends Symbol {
-    val path: String     = data.packageName
-    val typeName: String = data.typeName
-    val ref: Ref         = Ref(path, typeName, None)
-  }
-
-  final case class RefSymbol(valName: String, ref: Ref) extends Symbol {
-    val typeName: String = ref.typeName
   }
 
 }

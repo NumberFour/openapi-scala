@@ -53,7 +53,8 @@ class Http4sGeneratorSpec extends AnyFreeSpec with Matchers {
         Map.empty,
         Some(
           Map(
-            "application/json" -> TypeRepr.Ref("#/components/schemas/IndividualContact", "IndividualContact", None)
+            "application/json" -> TypeRepr
+              .Ref("#/components/schemas/IndividualContact", "IndividualContact", None, None, None)
           )
         ),
         200

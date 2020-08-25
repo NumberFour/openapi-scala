@@ -57,8 +57,8 @@ object PathInterfaceGenerator {
     val pathParamsSyntax: Option[String] =
       NonEmptyList.fromList(pathParams.map(param => s"$param: String")).map(_.toList.mkString(", "))
     val reqSyntax: Option[String] = reqType.map {
-      case request @ Ref(_, _, _) => s"request: ${resolveRef(request)(p)}"
-      case x                      => s"request: ${x.typeName}"
+      case request: Ref => s"request: ${resolveRef(request)(p)}"
+      case x            => s"request: ${x.typeName}"
     }
     List(querySyntax, pathParamsSyntax, reqSyntax).flatten
       .mkString(", ")

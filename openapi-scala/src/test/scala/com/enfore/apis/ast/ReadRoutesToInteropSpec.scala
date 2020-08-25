@@ -39,6 +39,8 @@ class ReadRoutesToInteropSpec extends AnyFlatSpec with Matchers {
                   "application/vnd.enfore.contacts+json" -> Ref(
                     "#/components/schemas/IndividualContact",
                     "IndividualContact",
+                    None,
+                    None,
                     None
                   )
                 )
@@ -53,12 +55,14 @@ class ReadRoutesToInteropSpec extends AnyFlatSpec with Matchers {
               PUT,
               List(PathParameter("contact-id")),
               Map(),
-              Some(Ref("foo", "IndividualContact", None)),
+              Some(Ref("foo", "IndividualContact", None, None, None)),
               Some(
                 Map(
                   "application/vnd.enfore.contacts+json" -> Ref(
                     "#/components/schemas/IndividualContact",
                     "IndividualContact",
+                    None,
+                    None,
                     None
                   )
                 )
