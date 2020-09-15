@@ -5,8 +5,8 @@ import enumeratum._
 
 import scala.collection.immutable
 
-// This attempts to be a representation of https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md
-// as close as possible.
+// This attempts to be an exact representation of the OpenAPI specification https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.1.0.md
+// One must not try to "improve" this structure as we load these objects directly from JSON.
 
 object SwaggerAST {
 
@@ -36,8 +36,6 @@ object SwaggerAST {
 
   /*
    * This is a marker trait for all type definitions that are possible in Swagger.
-   * This has to correspond exactly to the OpenAPI specification (currently we target 3.1.0-RC0),
-   * as we load these objects directly from JSON.
    */
   sealed trait SchemaOrReferenceObject {
     val default: Option[PrimitiveValue]

@@ -123,7 +123,7 @@ object ImplementationGenerator {
 
   private def getRequestBody(route: RouteDefinition): Option[Argument] = route match {
     case req: RequestWithPayload =>
-      req.readOnlyTypeName.map(ro => ("body", ro)).map(Argument.fromTuple)
+      req.requestTypeName.map(ro => ("body", ro)).map(Argument.fromTuple)
     case _: Any => None
   }
 }

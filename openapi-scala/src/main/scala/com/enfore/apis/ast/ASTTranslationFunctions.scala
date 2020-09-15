@@ -111,6 +111,7 @@ object ASTTranslationFunctions {
         throw new Exception(s"The component $typeName is not found in components ($context)")
       )
 
+  // TODO: Respect if TypeRepr is Ref with readOnly
   private def hasReadOnlyType(context: String, components: Map[String, SchemaObject]): TypeRepr => Boolean = {
     case _: Primitive => false
     case body: TypeRepr =>

@@ -174,7 +174,7 @@ object RouteGenerator {
   private def getImplementationCall(route: RouteDefinition): String = {
     val requestDecoding = route match {
       case a: RequestWithPayload =>
-        a.readOnlyTypeName.map(x => s"request.as[$x]").getOrElse("")
+        a.requestTypeName.map(x => s"request.as[$x]").getOrElse("")
       case _ => ""
     }
 

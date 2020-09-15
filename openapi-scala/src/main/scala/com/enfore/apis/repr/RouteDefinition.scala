@@ -53,7 +53,10 @@ final case class RequestWithPayload(
     successStatusCode: Int
 ) extends RouteDefinition {
 
-  lazy val readOnlyTypeName: Option[String] =
+  /**
+    * Normally `requestTypeName` is just `request.typeName` but if `hasReadOnlyType` is set, we attach `"Request"`
+    */
+  lazy val requestTypeName: Option[String] =
     (request, hasReadOnlyType).tupled.map {
       case (r, ro) =>
         if (ro) {
