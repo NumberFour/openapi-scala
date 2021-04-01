@@ -117,7 +117,7 @@ lazy val root = (project in ("."))
         openAPIOutputPackage := "com.enfore.model",
         libraryDependencies += "com.enfore" %% "openapi-lib" % "<openapi-scala-version>"
     )
-    .enablePlugins(OpenapiPlugin)
+    .enablePlugins(OpenAPIPlugin)
 ```
 
 ### SBT Settings
@@ -128,7 +128,7 @@ Following are the settings available for your SBT project.
 
 **openAPIOutput**: Output directory for the OpenAPI. Defaults to managed sources — `openapi`.
 
-**openAPIOutputPacakge**: Name of the package to be used for OpenAPI components.
+**openAPIOutputPackage**: Name of the package to be used for OpenAPI components.
 
 **routeImplementations**: A List of `com.enfore.apis.generator.RouteImplementation`, which controls which kind of routes should be generated. Find out more about [routes](#Routes)
 
